@@ -4,20 +4,14 @@
 #include <WiFi.h>
 #include <driver/i2s.h>
 
-#include "ADCSampler.h"
-#include "DACOutput.h"
+// #include "ADCSampler.h"
+// #include "DACOutput.h"
 #include "EspNowTransport.h"
 #include "I2SMEMSSampler.h"
 #include "I2SOutput.h"
 #include "OutputBuffer.h"
-#include "UdpTransport.h"
+// #include "UdpTransport.h"
 #include "config.h"
-
-#ifdef ARDUINO_TINYPICO
-// #include "TinyPICOIndicatorLed.h"
-#else
-// #include "GenericDevBoardIndicatorLed.h"
-#endif
 
 static void application_task(void *param) {
     // delegate onto the application
@@ -29,29 +23,17 @@ Application::Application() {
     m_output_buffer = new OutputBuffer(300 * 16);
 #ifdef USE_I2S_MIC_INPUT
     m_input = new I2SMEMSSampler(I2S_NUM_0, i2s_mic_pins, i2s_mic_Config, 128);
-#else
-    m_input = new ADCSampler(ADC_UNIT_1, ADC1_CHANNEL_7, i2s_adc_config);
 #endif
 
 #ifdef USE_I2S_SPEAKER_OUTPUT
     m_output = new I2SOutput(I2S_NUM_0, i2s_speaker_pins);
-#else
-    m_output = new DACOutput(I2S_NUM_0);
 #endif
 
 #ifdef USE_ESP_NOW
     m_transport = new EspNowTransport(m_output_buffer, ESP_NOW_WIFI_CHANNEL);
-#else
-    m_transport = new UdpTransport(m_output_buffer);
 #endif
 
     m_transport->set_header(TRANSPORT_HEADER_SIZE, transport_header);
-
-#ifdef ARDUINO_TINYPICO
-    // m_indicator_led = new TinyPICOIndicatorLed();
-#else
-    // m_indicator_led = new GenericDevBoardIndicatorLed();
-#endif
 
     if (I2S_SPEAKER_SD_PIN != -1) {
         pinMode(I2S_SPEAKER_SD_PIN, OUTPUT);
