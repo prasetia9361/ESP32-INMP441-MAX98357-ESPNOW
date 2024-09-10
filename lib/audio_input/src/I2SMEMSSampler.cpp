@@ -1,11 +1,13 @@
 #include "I2SMEMSSampler.h"
 
+
 #include "soc/i2s_reg.h"
 
 I2SMEMSSampler::I2SMEMSSampler(i2s_port_t i2s_port, i2s_pin_config_t &i2s_pins,
                                i2s_config_t i2s_config, int raw_samples_size,
-                               bool fixSPH0645)
-    : I2SSampler(i2s_port, i2s_config) {
+                               bool fixSPH0645) {
+    m_i2sPort = i2s_port;
+    m_i2s_config = i2s_config;
     m_read_head = 0;
     m_i2sPins = i2s_pins;
     m_fixSPH0645 = fixSPH0645;
@@ -16,6 +18,8 @@ I2SMEMSSampler::I2SMEMSSampler(i2s_port_t i2s_port, i2s_pin_config_t &i2s_pins,
 I2SMEMSSampler::~I2SMEMSSampler() { free(m_raw_samples); }
 
 void I2SMEMSSampler::configureI2S() {
+    i2s_driver_install(m_i2sPort, &m_i2s_config, 0, NULL);
+
     if (m_fixSPH0645) {
         // FIXES for SPH0645
 #if CONFIG_IDF_TARGET_ESP32
@@ -25,6 +29,20 @@ void I2SMEMSSampler::configureI2S() {
     }
 
     i2s_set_pin(m_i2sPort, &m_i2sPins);
+}
+
+void I2SMEMSSampler::start() {
+    // install and start i2s driver
+    i2s_driver_install(m_i2sPort, &m_i2s_config, 0, NULL);
+    // set up the I2S configuration from the subclass
+    configureI2S();
+}
+
+void I2SMEMSSampler::stop() {
+    // clear any I2S configuration
+    unConfigureI2S();
+    // stop the i2S driver
+    i2s_driver_uninstall(m_i2sPort);
 }
 
 int I2SMEMSSampler::read(int16_t *samples, int count) {
