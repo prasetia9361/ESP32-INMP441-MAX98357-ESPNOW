@@ -2,13 +2,9 @@
 #include <driver/i2s.h>
 #include <freertos/FreeRTOS.h>
 
-// WiFi credentials
-#define WIFI_SSID "KiBo Labs"
-#define WIFI_PSWD "1q2w3e4r"
-
 // sample rate for the system
 // #define SAMPLE_RATE 22050
-#define SAMPLE_RATE 44100  // Microfone
+#define SAMPLE_RATE 44100 // Microfone
 // are you using an I2S microphone - comment this if you want to use an analog
 // mic and ADC input #define USE_I2S_MIC_INPUT
 
@@ -29,13 +25,6 @@
 // transmit button
 #define GPIO_TRANSMIT_BUTTON 23
 
-// Which LED pin do you want to use? TinyPico LED or the builtin LED of a
-// generic ESP32 board? Comment out this line to use the builtin LED of a
-// generic ESP32 board #define USE_LED_GENERIC
-
-// Which transport do you want to use? ESP_NOW or UDP?
-// comment out this line to use UDP
-// #define USE_ESP_NOW
 
 // On which wifi channel (1-11) should ESP-Now transmit? The default ESP-Now
 // channel on ESP32 is channel 1

@@ -6,6 +6,7 @@
 
 #include "EspNowTransport.h"
 #include "I2SMEMSSampler.h"
+#include "OutputBuffer.h"
 #include "config.h"
 
 static void application_task(void *param)
@@ -17,8 +18,12 @@ static void application_task(void *param)
 
 Application::Application()
 {
+    // TODO: Fix this mmake selft buffer
+    m_output_buffer = new OutputBuffer(300 * 16);
+
     m_input = new I2SMEMSSampler(I2S_NUM_0, i2s_mic_pins, i2s_mic_Config, 128);
 
+    m_transport = new EspNowTransport(m_output_buffer, ESP_NOW_WIFI_CHANNEL);
     m_transport->set_header(TRANSPORT_HEADER_SIZE, transport_header);
 }
 
@@ -37,9 +42,6 @@ void Application::begin()
     Serial.println(WiFi.macAddress());
     // do any setup of the transport
     m_transport->begin();
-    // connected so show a solid green light
-    // m_indicator_led->set_default_color(0x00ff00);
-    // m_indicator_led->set_is_flashing(false, 0x00ff00);
     // setup the transmit button
     pinMode(GPIO_TRANSMIT_BUTTON, INPUT_PULLUP);
     // start the main task for the application
@@ -74,7 +76,7 @@ void Application::loop()
                 for (int i = 0; i < samples_read; i++)
                 {
                     // Serial.println(samples_read);
-                    // Serial.println(samples[i]);
+                    Serial.println(samples[i]);
                     m_transport->add_sample(samples[i]);
                 }
             }
