@@ -8,19 +8,22 @@
 #include "I2SMEMSSampler.h"
 #include "config.h"
 
-static void application_task(void *param) {
+static void application_task(void *param)
+{
     // delegate onto the application
     Application *application = reinterpret_cast<Application *>(param);
     application->loop();
 }
 
-Application::Application() {
+Application::Application()
+{
     m_input = new I2SMEMSSampler(I2S_NUM_0, i2s_mic_pins, i2s_mic_Config, 128);
 
     m_transport->set_header(TRANSPORT_HEADER_SIZE, transport_header);
 }
 
-void Application::begin() {
+void Application::begin()
+{
     Serial.print("My IDF Version is: ");
     Serial.println(esp_get_idf_version());
 
@@ -46,25 +49,30 @@ void Application::begin() {
 }
 
 // application task - coordinates everything
-void Application::loop() {
+void Application::loop()
+{
     int16_t *samples =
         reinterpret_cast<int16_t *>(malloc(sizeof(int16_t) * 128));
     // continue forever
-    while (true) {
+    while (true)
+    {
         // do we need to start transmitting?
-        if (!digitalRead(GPIO_TRANSMIT_BUTTON)) {
+        if (!digitalRead(GPIO_TRANSMIT_BUTTON))
+        {
             Serial.println("Started transmitting");
             // start the input to get samples from the microphone
             m_input->start();
             // transmit for at least 1 second or while the button is pushed
             unsigned long start_time = millis();
             while (millis() - start_time < 1000 ||
-                   !digitalRead(GPIO_TRANSMIT_BUTTON)) {
+                   !digitalRead(GPIO_TRANSMIT_BUTTON))
+            {
                 // read samples from the microphone
                 int samples_read = m_input->read(samples, 128);
                 // and send them over the transport
                 // Serial.println(samples_read);
-                for (int i = 0; i < samples_read; i++) {
+                for (int i = 0; i < samples_read; i++)
+                {
                     // Serial.println(samples_read);
                     // Serial.println(samples[i]);
                     m_transport->add_sample(samples[i]);
