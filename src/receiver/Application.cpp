@@ -4,12 +4,9 @@
 #include <WiFi.h>
 #include <driver/i2s.h>
 
-// #include "ADCSampler.h"
-// #include "DACOutput.h"
 #include "EspNowTransport.h"
 #include "I2SOutput.h"
 #include "OutputBuffer.h"
-// #include "UdpTransport.h"
 #include "config.h"
 
 static void application_task(void *param) {

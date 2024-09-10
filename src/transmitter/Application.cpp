@@ -17,8 +17,6 @@ static void application_task(void *param) {
 Application::Application() {
     m_input = new I2SMEMSSampler(I2S_NUM_0, i2s_mic_pins, i2s_mic_Config, 128);
 
-    m_transport = new EspNowTransport(m_output_buffer, ESP_NOW_WIFI_CHANNEL);
-
     m_transport->set_header(TRANSPORT_HEADER_SIZE, transport_header);
 }
 
