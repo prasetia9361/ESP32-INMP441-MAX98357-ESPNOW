@@ -4,13 +4,8 @@
 #include <WiFi.h>
 #include <driver/i2s.h>
 
-// #include "ADCSampler.h"
-// #include "DACOutput.h"
 #include "EspNowTransport.h"
 #include "I2SMEMSSampler.h"
-#include "I2SOutput.h"
-#include "OutputBuffer.h"
-// #include "UdpTransport.h"
 #include "config.h"
 
 static void application_task(void *param) {
@@ -20,52 +15,23 @@ static void application_task(void *param) {
 }
 
 Application::Application() {
-    m_output_buffer = new OutputBuffer(300 * 16);
-#ifdef USE_I2S_MIC_INPUT
     m_input = new I2SMEMSSampler(I2S_NUM_0, i2s_mic_pins, i2s_mic_Config, 128);
-#endif
 
-#ifdef USE_I2S_SPEAKER_OUTPUT
-    m_output = new I2SOutput(I2S_NUM_0, i2s_speaker_pins);
-#endif
-
-#ifdef USE_ESP_NOW
     m_transport = new EspNowTransport(m_output_buffer, ESP_NOW_WIFI_CHANNEL);
-#endif
 
     m_transport->set_header(TRANSPORT_HEADER_SIZE, transport_header);
-
-    if (I2S_SPEAKER_SD_PIN != -1) {
-        pinMode(I2S_SPEAKER_SD_PIN, OUTPUT);
-    }
 }
 
 void Application::begin() {
-    // show a flashing indicator that we are trying to connect
-    // m_indicator_led->set_default_color(0);
-    // m_indicator_led->set_is_flashing(true, 0xff0000);
-    // m_indicator_led->begin();
-
     Serial.print("My IDF Version is: ");
     Serial.println(esp_get_idf_version());
 
     // bring up WiFi
     WiFi.mode(WIFI_STA);
-#ifndef USE_ESP_NOW
-    WiFi.begin(WIFI_SSID, WIFI_PSWD);
-    if (WiFi.waitForConnectResult() != WL_CONNECTED) {
-        Serial.println("Connection Failed! Rebooting...");
-        delay(5000);
-        ESP.restart();
-    }
-    // this has a dramatic effect on packet RTT
-    WiFi.setSleep(WIFI_PS_NONE);
-    Serial.print("My IP Address is: ");
-    Serial.println(WiFi.localIP());
-#else
+
     // but don't connect if we're using ESP NOW
     WiFi.disconnect();
-#endif
+
     Serial.print("My MAC Address is: ");
     Serial.println(WiFi.macAddress());
     // do any setup of the transport
@@ -75,8 +41,6 @@ void Application::begin() {
     // m_indicator_led->set_is_flashing(false, 0x00ff00);
     // setup the transmit button
     pinMode(GPIO_TRANSMIT_BUTTON, INPUT_PULLUP);
-    // start off with i2S output running
-    m_output->start(SAMPLE_RATE);
     // start the main task for the application
     TaskHandle_t task_handle;
     xTaskCreate(application_task, "application_task", 8192, this, 1,
@@ -92,9 +56,6 @@ void Application::loop() {
         // do we need to start transmitting?
         if (!digitalRead(GPIO_TRANSMIT_BUTTON)) {
             Serial.println("Started transmitting");
-            // m_indicator_led->set_is_flashing(true, 0xff0000);
-            // stop the output as we're switching into transmit mode
-            m_output->stop();
             // start the input to get samples from the microphone
             m_input->start();
             // transmit for at least 1 second or while the button is pushed
@@ -116,26 +77,7 @@ void Application::loop() {
             Serial.println("Finished transmitting");
             // m_indicator_led->set_is_flashing(false, 0xff0000);
             m_input->stop();
-            m_output->start(SAMPLE_RATE);
         }
         // while the transmit button is not pushed and 1 second has not elapsed
-        Serial.println("Started Receiving");
-        if (I2S_SPEAKER_SD_PIN != -1) {
-            digitalWrite(I2S_SPEAKER_SD_PIN, HIGH);
-        }
-        unsigned long start_time = millis();
-        while (millis() - start_time < 1000 ||
-               digitalRead(GPIO_TRANSMIT_BUTTON)) {
-            // read from the output buffer (which should be getting filled by
-            // the transport)
-            m_output_buffer->remove_samples(samples, 128);
-            // Serial.println(samples);
-            // and send the samples to the speaker
-            m_output->write(samples, 128);
-        }
-        if (I2S_SPEAKER_SD_PIN != -1) {
-            digitalWrite(I2S_SPEAKER_SD_PIN, LOW);
-        }
-        Serial.println("Finished Receiving");
     }
 }
