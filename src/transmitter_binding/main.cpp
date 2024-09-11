@@ -1,6 +1,4 @@
 #include <Arduino.h>
-#include <ArduinoJson.h>  // Tambahkan pustaka ArduinoJson
-#include <SPIFFS.h>
 #include <WiFi.h>
 #include <esp_now.h>
 
@@ -9,14 +7,6 @@
 // Alamat MAC broadcast sementara
 uint8_t broadcastAddress[] = {0x24, 0x0A, 0xC4, 0xD2, 0x13, 0x4B};
 
-// Struktur data yang akan dikirimkan
-typedef struct struct_message {
-    int id;
-    float temperature;
-    float humidity;
-} struct_message;
-
-struct_message myData;
 bool buttonPressedTwice = false;
 unsigned long lastPressTime = 0;
 const int doublePressThreshold = 500;
