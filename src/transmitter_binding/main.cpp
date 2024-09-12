@@ -85,6 +85,7 @@ void setup() {
 }
 
 void loop() {
+    uint8_t address[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
     // Deteksi tombol ditekan dua kali
     if (digitalRead(BUTTON_PIN) == LOW) {
         unsigned long currentTime = millis();
@@ -96,9 +97,18 @@ void loop() {
 
     if (buttonPressedTwice) {
         // Update peer dengan alamat MAC yang baru
-        uint8_t address[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
         memcpy(broadcastAddress, address, 6);
         updatePeer(broadcastAddress);
         buttonPressedTwice = false;  // Reset tombol tekan
+    }
+
+    if (broadcastAddress != address) {
+        esp_err_t result = esp_now_send(broadcastAddress, broadcastAddress,
+                                        sizeof(broadcastAddress));
+        if (result == ESP_OK) {
+            Serial.println("Sent with success");
+        } else {
+            Serial.println("Error sending the data");
+        }
     }
 }
