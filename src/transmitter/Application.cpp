@@ -76,7 +76,6 @@ void Application::loop()
                 for (int i = 0; i < samples_read; i++)
                 {
                     // Serial.println(samples_read);
-                    Serial.println(samples[i]);
                     m_transport->add_sample(samples[i]);
                 }
             }
