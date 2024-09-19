@@ -52,6 +52,7 @@ void setup() {
   
   // Inisialisasi WiFi dalam mode Station
   WiFi.mode(WIFI_STA);
+  WiFi.disconnect(); 
   Serial.println("Mode WiFi: STA");
   
   // Inisialisasi ESP-NOW
@@ -77,9 +78,11 @@ void setup() {
       
       // Tambahkan Transmitter sebagai peer
       esp_now_peer_info_t peerInfo;
+      memset(&peerInfo, 0, sizeof(peerInfo));
       memcpy(peerInfo.peer_addr, transmitterMAC, 6);
       peerInfo.channel = 0;
       peerInfo.encrypt = false;
+      peerInfo.ifidx = WIFI_IF_STA; 
       
       if (esp_now_add_peer(&peerInfo) == ESP_OK){
         Serial.println("Transmitter ditambahkan sebagai peer dari SPIFFS");

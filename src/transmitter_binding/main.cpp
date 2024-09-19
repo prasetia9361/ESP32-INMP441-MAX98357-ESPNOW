@@ -60,6 +60,7 @@ void setup() {
   
   // Inisialisasi WiFi dalam mode Station
   WiFi.mode(WIFI_STA);
+  WiFi.disconnect(); 
   Serial.println("Mode WiFi: STA");
   
   // Inisialisasi ESP-NOW
@@ -86,14 +87,30 @@ void setup() {
       
       // Tambahkan Receiver sebagai peer
       esp_now_peer_info_t peerInfo;
+      memset(&peerInfo, 0, sizeof(peerInfo));
       memcpy(peerInfo.peer_addr, receiverMAC, 6);
       peerInfo.channel = 0;
       peerInfo.encrypt = false;
+      peerInfo.ifidx = WIFI_IF_STA; 
       
-      if (esp_now_add_peer(&peerInfo) == ESP_OK){
-        Serial.println("Receiver ditambahkan sebagai peer dari SPIFFS");
+      Serial.print("Mencoba menambahkan peer dengan MAC: ");
+      for (int i = 0; i < 6; i++) {
+        Serial.print(receiverMAC[i], HEX);
+        if (i < 5) Serial.print(":");
+      }
+      Serial.println();
+      
+      esp_err_t result = esp_now_add_peer(&peerInfo);
+      if (result == ESP_OK) {
+        Serial.println("Receiver ditambahkan sebagai peer");
       } else {
-        Serial.println("Gagal menambahkan Receiver sebagai peer dari SPIFFS");
+        Serial.print("Gagal menambahkan Receiver sebagai peer. Error code: ");
+        Serial.println(result);
+        
+        // Cek apakah peer sudah ada
+        if (esp_now_is_peer_exist(receiverMAC)) {
+          Serial.println("Peer sudah ada dalam daftar");
+        }
       }
     }
   } else {
