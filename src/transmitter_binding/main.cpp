@@ -33,17 +33,17 @@ void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) {
     Serial.println("Gagal membuka file untuk menulis");
   }
   
-  // Tambahkan Receiver sebagai peer
-  esp_now_peer_info_t peerInfo;
-  memcpy(peerInfo.peer_addr, receiverMAC, 6);
-  peerInfo.channel = 0; // Sesuaikan channel jika diperlukan
-  peerInfo.encrypt = false;
+//   // Tambahkan Receiver sebagai peer
+//   esp_now_peer_info_t peerInfo;
+//   memcpy(peerInfo.peer_addr, receiverMAC, 6);
+//   peerInfo.channel = 0; // Sesuaikan channel jika diperlukan
+//   peerInfo.encrypt = false;
   
-  if (esp_now_add_peer(&peerInfo) == ESP_OK){
-    Serial.println("Receiver ditambahkan sebagai peer");
-  } else {
-    Serial.println("Gagal menambahkan Receiver sebagai peer");
-  }
+//   if (esp_now_add_peer(&peerInfo) == ESP_OK){
+//     Serial.println("Receiver ditambahkan sebagai peer");
+//   } else {
+//     Serial.println("Gagal menambahkan Receiver sebagai peer");
+//   }
 }
 
 void setup() {
