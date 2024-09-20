@@ -7,6 +7,8 @@ const int buttonPin = 0; // Sesuaikan dengan pin yang digunakan
 unsigned long lastPress = 0;
 const unsigned long debounce = 300;
 int pressCount = 0;
+volatile bool stateBinding = false;
+
 
 // Variabel untuk menyimpan MAC Address
 uint8_t receiverMAC[6];
@@ -21,9 +23,10 @@ void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) {
   Serial.println(macStr);
   
   // Simpan MAC Address Receiver
-  memcpy(receiverMAC, incomingData, 6);
-  
-  // Simpan ke SPIFFS
+  memcpy(receiverMAC, mac, 6);
+  // Serial.println(stateBinding);
+  // if (stateBinding) {
+    // Simpan ke SPIFFS
   File file = SPIFFS.open("/receiverMAC.bin", FILE_WRITE);
   if (file) {
     file.write(receiverMAC, 6);
@@ -32,18 +35,12 @@ void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) {
   } else {
     Serial.println("Gagal membuka file untuk menulis");
   }
-  
-//   // Tambahkan Receiver sebagai peer
-//   esp_now_peer_info_t peerInfo;
-//   memcpy(peerInfo.peer_addr, receiverMAC, 6);
-//   peerInfo.channel = 0; // Sesuaikan channel jika diperlukan
-//   peerInfo.encrypt = false;
-  
-//   if (esp_now_add_peer(&peerInfo) == ESP_OK){
-//     Serial.println("Receiver ditambahkan sebagai peer");
-//   } else {
-//     Serial.println("Gagal menambahkan Receiver sebagai peer");
-//   }
+    // stateBinding = false;
+  // }
+  // Cetak nilai dari incomingData di serial monitor
+  Serial.print("Nilai incomingData: ");
+  String receivedData = String((char*)incomingData);
+  Serial.println(receivedData);
 }
 
 void setup() {
@@ -138,7 +135,7 @@ void loop() {
       if (pressCount == 2) {
         // Reset count
         pressCount = 0;
-        
+        stateBinding = true;
         // Lakukan binding
         Serial.println("Proses Binding Dimulai...");
         // Mengirim broadcast untuk mencari receiver
@@ -162,4 +159,16 @@ void loop() {
       }
     }
   }
+
+  static unsigned long lastSend = 0;
+  unsigned long currentMillis = millis();
+  if (SPIFFS.exists("/receiverMAC.bin")) {
+      if (currentMillis - lastSend >= 2000) {
+          const char* message = "data_dari_transmiter";
+          esp_now_send(receiverMAC, (const uint8_t*)message, strlen(message));
+          lastSend = currentMillis;
+          Serial.println("sending");
+      }
+  }
+  
 }
