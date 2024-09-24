@@ -154,14 +154,12 @@ void loop() {
         peerInfo.channel = 0;
         peerInfo.encrypt = false;
         peerInfo.ifidx = WIFI_IF_STA;
-        peerInfo.peer_addr[0] = 0xFF;
-        peerInfo.peer_addr[1] = 0xFF;
-        peerInfo.peer_addr[2] = 0xFF;
-        peerInfo.peer_addr[3] = 0xFF;
-        peerInfo.peer_addr[4] = 0xFF;
-        peerInfo.peer_addr[5] = 0xFF;
+        for (int i = 0; i < 6; i++) {
+          peerInfo.peer_addr[i] = 0xFF;
+        }
         
         esp_now_add_peer(&peerInfo);
+        
         
         // Kirim broadcast untuk meminta MAC Address
         esp_now_send(peerInfo.peer_addr, receiverMAC, 6);
