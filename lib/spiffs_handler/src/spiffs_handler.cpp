@@ -12,7 +12,11 @@ void spiffs_handler::init(EspNowHandler* _espNow){
 void spiffs_handler::write(){
   reciveMac = espNow->getMacAddr();
   incomingData = espNow->getIncomingData();
-  
+  Serial.print("Data diterima dari: ");
+  char macStr[18];
+  snprintf(macStr, sizeof(macStr), "%02X:%02X:%02X:%02X:%02X:%02X",
+           reciveMac[0], reciveMac[1], reciveMac[2], reciveMac[3], reciveMac[4], reciveMac[5]);
+  Serial.println(macStr);
   if (reciveMac != nullptr && reciveMac[0] != 0) {
     File file = SPIFFS.open("/receiverMAC.bin", FILE_WRITE);
     if (file) {
@@ -22,14 +26,15 @@ void spiffs_handler::write(){
     } else {
       Serial.println("Gagal membuka file untuk menulis");
     }
+      // Cetak nilai dari incomingData di serial monitor
+    Serial.print("Nilai incomingData: ");
+    receivedData = String((char*)incomingData);
+    Serial.println(receivedData);
   } else {
     Serial.println("reciveMac kosong, tidak ada yang disimpan ke SPIFFS");
   }
 
-  // Cetak nilai dari incomingData di serial monitor
-  Serial.print("Nilai incomingData: ");
-  receivedData = String((char*)incomingData);
-  Serial.println(receivedData);
+
 }
 
 void spiffs_handler::readClose(uint8_t * mac){
