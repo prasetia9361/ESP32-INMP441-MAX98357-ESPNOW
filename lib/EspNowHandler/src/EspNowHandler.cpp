@@ -1,11 +1,7 @@
 #include "EspNowHandler.h"
-#include "spiffs_handler.h"
+ // Tambahkan ini
 
-EspNowHandler* EspNowHandler::instance = nullptr; // Tambahkan ini
-
-EspNowHandler::EspNowHandler() {
-    instance = this; // Tambahkan ini
-}
+EspNowHandler::EspNowHandler() {}
 
 void EspNowHandler::init() {
     WiFi.mode(WIFI_STA);
@@ -18,9 +14,11 @@ void EspNowHandler::init() {
 }
 
 void EspNowHandler::callBack(){
-    esp_now_register_recv_cb([](const uint8_t* mac, const uint8_t* incomingData, int len) {
-        EspNowHandler::OnDataRecv(mac, incomingData, len);
-    });
+    // esp_now_register_recv_cb([](const uint8_t* mac, const uint8_t* incomingData, int len) {
+    //     EspNowHandler::OnDataRecv(mac, incomingData, len);
+        
+    // });
+    esp_now_register_recv_cb(OnDataRecv);
 }
 
 esp_err_t EspNowHandler::addPeer(const uint8_t* mac){
@@ -29,10 +27,12 @@ esp_err_t EspNowHandler::addPeer(const uint8_t* mac){
     peerInfo.channel = 0;
     peerInfo.encrypt = false;
     peerInfo.ifidx = WIFI_IF_STA; 
+    esp_err_t result;
     if (!esp_now_is_peer_exist(mac)) {
-        esp_err_t result = esp_now_add_peer(&peerInfo);
-        return result;
+        result = esp_now_add_peer(&peerInfo);
+        // return result;
     }
+    return result;
 }
 
 esp_err_t EspNowHandler::sendingData(const uint8_t* mac, const uint8_t* data, size_t len){
@@ -62,11 +62,11 @@ void EspNowHandler::bindingMode() {
 
 
 void EspNowHandler::OnDataRecv(const uint8_t* mac, const uint8_t* incomingData, int len) {
-    // struct_message receivedData;
-    // memcpy(receivedData.macAddr, mac, 6);
-    // memcpy(receivedData.incomingData, incomingData, len);
-    // receivedData.size = len;
+    struct_message receivedData;
+    memcpy(receivedData.macAddr, mac, 6);
+    memcpy(receivedData.incomingData, incomingData, len);
+    receivedData.size = len;
 
     // Panggil fungsi write dari spiffs_handler
-    instance->spiffsHandler.write(mac,incomingData);
+    // instance->spiffsHandler->write(mac, incomingData);
 }

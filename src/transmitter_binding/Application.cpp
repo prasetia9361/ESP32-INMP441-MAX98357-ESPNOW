@@ -79,7 +79,8 @@ void Application::sendingLoop(){
     for (;;)
     {
        spiffs->readClose(receiverMAC);
-       vTaskDelay(1000 / portTICK_PERIOD_MS);
+       spiffs->write();
+       vTaskDelay(400 / portTICK_PERIOD_MS);
     }
     
 }
