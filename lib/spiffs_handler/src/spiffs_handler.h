@@ -6,21 +6,21 @@
 #include "FS.h"
 #include "SD.h"
 
-class EspNowHandler;
+// class EspNowHandler;
 class spiffs_handler{
 private:
-    EspNowHandler* espNow;
+    // EspNowHandler* espNow;
     String receivedData;
-    unsigned long currentMillis;
-    unsigned long lastSend = 0;
-    uint8_t* reciveMac;
-    uint8_t* incomingData;
+    // unsigned long currentMillis;
+    // unsigned long lastSend = 0;
+    // uint8_t* reciveMac;
+    // uint8_t* incomingData;
     bool exists(){return SPIFFS.exists("/receiverMAC.bin");}
     File readData(){return SPIFFS.open("/receiverMAC.bin", FILE_READ);}
 public:
     spiffs_handler();
-    void init(EspNowHandler* _espNow);
-    void write();
+    void init();
+    void write(const uint8_t* reciveMac, const uint8_t* incomingData);
     void readClose(uint8_t * mac);
 };
 
