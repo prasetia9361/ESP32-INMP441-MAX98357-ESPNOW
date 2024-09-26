@@ -12,15 +12,15 @@ private:
    
     
     typedef struct struct_message {
-        uint8_t macAddr[6];
-        uint8_t incomingData[250]; 
+        uint8_t* macAddr;
+        uint8_t* incomingData; 
         int size;
     } struct_message;
     struct_message receivedData;
 
     typedef struct fromSpiffs {
-        uint8_t receiverMAC[6];
-        uint8_t incomingData[250]; 
+        uint8_t receiverMAC;
+        uint8_t incomingData; 
         size_t len;
     } fromSpiffs;
     fromSpiffs myData;

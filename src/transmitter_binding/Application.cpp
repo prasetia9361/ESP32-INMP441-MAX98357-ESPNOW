@@ -13,10 +13,16 @@ static void sending_task(void *param){
     application->sendingLoop();
 }
 
+static void writing_task(void *param){
+    Application *application = reinterpret_cast<Application *>(param);
+    application->writingLoop();
+}
+
 Application::Application(){
     espNow = new EspNowHandler();
     spiffs = new spiffs_handler();
     pinMode(buttonPin, INPUT_PULLUP);
+    pressCount = 0; 
     // 
 }
 
@@ -43,6 +49,15 @@ void Application::init(){
     1,             /* priority of the task */
     NULL,          /* Task handle to keep track of created task */
     1);            /* pin task to core 1 */
+
+    xTaskCreatePinnedToCore(
+    writing_task,   /* Task function. */
+    "WritingTask", /* name of task. */
+    10000,         /* Stack size of task */
+    this,          /* parameter of the task */
+    1,             /* priority of the task */
+    NULL,          /* Task handle to keep track of created task */
+    1);            /* pin task to core 1 */
 }
 
 void Application::bindingLoop(){
@@ -60,9 +75,10 @@ void Application::bindingLoop(){
                     Serial.println(pressCount);
                     if (pressCount == 2)
                     {
-                        pressCount = 0;
+                        
                         Serial.println("Proses Binding Dimulai...");
                         espNow->bindingMode();
+                        pressCount = 0;
                     }
                     
                 }
@@ -79,8 +95,14 @@ void Application::sendingLoop(){
     for (;;)
     {
        spiffs->readClose(receiverMAC);
-       spiffs->write();
-       vTaskDelay(400 / portTICK_PERIOD_MS);
+       vTaskDelay(500 / portTICK_PERIOD_MS);
     }
-    
+}
+
+void Application::writingLoop(){
+    for (;;)
+    {
+       spiffs->write();
+       vTaskDelay(200 / portTICK_PERIOD_MS);
+    }
 }

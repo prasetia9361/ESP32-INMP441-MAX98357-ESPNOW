@@ -21,5 +21,6 @@ public:
     void init();
     void sendingLoop();
     void bindingLoop();
+    void writingLoop();
 
 };

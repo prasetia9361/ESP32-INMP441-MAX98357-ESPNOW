@@ -19,7 +19,7 @@ void EspNowHandler::callBack(){
     //     EspNowHandler::OnDataRecv(mac, incomingData, len);
         
     // });
-    memset(&receivedData, 0, sizeof(receivedData));  // Mengosongkan receivedData terlebih dahulu
+    // memset(&receivedData, 0, sizeof(receivedData));  // Mengosongkan receivedData terlebih dahulu
     esp_now_register_recv_cb(OnDataRecv);
 }
 
@@ -65,8 +65,8 @@ void EspNowHandler::bindingMode() {
 
 void EspNowHandler::OnDataRecv(const uint8_t* mac, const uint8_t* incomingData, int len) {
     struct_message receivedData;
-    memcpy(receivedData.macAddr, mac, 6);
-    memcpy(receivedData.incomingData, incomingData, sizeof(incomingData));
+    // memcpy(receivedData.macAddr, mac, 6);
+    // memcpy(receivedData.incomingData, incomingData, sizeof(incomingData));
     receivedData.size = len;
 
     // Panggil fungsi write dari spiffs_handler
