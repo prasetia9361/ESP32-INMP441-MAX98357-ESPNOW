@@ -1,141 +1,47 @@
-#include <WiFi.h>
-#include <esp_now.h>
-#include <SPIFFS.h>
+#include <Arduino.h>
+#include "EspNowHandler.h"
+#include "spiffs_handler.h"
 
+
+EspNowHandler * espNow;
+spiffs_handler * spiffs;
 // Pin untuk tombol
 const int buttonPin = 0; // Sesuaikan dengan pin yang digunakan
+unsigned long currentTime;
 unsigned long lastPress = 0;
+unsigned long currenMillis;
+unsigned long sendingMillis = 0;
 const unsigned long debounce = 300;
 int pressCount = 0;
-volatile bool stateBinding = false;
+// volatile bool stateBinding = false;
+bool stateBinding = false;
 
 // Variabel untuk menyimpan MAC Address
 uint8_t transmitterMAC[6];
-uint8_t receiverMAC[6];
 
-// Callback ketika data diterima
-void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) {
-  Serial.print("Data diterima dari: ");
-  char macStr[18];
-  snprintf(macStr, sizeof(macStr), "%02X:%02X:%02X:%02X:%02X:%02X",
-           mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
-  Serial.println(macStr);
-  
-  // Simpan MAC Address Transmitter
-  memcpy(transmitterMAC, mac, 6);
-  
-  if (stateBinding) {
-    
-    // Simpan ke SPIFFS
-    File file = SPIFFS.open("/transmitterMAC.bin", FILE_WRITE);
-    if (file) {
-      file.write(transmitterMAC, 6);
-      file.close();
-      Serial.println("Transmitter MAC disimpan ke SPIFFS");
-    } else {
-      Serial.println("Gagal membuka file untuk menulis");
-    }
-    stateBinding = false;
-  } else{
-    String receivedData = String((char*)incomingData);
-    
-    // Tampilkan di serial monitor
-    Serial.print("Data yang diterima : ");
-    Serial.println(receivedData);
-    
-    // Tambahkan pengirim sebagai peer
-    esp_now_peer_info_t peerInfo;
-    memset(&peerInfo, 0, sizeof(peerInfo));
-    memcpy(peerInfo.peer_addr, mac, 6);
-    peerInfo.channel = 0;
-    peerInfo.encrypt = false;
-    peerInfo.ifidx = WIFI_IF_STA;
-    
-    if (esp_now_add_peer(&peerInfo) != ESP_OK) {
-      Serial.println("Gagal menambahkan pengirim sebagai peer");
-      return;
-    }
-    
-    // Kirim kembali data string ke pengirim
-    esp_err_t result = esp_now_send(mac, (uint8_t*)receivedData.c_str(), receivedData.length());
-    if (result == ESP_OK) {
-      Serial.println("Data string berhasil dikirim kembali ke pengirim");
-    } else {
-      Serial.println("Gagal mengirim data kembali ke pengirim");
-    }
+uint8_t* macAddr;
+uint8_t* incomingData;
+// uint8_t receiverMAC[6];
 
-    esp_now_del_peer(mac);
-  }
-  
 
-}
 
 void setup() {
   Serial.begin(115200);
-  
-  // Inisialisasi tombol
+  espNow = new EspNowHandler();
+  spiffs = new spiffs_handler();
   pinMode(buttonPin, INPUT_PULLUP);
-  
-  // Inisialisasi SPIFFS
-  if (!SPIFFS.begin(true)) {
-    Serial.println("Gagal menginisialisasi SPIFFS");
-    return;
-  }
-  
-  // Inisialisasi WiFi dalam mode Station
-  WiFi.mode(WIFI_STA);
-  WiFi.disconnect(); 
-  Serial.println("Mode WiFi: STA");
-  
-  // Inisialisasi ESP-NOW
-  if (esp_now_init() != ESP_OK) {
-    Serial.println("Error initializing ESP-NOW");
-    return;
-  }
-  
-  // Register callback
-  esp_now_register_recv_cb(OnDataRecv);
-  // Cek apakah Transmitter MAC sudah ada di SPIFFS
-  if (SPIFFS.exists("/transmitterMAC.bin")) {
-    File file = SPIFFS.open("/transmitterMAC.bin", FILE_READ);
-    if (file) {
-      file.read(transmitterMAC, 6);
-      file.close();
-      Serial.print("Transmitter MAC dimuat dari SPIFFS: ");
-      char macStr[18];
-      snprintf(macStr, sizeof(macStr), "%02X:%02X:%02X:%02X:%02X:%02X",
-               transmitterMAC[0], transmitterMAC[1], transmitterMAC[2],
-               transmitterMAC[3], transmitterMAC[4], transmitterMAC[5]);
-      Serial.println(macStr);
-      
-      // // Tambahkan Transmitter sebagai peer
-      // esp_now_peer_info_t peerInfo;
-      // memset(&peerInfo, 0, sizeof(peerInfo));
-      // memcpy(peerInfo.peer_addr, transmitterMAC, 6);
-      // peerInfo.channel = 0;
-      // peerInfo.encrypt = false;
-      // peerInfo.ifidx = WIFI_IF_STA; 
-      
-      // if (esp_now_add_peer(&peerInfo) == ESP_OK){
-      //   Serial.println("Transmitter ditambahkan sebagai peer dari SPIFFS");
-      // } else {
-      //   Serial.println("Gagal menambahkan Transmitter sebagai peer dari SPIFFS");
-      // }
-    }
-  } else {
-    Serial.println("Transmitter MAC belum terikat");
-  }
-  // Dapatkan MAC Address Receiver
-  memcpy(receiverMAC, WiFi.macAddress().c_str(), 6);
-  
-  Serial.print("Receiver MAC: ");
-  Serial.println(WiFi.macAddress());
+  espNow->init();
+  spiffs->init();
+  espNow->callBack();
+  Serial.println("Sistem reciver binding strated");
+
+  // spiffs->readClose(transmitterMAC);
 }
 
 void loop() {
   int buttonState = digitalRead(buttonPin);
   if (buttonState == LOW) { // Asumsikan tombol terhubung ke GND
-    unsigned long currentTime = millis();
+    currentTime = millis();
     if (currentTime - lastPress > debounce) {
       pressCount++;
       lastPress = currentTime;
@@ -144,27 +50,43 @@ void loop() {
       
       if (pressCount == 2) {
         // Reset count
-        pressCount = 0;
         stateBinding = true;
+        espNow->bindingMode();
+        pressCount = 0;
+        
         // Lakukan binding
         Serial.println("Proses Binding Dimulai...");
         // Mengirim broadcast untuk mencari transmitter
-        esp_now_peer_info_t peerInfo;
-        memset(&peerInfo, 0, sizeof(peerInfo));
-        peerInfo.channel = 0;
-        peerInfo.encrypt = false;
-        peerInfo.ifidx = WIFI_IF_STA;
-        for (int i = 0; i < 6; i++) {
-          peerInfo.peer_addr[i] = 0xFF;
-        }
-        
-        esp_now_add_peer(&peerInfo);
-        
-        
-        // Kirim broadcast untuk meminta MAC Address
-        esp_now_send(peerInfo.peer_addr, receiverMAC, 6);
-        Serial.println("Broadcast Receiver MAC dikirim");
       }
     }
   }
+  if (memcmp(transmitterMAC, "\0\0\0\0\0\0", 6) == 0) {
+    spiffs->readClose(transmitterMAC);
+  }
+  macAddr = espNow->getMacAddr();
+  incomingData = espNow->getIncomingData();
+  if (macAddr != nullptr && incomingData != nullptr) {
+    if (stateBinding){
+      spiffs->write(macAddr, incomingData);
+      stateBinding = false;
+    }else{
+      Serial.print("Nilai incomingData: ");
+      String message = String((char*)incomingData,espNow->getSize());
+      Serial.println(message);
+      esp_err_t result = espNow->addPeer(transmitterMAC);
+      if (result == ESP_OK){
+        Serial.println("berhasil ditambahkan sebagai peer");
+      }else{
+        Serial.print("gagal menambahkan mac adrr dengan kode :");
+        Serial.println(result);
+      }
+      esp_err_t sending = espNow->sendingData(transmitterMAC, (uint8_t*)message.c_str(), message.length());
+      if (sending == ESP_OK) {
+          Serial.println("Data berhasil dikirim");
+      } else {
+          Serial.println("Gagal mengirim data");
+      }
+    }
+  }
+    vTaskDelay(200 / portTICK_PERIOD_MS);
 }

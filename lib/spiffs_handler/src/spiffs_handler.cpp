@@ -19,7 +19,7 @@ void spiffs_handler::write(const uint8_t* reciveMac, const uint8_t* incomingData
     file.write(reciveMac, 6);
     file.close();
     Serial.print("Nilai incomingData: ");
-    receivedData = String((char*)incomingData);
+    receivedData = String((char*)incomingData, sizeof(incomingData));
     Serial.println(receivedData);
 }
 

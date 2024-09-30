@@ -37,7 +37,7 @@ void EspNowHandler::OnDataRecv(const uint8_t* mac, const uint8_t* incomingData, 
     // Simpan panjang data
     receivedData.size = len;
     
-    Serial.println("Data berhasil disimpan ke dalam receivedData");
+    // Serial.println("Data berhasil disimpan ke dalam receivedData");
 
 }
 
