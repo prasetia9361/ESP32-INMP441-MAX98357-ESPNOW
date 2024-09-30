@@ -11,6 +11,7 @@ class spiffs_handler{
 private:
     // EspNowHandler* espNow;
     String receivedData;
+    uint8_t macAddr[6];
     // unsigned long currentMillis;
     // unsigned long lastSend = 0;
     // uint8_t* reciveMac;

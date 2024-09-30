@@ -7,70 +7,48 @@ void spiffs_handler::init(){
     Serial.println("Gagal menginisialisasi SPIFFS");
     return;
   }
+  // memset(macAddr, 0,sizeof(macAddr));
 }
 
-void spiffs_handler::write(const uint8_t* reciveMac, const uint8_t* incomingData){
-//   reciveMac = espNow->getMacAddr();
-//   incomingData = espNow->getIncomingData();
-  // Serial.print("Data diterima dari: ");
-  // char macStr[18];
-  // snprintf(macStr, sizeof(macStr), "%02X:%02X:%02X:%02X:%02X:%02X",
-  //          reciveMac[0], reciveMac[1], reciveMac[2], reciveMac[3], reciveMac[4], reciveMac[5]);
-  // Serial.println(macStr);
-  if (!exists()) {
+void spiffs_handler::write(const uint8_t* reciveMac, const uint8_t* incomingData) {
     File file = SPIFFS.open("/receiverMAC.bin", FILE_WRITE);
-    if (file) {
-      file.write(reciveMac, 6);
-      file.close();
-      Serial.println("Receiver MAC disimpan ke SPIFFS");
-    } else {
-      Serial.println("Gagal membuka file untuk menulis");
+    if (!file) {
+        Serial.println("Gagal membuka file untuk ditulis");
+        return;
     }
-      // Cetak nilai dari incomingData di serial monitor
+    file.write(reciveMac, 6);
+    file.close();
     Serial.print("Nilai incomingData: ");
     receivedData = String((char*)incomingData);
     Serial.println(receivedData);
-  } else {
-    Serial.println("reciveMac kosong, tidak ada yang disimpan ke SPIFFS");
-  }
-
-
 }
 
-void spiffs_handler::readClose(uint8_t * mac){
-    uint8_t macAddr[6];
-    if (SPIFFS.exists("/receiverMAC.bin")){
-      File file = SPIFFS.open("/receiverMAC.bin", FILE_READ);
-        if (file){
-            file.read(macAddr, 6);
-            file.close();
-            
-            // Copy the read MAC address to the provided mac variable
-            memcpy(mac, macAddr, 6);
-            
-            // esp_err_t result = espNow->addPeer(mac);
-            // if (result == ESP_OK) {
-            // Serial.println("Receiver ditambahkan sebagai peer");
-            // } else {
-            //     Serial.print("Gagal menambahkan Receiver sebagai peer. Error code: ");
-            //     Serial.println(result);
-            // }
-            // currentMillis = millis();
-            // if (currentMillis - lastSend >= 2000) {
-            //     const char* message = "data_dari_transmiter";
-            //     esp_err_t result =espNow->sendingData(mac, (const uint8_t*)message, strlen(message));
-            //     if (result == ESP_OK) {
-            //         Serial.println("Data berhasil dikirim");
-            //     } else {
-            //         Serial.println("Gagal mengirim data");
-            //     }
-            //     lastSend = currentMillis;
-            // }
-        } else {
-            Serial.println("Gagal membuka file MAC address");
-        }
-    } else {
-      Serial.println("Menunggu proses binding...");
+void spiffs_handler::readClose(uint8_t * mac) {
+    if (!exists()) {
+        Serial.println("File tidak ditemukan");
+        memset(mac, 0, 6);
+        return;
     }
+
+    File file = readData();
+    if (!file) {
+        Serial.println("Gagal membuka file untuk dibaca");
+        memset(mac, 0, 6);
+        return;
+    }
+    file.read(mac, 6);
+    if (memcmp(mac, "\0\0\0\0\0\0", 6) == 0) {
+        Serial.println("Data kosong");
+    } else {
+        Serial.println("Data MAC berhasil dibaca dari SPIFFS");
+    }
+    // if (file.size() >= 6) {
+    //     file.read(mac, 6);
+    //     Serial.println("Data MAC berhasil dibaca dari SPIFFS");
+    // } else {
+    //     Serial.println("File tidak berisi data MAC yang valid");
+    //     memset(mac, 0, 6);
+    // }
+    file.close();
 }
-    
+

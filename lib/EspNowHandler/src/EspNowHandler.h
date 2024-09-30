@@ -26,19 +26,22 @@ private:
     fromSpiffs myData;
 
     // void receiver();
-    static void OnDataRecv(const uint8_t* mac, const uint8_t* incomingData, int len);
+    // 
     
     uint8_t transmitterMAC[6];
     bool bindingModeActive;
     esp_now_peer_info_t peerInfo;
+
+    static void OnDataRecvWrapper(const uint8_t* mac, const uint8_t* incomingData, int len);
+    static EspNowHandler* instance;
     
 
 
 public:
     EspNowHandler();
     void init();
-    void callBack();
-    // void transmitter(const uint8_t* mac, const uint8_t* data, size_t len);
+    void callBack() ;
+    void OnDataRecv(const uint8_t* mac, const uint8_t* incomingData, int len);
     esp_err_t addPeer(const uint8_t* mac);
     esp_err_t sendingData(const uint8_t* mac, const uint8_t* data, size_t len);
     void bindingMode();
