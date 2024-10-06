@@ -8,6 +8,7 @@ Transport::Transport(OutputBuffer *output_buffer, size_t buffer_size) {
     m_buffer = (uint8_t *)malloc(m_buffer_size);
     m_index = 0;
     m_header_size = 0;
+    stateBinding = false;
 }
 
 void Transport::add_sample(int16_t sample) {
@@ -26,6 +27,12 @@ void Transport::flush() {
         send();
         m_index = 0;
     }
+}void Transport::statusBinding(){
+    bindingMode();
+}
+
+void Transport::peerReady(){
+    addPeer();
 }
 
 int Transport::set_header(const int header_size, const uint8_t *header) {
@@ -36,4 +43,9 @@ int Transport::set_header(const int header_size, const uint8_t *header) {
     } else {
         return -1;
     }
+}
+
+bool Transport::binding(bool bindingState){
+    stateBinding = bindingState;
+    return stateBinding;
 }

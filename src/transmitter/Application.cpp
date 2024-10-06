@@ -7,6 +7,7 @@
 #include "EspNowTransport.h"
 #include "I2SMEMSSampler.h"
 #include "OutputBuffer.h"
+#include "spiffs_handler.h"
 #include "config.h"
 
 static void application_task(void *param)
@@ -22,8 +23,8 @@ Application::Application()
     m_output_buffer = new OutputBuffer(300 * 16);
 
     m_input = new I2SMEMSSampler(I2S_NUM_0, i2s_mic_pins, i2s_mic_Config, 128);
-
-    m_transport = new EspNowTransport(m_output_buffer, ESP_NOW_WIFI_CHANNEL);
+    spiffs = new spiffs_handler();
+    m_transport = new EspNowTransport(m_output_buffer, spiffs, ESP_NOW_WIFI_CHANNEL);
     m_transport->set_header(TRANSPORT_HEADER_SIZE, transport_header);
 }
 
@@ -44,37 +45,73 @@ void Application::begin()
     m_transport->begin();
     // setup the transmit button
     pinMode(GPIO_TRANSMIT_BUTTON, INPUT_PULLUP);
+    //setup button for binding mode
+    pinMode(BINDING_BUTTON,INPUT_PULLUP);
     // start the main task for the application
     TaskHandle_t task_handle;
     xTaskCreate(application_task, "application_task", 8192, this, 1,
                 &task_handle);
 }
-
 // application task - coordinates everything
 void Application::loop()
 {
     int16_t *samples =
         reinterpret_cast<int16_t *>(malloc(sizeof(int16_t) * 128));
     // continue forever
-    while (true)
-    {
+    unsigned long lastPress = 0; // Ensure this is initialized
+    int pressCount = 0; 
+    unsigned long lastDebounceTime = 0;  // last time the button state changed
+    int lastButtonState = HIGH;           // previous reading from the input pin
+    int buttonState;                      // current reading from the input pin
+
+    while (true) {
+        // Read the state of the button
+        int reading = digitalRead(BINDING_BUTTON);
+
+        // Check if the button state has changed
+        if (reading != lastButtonState) {
+            lastDebounceTime = millis(); // reset the debouncing timer
+        }
+
+        // If the button state has been stable for longer than the debounce time
+        if ((millis() - lastDebounceTime) > 50) {
+            // If the button state has changed
+            if (reading != buttonState) {
+                buttonState = reading;
+                // Only count the button press if it was pressed
+                if (buttonState == LOW) {
+                    currentTime = millis();
+                    if (currentTime - lastPress > 300) {
+                        pressCount++;
+                        lastPress = currentTime;
+                        Serial.print("tombol ditekan: ");
+                        Serial.println(pressCount);
+                        if (pressCount == 2) {
+                            Serial.println("Proses binding dimulai");
+                            m_transport->statusBinding();
+                            pressCount = 0;
+                        }
+                    }
+                }
+            }
+        }
+
+        lastButtonState = reading; // save the reading for next time
+        m_transport->peerReady();
         // do we need to start transmitting?
-        if (!digitalRead(GPIO_TRANSMIT_BUTTON))
-        {
+        if (!digitalRead(GPIO_TRANSMIT_BUTTON)){
             Serial.println("Started transmitting");
+            
             // start the input to get samples from the microphone
             m_input->start();
             // transmit for at least 1 second or while the button is pushed
             unsigned long start_time = millis();
-            while (millis() - start_time < 1000 ||
-                   !digitalRead(GPIO_TRANSMIT_BUTTON))
-            {
+            while (millis() - start_time < 1000 || !digitalRead(GPIO_TRANSMIT_BUTTON)){
                 // read samples from the microphone
                 int samples_read = m_input->read(samples, 128);
                 // and send them over the transport
                 // Serial.println(samples_read);
-                for (int i = 0; i < samples_read; i++)
-                {
+                for (int i = 0; i < samples_read; i++){
                     // Serial.println(samples_read);
                     m_transport->add_sample(samples[i]);
                 }

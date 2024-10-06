@@ -24,7 +24,7 @@
 
 // transmit button
 #define GPIO_TRANSMIT_BUTTON 23
-
+#define BINDING_BUTTON 0
 
 // On which wifi channel (1-11) should ESP-Now transmit? The default ESP-Now
 // channel on ESP32 is channel 1

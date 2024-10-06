@@ -8,7 +8,7 @@ spiffs_handler * spiffs;
 SemaphoreHandle_t bindingSemaphore;
 String receivedData;
 const int buttonPin = 0;
-int pressCount;
+int pressCount = 0;
 unsigned long currentTime;
 unsigned long lastPress = 0;
 unsigned long currenMillis;

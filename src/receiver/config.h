@@ -16,6 +16,8 @@
 // Shutdown line if you have this wired up or -1 if you don't
 #define I2S_SPEAKER_SD_PIN GPIO_NUM_22
 
+#define BINDING_BUTTON 0
+
 // On which wifi channel (1-11) should ESP-Now transmit? The default ESP-Now
 // channel on ESP32 is channel 1
 #define ESP_NOW_WIFI_CHANNEL 1
