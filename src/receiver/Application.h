@@ -3,13 +3,13 @@
 class Output;
 class Transport;
 class OutputBuffer;
-class spiffs_handler;
+class spiffsHandler;
 
 class Application {
    private:
     Output *m_output;
     Transport *m_transport;
-    spiffs_handler *spiffs;
+    spiffsHandler *spiffs;
     OutputBuffer *m_output_buffer;
     
     unsigned long currentTime;

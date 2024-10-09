@@ -1,14 +1,14 @@
 #pragma once
 
 #include "Transport.h"
-#include "spiffs_handler.h"
+#include "spiffsHandler.h"
 
 class OutputBuffer;
-class spiffs_handler;
+class spiffsHandler;
 
 class EspNowTransport: public Transport {
 private:
-  spiffs_handler* spiffs;
+  spiffsHandler* spiffs;
   uint8_t m_wifi_channel;
   uint8_t transmitterMAC[6];
 
@@ -18,7 +18,7 @@ protected:
   void bindingMode();
 
 public:
-  EspNowTransport(OutputBuffer *output_buffer,spiffs_handler *_spiffs, uint8_t wifi_channel);
+  EspNowTransport(OutputBuffer *output_buffer,spiffsHandler *_spiffs, uint8_t wifi_channel);
   virtual bool begin() override;
   friend void receiveCallback(const uint8_t *macAddr, const uint8_t *data, int dataLen);
 };

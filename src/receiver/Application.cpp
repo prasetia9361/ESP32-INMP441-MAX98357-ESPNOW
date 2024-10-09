@@ -7,7 +7,7 @@
 #include "EspNowTransport.h"
 #include "I2SOutput.h"
 #include "OutputBuffer.h"
-#include "spiffs_handler.h"
+#include "spiffsHandler.h" 
 #include "config.h"
 
 SemaphoreHandle_t bindingSemaphore;
@@ -22,7 +22,7 @@ Application::Application()
 {
     m_output_buffer = new OutputBuffer(300 * 16);
     m_output = new I2SOutput(I2S_NUM_0, i2s_speaker_pins);
-    spiffs = new spiffs_handler();
+    spiffs = new spiffsHandler(); // Changed from spiffs_handler to spiffsHandler
     m_transport = new EspNowTransport(m_output_buffer, spiffs, ESP_NOW_WIFI_CHANNEL);
     m_transport->set_header(TRANSPORT_HEADER_SIZE, transport_header);
 

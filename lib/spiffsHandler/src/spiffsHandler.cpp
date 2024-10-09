@@ -1,8 +1,8 @@
-#include "spiffs_handler.h"
+#include "spiffsHandler.h"
 
-spiffs_handler::spiffs_handler(){}
+spiffsHandler::spiffsHandler(){}
 
-void spiffs_handler::init(){
+void spiffsHandler::init(){
     if (!SPIFFS.begin(true)) {
         Serial.println("Gagal menginisialisasi SPIFFS");
         return;
@@ -39,7 +39,6 @@ void spiffs_handler::init(){
             return;
         }
 
-        // Memecah string MAC address dan mengonversinya ke uint8_t
         for (int i = 0; i < 6; i++) {
             char byteStr[3];
             byteStr[0] = dataMac[i * 3];
@@ -51,7 +50,7 @@ void spiffs_handler::init(){
         Serial.println("MAC address converted successfully");
     }
 }
-void spiffs_handler::writeMacAddress(const uint8_t *mac){
+void spiffsHandler::writeMacAddress(const uint8_t *mac){
     JsonDocument doc;
     char macStr[18];
     snprintf(macStr, sizeof(macStr), "%02X:%02X:%02X:%02X:%02X:%02X", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);

@@ -3,7 +3,7 @@
 class I2SMEMSSampler;
 class Transport;
 class OutputBuffer;
-class spiffs_handler;
+class spiffsHandler;
 
 class Application
 {
@@ -11,7 +11,7 @@ private:
     I2SMEMSSampler *m_input;
     Transport *m_transport;
     OutputBuffer *m_output_buffer;
-    spiffs_handler *spiffs;
+    spiffsHandler *spiffs;
     
     unsigned long currentTime;
 

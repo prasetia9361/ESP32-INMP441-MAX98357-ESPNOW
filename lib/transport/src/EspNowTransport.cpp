@@ -9,8 +9,6 @@
 
 const int MAX_ESP_NOW_PACKET_SIZE = 250;
 const char* message = "hello binding started!";
-uint8_t broadcastAddress[] = {0xD0,0xEF,0x76,0x47,0x1A,0x48};
-// uint8_t broadcastAddress[] = {0xF9,0xF8,0xF7,0xF6,0xF5,0xF4};
 
 static EspNowTransport *instance = NULL;
 
@@ -37,16 +35,16 @@ void receiveCallback(const uint8_t *macAddr, const uint8_t *data, int dataLen) {
 
 }
 
-EspNowTransport::EspNowTransport(OutputBuffer *output_buffer,spiffs_handler *_spiffs, uint8_t wifi_channel): Transport(output_buffer, MAX_ESP_NOW_PACKET_SIZE) {
-    spiffs = _spiffs;
+EspNowTransport::EspNowTransport(OutputBuffer *output_buffer,spiffsHandler *_spiffs, uint8_t wifi_channel): Transport(output_buffer, MAX_ESP_NOW_PACKET_SIZE) {
     instance = this;
+    spiffs = _spiffs;
     m_wifi_channel = wifi_channel;
 }
 
 bool EspNowTransport::begin() {
     if (spiffs == nullptr) {
         Serial.println("Error: spiffs tidak terinisialisasi");
-        return false; // Mengembalikan false jika spiffs tidak terinisialisasi
+        return false;
     }
     
     esp_wifi_set_promiscuous(true);
@@ -65,6 +63,11 @@ bool EspNowTransport::begin() {
 }
 
 void EspNowTransport::addPeer(){
+    if (spiffs->getMac()[0] == 0)
+    {
+        return;
+    }
+    
     esp_now_peer_info_t peerInfo;
     memset(&peerInfo, 0, sizeof(peerInfo));
     memcpy(peerInfo.peer_addr, spiffs->getMac(), 6);
@@ -76,8 +79,15 @@ void EspNowTransport::addPeer(){
         esp_err_t result = esp_now_add_peer(&peerInfo);
         if (result == ESP_OK) {
         Serial.println("Receiver ditambahkan sebagai peer");
+
         char macStr[18];
-        snprintf(macStr, sizeof(macStr), "%02X:%02X:%02X:%02X:%02X:%02X", spiffs->getMac()[0], spiffs->getMac()[1], spiffs->getMac()[2], spiffs->getMac()[3], spiffs->getMac()[4], spiffs->getMac()[5]);
+        snprintf(macStr, sizeof(macStr), "%02X:%02X:%02X:%02X:%02X:%02X", 
+            spiffs->getMac()[0], 
+            spiffs->getMac()[1], 
+            spiffs->getMac()[2], 
+            spiffs->getMac()[3], 
+            spiffs->getMac()[4], 
+            spiffs->getMac()[5]);
         Serial.printf("mac address: %s\n", macStr);
         } else {
         Serial.print("Gagal menambahkan Receiver sebagai peer. Error code: ");
@@ -86,19 +96,15 @@ void EspNowTransport::addPeer(){
     }
 }
 void EspNowTransport::send() {
-    // size_t dataSize = m_index + m_header_size;
-    // if (dataSize > MAX_ESP_NOW_PACKET_SIZE) {
-    //     Serial.println("Ukuran data melebihi ukuran paket maksimum ESP-NOW.");
-    //     return; // Mencegah pengiriman jika ukuran data terlalu besar
-    // }
+    if (spiffs->getMac()[0] == 0)
+    {
+        return;
+    }
+    
     
     esp_err_t send = esp_now_send(spiffs->getMac(), m_buffer, m_index + m_header_size);
     if (send != ESP_OK) {
         Serial.printf("Gagal mengirim: %s\n", esp_err_to_name(send));
-        // Serial.printf("Free heap: %d bytes\n", esp_get_free_heap_size());
-    }else
-    {
-        Serial.println("sending success");
     }
 }
 

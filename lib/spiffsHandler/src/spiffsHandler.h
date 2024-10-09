@@ -1,5 +1,5 @@
-#ifndef SPIFFS_HANDLER_H
-#define SPIFFS_HANDLER_H
+#ifndef SPIFFSHANDLER_H
+#define SPIFFSHANDLER_H
 
 #include <Arduino.h>
 #include <SPIFFS.h>
@@ -7,19 +7,18 @@
 #include "FS.h"
 #include "SD.h"
 
-// class EspNowHandler;
-class spiffs_handler{
+class spiffsHandler{
 private:
     typedef struct config {
-        uint8_t macAddress[6];
+        uint8_t macAddress[6] = {0,0,0,0,0,0};
     } config;
     config configData;
-    
+
     String receivedData;
     uint8_t macAddr[6];
 
 public:
-    spiffs_handler();
+    spiffsHandler();
 
     uint8_t *getMac(){return configData.macAddress;}
 

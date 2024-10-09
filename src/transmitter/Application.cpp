@@ -7,7 +7,7 @@
 #include "EspNowTransport.h"
 #include "I2SMEMSSampler.h"
 #include "OutputBuffer.h"
-#include "spiffs_handler.h"
+#include "spiffsHandler.h" 
 #include "config.h"
 
 static void application_task(void *param)
@@ -18,9 +18,9 @@ static void application_task(void *param)
 
 Application::Application()
 {
-    m_output_buffer = new OutputBuffer(0);
+    m_output_buffer = new OutputBuffer(300 * 16);
     m_input = new I2SMEMSSampler(I2S_NUM_0, i2s_mic_pins, i2s_mic_Config, 128);
-    spiffs = new spiffs_handler();
+    spiffs = new spiffsHandler(); // Changed from spiffs_handler to spiffsHandler
     m_transport = new EspNowTransport(m_output_buffer, spiffs, ESP_NOW_WIFI_CHANNEL);
     m_transport->set_header(TRANSPORT_HEADER_SIZE, transport_header);
 }
@@ -29,7 +29,7 @@ void Application::begin()
 {
     Serial.print("My IDF Version is: ");
     Serial.println(esp_get_idf_version());
-    
+
     WiFi.mode(WIFI_STA);
     WiFi.disconnect();
     Serial.print("My MAC Address is: ");
@@ -88,7 +88,7 @@ void Application::loop()
         if (!digitalRead(GPIO_TRANSMIT_BUTTON)){
             Serial.println("Started transmitting");
             m_input->start();
-            
+
             unsigned long start_time = millis();
             while (millis() - start_time < 1000 || !digitalRead(GPIO_TRANSMIT_BUTTON)){
                 int samples_read = m_input->read(samples, 128);
