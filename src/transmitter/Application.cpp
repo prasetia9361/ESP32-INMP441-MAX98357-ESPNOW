@@ -88,6 +88,7 @@ void Application::loop()
         if (!digitalRead(GPIO_TRANSMIT_BUTTON)){
             Serial.println("Started transmitting");
             m_input->start();
+            
             unsigned long start_time = millis();
             while (millis() - start_time < 1000 || !digitalRead(GPIO_TRANSMIT_BUTTON)){
                 int samples_read = m_input->read(samples, 128);
@@ -102,4 +103,5 @@ void Application::loop()
         }
     }
     // free(samples);
+    delay(50);
 }

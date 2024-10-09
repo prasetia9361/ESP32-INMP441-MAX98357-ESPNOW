@@ -37,6 +37,12 @@ void receiveCallback(const uint8_t *macAddr, const uint8_t *data, int dataLen) {
 
 }
 
+EspNowTransport::EspNowTransport(OutputBuffer *output_buffer,spiffs_handler *_spiffs, uint8_t wifi_channel): Transport(output_buffer, MAX_ESP_NOW_PACKET_SIZE) {
+    spiffs = _spiffs;
+    instance = this;
+    m_wifi_channel = wifi_channel;
+}
+
 bool EspNowTransport::begin() {
     if (spiffs == nullptr) {
         Serial.println("Error: spiffs tidak terinisialisasi");
@@ -58,11 +64,6 @@ bool EspNowTransport::begin() {
     return true;
 }
 
-EspNowTransport::EspNowTransport(OutputBuffer *output_buffer,spiffs_handler *_spiffs, uint8_t wifi_channel): Transport(output_buffer, MAX_ESP_NOW_PACKET_SIZE) {
-    spiffs = _spiffs;
-    instance = this;
-    m_wifi_channel = wifi_channel;
-}
 void EspNowTransport::addPeer(){
     esp_now_peer_info_t peerInfo;
     memset(&peerInfo, 0, sizeof(peerInfo));
@@ -85,19 +86,18 @@ void EspNowTransport::addPeer(){
     }
 }
 void EspNowTransport::send() {
-    size_t dataSize = m_index + m_header_size;
-    if (dataSize > MAX_ESP_NOW_PACKET_SIZE) {
-        Serial.println("Ukuran data melebihi ukuran paket maksimum ESP-NOW.");
-        return; // Mencegah pengiriman jika ukuran data terlalu besar
-    }
+    // size_t dataSize = m_index + m_header_size;
+    // if (dataSize > MAX_ESP_NOW_PACKET_SIZE) {
+    //     Serial.println("Ukuran data melebihi ukuran paket maksimum ESP-NOW.");
+    //     return; // Mencegah pengiriman jika ukuran data terlalu besar
+    // }
     
     esp_err_t send = esp_now_send(spiffs->getMac(), m_buffer, m_index + m_header_size);
     if (send != ESP_OK) {
-        Serial.printf("Failed to send: %s\n", esp_err_to_name(send));
+        Serial.printf("Gagal mengirim: %s\n", esp_err_to_name(send));
         // Serial.printf("Free heap: %d bytes\n", esp_get_free_heap_size());
     }else
     {
-        Serial.printf("Failed to send: %s\n", esp_err_to_name(send));
         Serial.println("sending success");
     }
 }
