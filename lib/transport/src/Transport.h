@@ -7,7 +7,6 @@ class OutputBuffer;
 class Transport
 {
 protected:
-  // audio buffer for samples we need to send
   uint8_t *m_buffer = NULL;
   int m_buffer_size = 0;
   int m_index = 0;

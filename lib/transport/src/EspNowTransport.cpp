@@ -8,40 +8,31 @@
 #include "OutputBuffer.h"
 
 const int MAX_ESP_NOW_PACKET_SIZE = 250;
-// const int MAX_ESP_NOW_PACKET_SIZE = 128;
-// uint8_t broadcastAddress[6];
 const char* message = "hello binding started!";
-// uint8_t broadcastAddress[] = {0xF9, 0xF8, 0xF7, 0xF6, 0xF5, 0xF4};
+uint8_t broadcastAddress[] = {0xD0,0xEF,0x76,0x47,0x1A,0x48};
+// uint8_t broadcastAddress[] = {0xF9,0xF8,0xF7,0xF6,0xF5,0xF4};
 
 static EspNowTransport *instance = NULL;
 
 void receiveCallback(const uint8_t *macAddr, const uint8_t *data, int dataLen) {
-
     #ifdef TRANSMITTER
+    // Serial.print("Receiver Address: ");
     instance->spiffs->writeMacAddress(macAddr);
     #else
     bool binding = instance->stateBinding;
     if (binding)
     {  
-        instance->spiffs->write(macAddr, data);
+        instance->spiffs->writeMacAddress(macAddr);
         Serial.println("binding transport true");
         binding = false;
     }else
     {
-        // buat variable mac kemudian panggil spiffs->readClose() 
-        // lalu cek apakah macAddr sama dengand data yang disimpan di spiffs 
-        // klo iya maka buffer dimasukan ke addsampel 
         int header_size = instance->m_header_size;
-        // first m_header_size bytes of m_buffer are the expected header
+
         if ((dataLen > header_size) && (dataLen <= MAX_ESP_NOW_PACKET_SIZE) && (memcmp(data, instance->m_buffer, header_size) == 0)) {
             instance->m_output_buffer->add_samples(data + header_size, dataLen - header_size);
         }
     }
-    
-    
-    // annoyingly we can't pass an param into this so we need to do a bit of
-    // hack to access the EspNowTransport instance
-
     #endif
 
 }
@@ -51,32 +42,19 @@ bool EspNowTransport::begin() {
         Serial.println("Error: spiffs tidak terinisialisasi");
         return false; // Mengembalikan false jika spiffs tidak terinisialisasi
     }
-    // Set Wifi channel
+    
     esp_wifi_set_promiscuous(true);
     esp_wifi_set_channel(m_wifi_channel, WIFI_SECOND_CHAN_NONE);
     esp_wifi_set_promiscuous(false);
 
     esp_err_t result = esp_now_init();
     if (result == ESP_OK) {
-        // Serial.println("ESPNow Init Success");
+        Serial.println("ESPNow Init Success");
         esp_now_register_recv_cb(receiveCallback);
     }else {
         Serial.printf("ESPNow Init failed: %s\n", esp_err_to_name(result));
         return false;
     }
-
-    
-    // memcpy(transmitterMAC, WiFi.macAddress().c_str(), 6);
-    // // this will broadcast a message to everyone in range
-    // esp_now_peer_info_t peerInfo = {};
-    // memcpy(&peerInfo.peer_addr, broadcastAddress, 6);
-    // if (!esp_now_is_peer_exist(broadcastAddress)) {
-    //     result = esp_now_add_peer(&peerInfo);
-    //     if (result != ESP_OK) {
-    //         Serial.printf("Failed to add broadcast peer: %s\n", esp_err_to_name(result));
-    //         return false;
-    //     }
-    // }
     return true;
 }
 
@@ -86,38 +64,25 @@ EspNowTransport::EspNowTransport(OutputBuffer *output_buffer,spiffs_handler *_sp
     m_wifi_channel = wifi_channel;
 }
 void EspNowTransport::addPeer(){
-    // if (memcmp(broadcastAddress, "\0\0\0\0\0\0", 6) == 0) {
-    //     spiffs->readClose(broadcastAddress);
-    // }else{
-        // Serial.print("Data diterima dari: ");
-       
-        // memcpy(broadcastAddress,spiffs->getMac(),6);
-        
-        esp_now_peer_info_t peerInfo;
-        memset(&peerInfo, 0, sizeof(peerInfo));
-        memcpy(peerInfo.peer_addr, spiffs->getMac(), 6);
-        peerInfo.channel = 0;
-        peerInfo.encrypt = false;
-        peerInfo.ifidx = WIFI_IF_STA; 
-        
-        if (!esp_now_is_peer_exist(spiffs->getMac())) {
-          esp_err_t result = esp_now_add_peer(&peerInfo);
-          if (result == ESP_OK) {
-            Serial.println("Receiver ditambahkan sebagai peer");
-            char macStr[18];
-            snprintf(macStr, sizeof(macStr), "%02X:%02X:%02X:%02X:%02X:%02X", spiffs->getMac()[0], spiffs->getMac()[1], spiffs->getMac()[2], spiffs->getMac()[3], spiffs->getMac()[4], spiffs->getMac()[5]);
-            Serial.printf("mac address: %s\n", macStr);
-          } else {
-            Serial.print("Gagal menambahkan Receiver sebagai peer. Error code: ");
-            Serial.println(result);
-          }
+    esp_now_peer_info_t peerInfo;
+    memset(&peerInfo, 0, sizeof(peerInfo));
+    memcpy(peerInfo.peer_addr, spiffs->getMac(), 6);
+    peerInfo.channel = 0;
+    peerInfo.encrypt = false;
+    peerInfo.ifidx = WIFI_IF_STA; 
+    
+    if (!esp_now_is_peer_exist(spiffs->getMac())) {
+        esp_err_t result = esp_now_add_peer(&peerInfo);
+        if (result == ESP_OK) {
+        Serial.println("Receiver ditambahkan sebagai peer");
+        char macStr[18];
+        snprintf(macStr, sizeof(macStr), "%02X:%02X:%02X:%02X:%02X:%02X", spiffs->getMac()[0], spiffs->getMac()[1], spiffs->getMac()[2], spiffs->getMac()[3], spiffs->getMac()[4], spiffs->getMac()[5]);
+        Serial.printf("mac address: %s\n", macStr);
+        } else {
+        Serial.print("Gagal menambahkan Receiver sebagai peer. Error code: ");
+        Serial.println(result);
         }
-        // else
-        // {
-        //     esp_now_del_peer(broadcastAddress);
-        // }
-        
-    // }
+    }
 }
 void EspNowTransport::send() {
     size_t dataSize = m_index + m_header_size;
@@ -125,16 +90,16 @@ void EspNowTransport::send() {
         Serial.println("Ukuran data melebihi ukuran paket maksimum ESP-NOW.");
         return; // Mencegah pengiriman jika ukuran data terlalu besar
     }
-    // memcpy(broadcastAddress,spiffs->getMac(),6);
+    
     esp_err_t send = esp_now_send(spiffs->getMac(), m_buffer, m_index + m_header_size);
     if (send != ESP_OK) {
         Serial.printf("Failed to send: %s\n", esp_err_to_name(send));
         // Serial.printf("Free heap: %d bytes\n", esp_get_free_heap_size());
     }else
     {
+        Serial.printf("Failed to send: %s\n", esp_err_to_name(send));
         Serial.println("sending success");
     }
-    
 }
 
 void EspNowTransport::bindingMode(){
@@ -143,9 +108,11 @@ void EspNowTransport::bindingMode(){
     peerInfo.channel = 0;
     peerInfo.encrypt = false;
     peerInfo.ifidx = WIFI_IF_STA;
+
     for (int i = 0; i < 6; i++) {
         peerInfo.peer_addr[i] = 0xFF;
     }
+
     if (esp_now_add_peer(&peerInfo) == ESP_OK) {
         esp_now_send(peerInfo.peer_addr, ( uint8_t *)message, 6);
         esp_now_del_peer(peerInfo.peer_addr);

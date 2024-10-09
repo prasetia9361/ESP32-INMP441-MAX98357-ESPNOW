@@ -27,7 +27,9 @@ void Transport::flush() {
         send();
         m_index = 0;
     }
-}void Transport::statusBinding(){
+}
+
+void Transport::statusBinding(){
     bindingMode();
 }
 

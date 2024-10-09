@@ -11,10 +11,8 @@ class Application {
     Transport *m_transport;
     spiffs_handler *spiffs;
     OutputBuffer *m_output_buffer;
-    // int buttonState;
-    // int pressCount = 0;
+    
     unsigned long currentTime;
-    // unsigned long lastPress;
     volatile bool stateBinding = false;
 
    public:

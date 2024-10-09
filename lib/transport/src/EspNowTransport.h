@@ -3,7 +3,6 @@
 #include "Transport.h"
 #include "spiffs_handler.h"
 
-
 class OutputBuffer;
 class spiffs_handler;
 
@@ -12,6 +11,7 @@ private:
   spiffs_handler* spiffs;
   uint8_t m_wifi_channel;
   uint8_t transmitterMAC[6];
+
 protected:
   void addPeer();
   void send();
