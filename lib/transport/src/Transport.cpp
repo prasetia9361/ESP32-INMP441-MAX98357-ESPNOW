@@ -12,8 +12,8 @@ Transport::Transport(OutputBuffer *output_buffer, size_t buffer_size) {
 }
 
 void Transport::add_sample(int16_t sample) {
-    // m_buffer[m_index + m_header_size] = (sample + 4096) >> 5;
-    m_buffer[m_index + m_header_size] = (sample + 16384) >> 7;
+    m_buffer[m_index + m_header_size] = (sample + 4096) >> 5;
+    // m_buffer[m_index + m_header_size] = (sample + 16384) >> 7;
     m_index++;
     // have we reached a full packet?
     if ((m_index + m_header_size) == m_buffer_size) {

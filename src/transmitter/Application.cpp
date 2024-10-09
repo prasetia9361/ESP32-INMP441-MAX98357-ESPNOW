@@ -20,7 +20,7 @@ static void application_task(void *param)
 Application::Application()
 {
     // TODO: Fix this mmake selft buffer
-    m_output_buffer = new OutputBuffer(300 * 16);
+    m_output_buffer = new OutputBuffer(0);
 
     m_input = new I2SMEMSSampler(I2S_NUM_0, i2s_mic_pins, i2s_mic_Config, 128);
     spiffs = new spiffs_handler();
@@ -42,14 +42,17 @@ void Application::begin()
     Serial.print("My MAC Address is: ");
     Serial.println(WiFi.macAddress());
     // do any setup of the transport
+    spiffs->init();
+    spiffs->readMacAddress();
     m_transport->begin();
+    
     // setup the transmit button
     pinMode(GPIO_TRANSMIT_BUTTON, INPUT_PULLUP);
     //setup button for binding mode
     pinMode(BINDING_BUTTON,INPUT_PULLUP);
     // start the main task for the application
     TaskHandle_t task_handle;
-    xTaskCreate(application_task, "application_task", 8192, this, 1,
+    xTaskCreate(application_task, "application_task", 10192, this, 1,
                 &task_handle);
 }
 // application task - coordinates everything
@@ -97,6 +100,9 @@ void Application::loop()
         }
 
         lastButtonState = reading; // save the reading for next time
+        // char macStr[18];
+        // snprintf(macStr, sizeof(macStr), "%02X:%02X:%02X:%02X:%02X:%02X", spiffs->getMac()[0], spiffs->getMac()[1], spiffs->getMac()[2], spiffs->getMac()[3], spiffs->getMac()[4], spiffs->getMac()[5]);
+        // Serial.printf("mac address: %s\n", macStr);
         m_transport->peerReady();
         // do we need to start transmitting?
         if (!digitalRead(GPIO_TRANSMIT_BUTTON)){
@@ -124,4 +130,5 @@ void Application::loop()
         }
         // while the transmit button is not pushed and 1 second has not elapsed
     }
+    // free(samples);
 }

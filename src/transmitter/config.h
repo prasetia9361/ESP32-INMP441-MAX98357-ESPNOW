@@ -3,7 +3,7 @@
 #include <freertos/FreeRTOS.h>
 
 // sample rate for the system
-// #define SAMPLE_RATE 22050
+// #define SAMPLE_RATE 16000
 #define SAMPLE_RATE 44100 // Microfone
 // are you using an I2S microphone - comment this if you want to use an analog
 // mic and ADC input #define USE_I2S_MIC_INPUT
