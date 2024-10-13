@@ -19,7 +19,7 @@ i2s_config_t i2s_mic_Config = {
 #endif
     .intr_alloc_flags = ESP_INTR_FLAG_LEVEL1,
     .dma_buf_count = 8,
-    .dma_buf_len = 64,
+    .dma_buf_len = 32,
     .use_apll = false,
     .tx_desc_auto_clear = false,
     .fixed_mclk = 0};

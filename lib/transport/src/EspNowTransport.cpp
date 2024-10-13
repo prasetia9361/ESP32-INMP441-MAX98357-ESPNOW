@@ -8,7 +8,8 @@
 #include "OutputBuffer.h"
 
 const int MAX_ESP_NOW_PACKET_SIZE = 250;
-const char* message = "hello binding started!";
+
+const char* messaging = "hello binding started!";
 
 static EspNowTransport *instance = NULL;
 
@@ -25,17 +26,18 @@ void receiveCallback(const uint8_t *macAddr, const uint8_t *data, int dataLen) {
         binding = false;
     }else
     {
+        memcpy(&instance->messageData, data, sizeof(instance->messageData));
         int header_size = instance->m_header_size;
 
         if ((dataLen > header_size) && (dataLen <= MAX_ESP_NOW_PACKET_SIZE) && (memcmp(data, instance->m_buffer, header_size) == 0)) {
-            instance->m_output_buffer->add_samples(data + header_size, dataLen - header_size);
+            instance->m_output_buffer->add_samples(instance->messageData.m_buffer + header_size, sizeof(instance->messageData.m_buffer) - header_size);
         }
     }
     #endif
 
 }
 
-EspNowTransport::EspNowTransport(OutputBuffer *output_buffer,spiffsHandler *_spiffs, uint8_t wifi_channel): Transport(output_buffer, MAX_ESP_NOW_PACKET_SIZE) {
+EspNowTransport::EspNowTransport(OutputBuffer *output_buffer, spiffsHandler *_spiffs, uint8_t wifi_channel): Transport(output_buffer, MAX_ESP_NOW_PACKET_SIZE) {
     instance = this;
     spiffs = _spiffs;
     m_wifi_channel = wifi_channel;
@@ -59,6 +61,9 @@ bool EspNowTransport::begin() {
         Serial.printf("ESPNow Init failed: %s\n", esp_err_to_name(result));
         return false;
     }
+    if (messageData.m_buffer == NULL) {
+        Serial.println("Error: Memory allocation failed for m_buffer");
+    }
     return true;
 }
 
@@ -67,6 +72,7 @@ void EspNowTransport::addPeer(){
     {
         return;
     }
+
     
     esp_now_peer_info_t peerInfo;
     memset(&peerInfo, 0, sizeof(peerInfo));
@@ -94,18 +100,18 @@ void EspNowTransport::addPeer(){
         Serial.println(result);
         }
     }
+    
 }
 void EspNowTransport::send() {
-    if (spiffs->getMac()[0] == 0)
-    {
+    if (spiffs->getMac()[0] == 0) {
         return;
     }
-    
-    
-    esp_err_t send = esp_now_send(spiffs->getMac(), m_buffer, m_index + m_header_size);
-    if (send != ESP_OK) {
-        Serial.printf("Gagal mengirim: %s\n", esp_err_to_name(send));
-    }
+
+    esp_err_t send = esp_now_send(spiffs->getMac(), messageData.m_buffer, m_index + m_header_size);
+    // esp_err_t send = esp_now_send(spiffs->getMac(), (uint8_t *)&messageData, sizeof(messageData));
+
+    Serial.printf("Mengirim data dengan ukuran: %d\n", m_index + m_header_size);
+    // Serial.println((char *)messageData.m_buffer); 
 }
 
 void EspNowTransport::bindingMode(){
@@ -120,7 +126,7 @@ void EspNowTransport::bindingMode(){
     }
 
     if (esp_now_add_peer(&peerInfo) == ESP_OK) {
-        esp_now_send(peerInfo.peer_addr, ( uint8_t *)message, 6);
+        esp_now_send(peerInfo.peer_addr, ( uint8_t *)messaging, 6);
         esp_now_del_peer(peerInfo.peer_addr);
     }
 }

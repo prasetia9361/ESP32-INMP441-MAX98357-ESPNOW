@@ -7,7 +7,12 @@ class OutputBuffer;
 class Transport
 {
 protected:
-  uint8_t *m_buffer = NULL;
+  typedef struct message{
+    uint8_t *m_buffer;
+    const char *data;
+  }message;
+  message messageData;
+  // uint8_t *m_buffer = NULL;
   int m_buffer_size = 0;
   int m_index = 0;
   int m_header_size;
