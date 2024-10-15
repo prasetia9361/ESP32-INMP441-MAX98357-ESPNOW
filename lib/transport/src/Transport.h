@@ -12,7 +12,7 @@ protected:
     const char *data;
   }message;
   message messageData;
-  // uint8_t *m_buffer = NULL;
+  uint8_t *bufferValue = NULL;
   int m_buffer_size = 0;
   int m_index = 0;
   int m_header_size;
@@ -25,11 +25,15 @@ protected:
 
 public:
   Transport(OutputBuffer *output_buffer, size_t buffer_size);
+  
   int set_header(const int header_size, const uint8_t *header);
+  virtual bool begin() = 0;
+  bool setBinding(bool bindingState);
+  bool getBinding(){return stateBinding;}
+
   void add_sample(int16_t sample);
   void flush();
   void statusBinding();
   void peerReady();
-  virtual bool begin() = 0;
-  bool binding(bool bindingState);
+
 };

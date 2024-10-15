@@ -18,19 +18,21 @@ void receiveCallback(const uint8_t *macAddr, const uint8_t *data, int dataLen) {
     // Serial.print("Receiver Address: ");
     instance->spiffs->writeMacAddress(macAddr);
     #else
-    bool binding = instance->stateBinding;
-    if (binding)
+    // bool binding = instance->stateBinding;
+    if (instance->stateBinding)
     {  
         instance->spiffs->writeMacAddress(macAddr);
         Serial.println("binding transport true");
-        binding = false;
+        instance->stateBinding = false;
     }else
     {
+        
         memcpy(&instance->messageData, data, sizeof(instance->messageData));
         int header_size = instance->m_header_size;
-
-        if ((dataLen > header_size) && (dataLen <= MAX_ESP_NOW_PACKET_SIZE) && (memcmp(data, instance->m_buffer, header_size) == 0)) {
-            instance->m_output_buffer->add_samples(instance->messageData.m_buffer + header_size, sizeof(instance->messageData.m_buffer) - header_size);
+        
+        printf("Size of messageData.m_buffer: %d\n", dataLen);
+        if ((dataLen > header_size) && (dataLen <= MAX_ESP_NOW_PACKET_SIZE) && (memcmp(instance->messageData.m_buffer, instance->bufferValue, header_size) == 0)) {
+            instance->m_output_buffer->add_samples(instance->messageData.m_buffer + header_size, dataLen - header_size);
         }
     }
     #endif
@@ -61,9 +63,7 @@ bool EspNowTransport::begin() {
         Serial.printf("ESPNow Init failed: %s\n", esp_err_to_name(result));
         return false;
     }
-    if (messageData.m_buffer == NULL) {
-        Serial.println("Error: Memory allocation failed for m_buffer");
-    }
+
     return true;
 }
 
@@ -106,12 +106,15 @@ void EspNowTransport::send() {
     if (spiffs->getMac()[0] == 0) {
         return;
     }
-
-    esp_err_t send = esp_now_send(spiffs->getMac(), messageData.m_buffer, m_index + m_header_size);
+    messageData.m_buffer = bufferValue;
+    esp_err_t send = esp_now_send(spiffs->getMac(), (uint8_t *)&messageData, m_index + m_header_size);
     // esp_err_t send = esp_now_send(spiffs->getMac(), (uint8_t *)&messageData, sizeof(messageData));
-
-    Serial.printf("Mengirim data dengan ukuran: %d\n", m_index + m_header_size);
-    // Serial.println((char *)messageData.m_buffer); 
+    if (send == ESP_OK)
+    {
+        Serial.printf("Status pengiriman: %s\n", esp_err_to_name(send));
+        Serial.printf("Mengirim data dengan ukuran: %d\n", m_index + m_header_size);
+        Serial.printf("mesageData len: %d\n", sizeof(messageData));
+    }
 }
 
 void EspNowTransport::bindingMode(){

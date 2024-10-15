@@ -61,7 +61,7 @@ void Application::loop()
     int pressCount = 0;
     while (true)
     {
-        m_transport->binding(stateBinding);
+        
         Serial.println("Started Receiving");
 
         if (I2S_SPEAKER_SD_PIN != -1)
@@ -73,26 +73,31 @@ void Application::loop()
         while (millis() - start_time < 1000)
         {
             int buttonState = digitalRead(BINDING_BUTTON);
-            if (buttonState == LOW) {
+            if (buttonState == LOW) 
+            {
                 unsigned long currentTime = millis();
-                if (currentTime - lastPress > 300) {
+                if (currentTime - lastPress > 300) 
+                {
                     pressCount++;
                     lastPress = currentTime;
                     Serial.print("tombol ditekan: ");
                     Serial.println(pressCount);
-                    if (pressCount == 2) {
+                    if (pressCount == 2) 
+                    {
                         Serial.println("Proses binding dimulai");
                         m_transport->statusBinding();
                         stateBinding = true;
+                        m_transport->setBinding(stateBinding);
                         pressCount = 0;
                     }
                 }
             }
-
+            
+            stateBinding = m_transport->getBinding();
             m_output_buffer->remove_samples(samples, 128);
             m_output->write(samples, 128);
         }
-
+        
         if (I2S_SPEAKER_SD_PIN != -1)
         {
             digitalWrite(I2S_SPEAKER_SD_PIN, LOW);

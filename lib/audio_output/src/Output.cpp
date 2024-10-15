@@ -10,7 +10,6 @@ const int NUM_FRAMES_TO_SEND = 256;
 
 Output::Output(i2s_port_t i2s_port) : m_i2s_port(i2s_port)
 {
-    // this will contain the prepared samples for sending to the I2S device
     m_frames = (int16_t *)malloc(2 * sizeof(int16_t) * NUM_FRAMES_TO_SEND);
 }
 
@@ -21,7 +20,6 @@ Output::~Output()
 
 void Output::stop()
 {
-    // stop the i2S driver
     i2s_stop(m_i2s_port);
     i2s_driver_uninstall(m_i2s_port);
 }
@@ -40,7 +38,6 @@ void Output::write(int16_t *samples, int count)
             samples_to_send++;
             sample_index++;
         }
-        // write data to the i2s peripheral
         size_t bytes_written = 0;
         i2s_write(m_i2s_port, m_frames, samples_to_send * sizeof(int16_t) * 2, &bytes_written, portMAX_DELAY);
         if (bytes_written != samples_to_send * sizeof(int16_t) * 2)

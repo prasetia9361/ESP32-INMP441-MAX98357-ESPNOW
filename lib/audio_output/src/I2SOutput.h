@@ -2,9 +2,7 @@
 
 #include "Output.h"
 
-/**
- * Base Class for both the ADC and I2S sampler
- **/
+
 class I2SOutput : public Output {
    private:
     i2s_pin_config_t m_i2s_pins;
