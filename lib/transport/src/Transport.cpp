@@ -15,7 +15,7 @@ void Transport::add_sample(int16_t sample) {
     bufferValue[m_index + m_header_size] = (sample + 4096) >> 5;
     // bufferValue[m_index + m_header_size] = (sample + 16384) >> 7;
     m_index++;
-    
+
     if ((m_index + m_header_size) == m_buffer_size) {
         send();
         m_index = 0;
@@ -29,25 +29,21 @@ void Transport::flush() {
     }
 }
 
-void Transport::statusBinding(){
-    bindingMode();
-}
+void Transport::statusBinding() { bindingMode(); }
 
-void Transport::peerReady(){
-    addPeer();
-}
+void Transport::peerReady() { addPeer(); }
 
 int Transport::set_header(const int header_size, const uint8_t *header) {
     if ((header_size < m_buffer_size) && (header)) {
         m_header_size = header_size;
-        memcpy(bufferValue, header,header_size);
+        memcpy(bufferValue, header, header_size);
         return 0;
     } else {
         return -1;
     }
 }
 
-bool Transport::setBinding(bool bindingState){
+bool Transport::setBinding(bool bindingState) {
     stateBinding = bindingState;
     return stateBinding;
 }

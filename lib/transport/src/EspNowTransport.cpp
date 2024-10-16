@@ -18,22 +18,26 @@ void receiveCallback(const uint8_t *macAddr, const uint8_t *data, int dataLen) {
     // Serial.print("Receiver Address: ");
     instance->spiffs->writeMacAddress(macAddr);
 #else
+    message messageData;
     // bool binding = instance->stateBinding;
     if (instance->stateBinding) {
         instance->spiffs->writeMacAddress(macAddr);
         Serial.println("binding transport true");
         instance->stateBinding = false;
     } else {
-        memcpy(&instance->messageData, data, sizeof(instance->messageData));
+        memcpy(&messageData, data, sizeof(messageData));
         int header_size = instance->m_header_size;
 
-        printf("Size of messageData.m_buffer: %d\n", dataLen);
-        if ((dataLen > header_size) && (dataLen <= MAX_ESP_NOW_PACKET_SIZE) &&
-            (memcmp(instance->messageData.m_buffer, instance->bufferValue,
-                    header_size) == 0)) {
+        printf("Size of messageData.m_buffer: %d\n", messageData.m_buffer);
+        printf("Size of messageData.dataLen: %d\n", messageData.dataLen);
+
+        if ((messageData.dataLen > header_size) &&
+            (messageData.dataLen <= MAX_ESP_NOW_PACKET_SIZE) &&
+            (memcmp(messageData.m_buffer, instance->bufferValue, header_size) ==
+             0)) {
             instance->m_output_buffer->add_samples(
-                instance->messageData.m_buffer + header_size,
-                dataLen - header_size);
+                messageData.m_buffer + header_size,
+                messageData.dataLen - header_size);
         }
     }
 #endif
@@ -104,16 +108,17 @@ void EspNowTransport::send() {
         return;
     }
     messageData.m_buffer = bufferValue;
-    esp_err_t send = esp_now_send(spiffs->getMac(), (uint8_t *)&messageData,
-                                  m_index + m_header_size);
+    messageData.dataLen = m_index + m_header_size;
+    // esp_err_t send = esp_now_send(spiffs->getMac(),
+    // (uint8_t *)&messageData,
+    //                               m_index + m_header_size);
     esp_err_t send = esp_now_send(spiffs->getMac(), (uint8_t *)&messageData,
                                   sizeof(messageData));
     // if (send == ESP_OK)
     // {
-    // Serial.printf("Status pengiriman: %s\n", esp_err_to_name(send));
-    // Serial.printf("Mengirim data dengan ukuran: %d\n", m_index +
-    // m_header_size); Serial.printf("mesageData len: %d\n",
-    // sizeof(messageData));
+    Serial.printf("Status pengiriman: %s\n", esp_err_to_name(send));
+    Serial.printf("Mengirim data dengan ukuran: %d\n", messageData.dataLen);
+    Serial.printf("mesageData len: %d\n", sizeof(messageData));
     // }
 }
 

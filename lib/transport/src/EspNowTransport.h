@@ -11,8 +11,14 @@ private:
   spiffsHandler* spiffs;
   uint8_t m_wifi_channel;
   uint8_t transmitterMAC[6];
+  typedef struct message {
+      uint8_t *m_buffer;
+      const char *data;
+      int dataLen;
+  } message;
+  message messageData;
 
-protected:
+ protected:
   void addPeer();
   void send();
   void bindingMode();

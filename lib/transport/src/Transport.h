@@ -10,6 +10,7 @@ protected:
   typedef struct message{
     uint8_t *m_buffer;
     const char *data;
+    int dataLen;
   }message;
   message messageData;
   uint8_t *bufferValue = NULL;
