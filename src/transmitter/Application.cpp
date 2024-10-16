@@ -101,7 +101,7 @@ void Application::loop()
                 int samples_read = m_input->read(samples, 128); 
                 
                 for (int i = 0; i < samples_read; i++){
-                    Serial.println(samples_read);
+                    // Serial.println(samples[i]);
                     m_transport->add_sample(samples[i]);
                 }
             }
@@ -112,5 +112,5 @@ void Application::loop()
         }
     }
     // free(samples);
-    delay(50);
+    // delay(50);
 }
