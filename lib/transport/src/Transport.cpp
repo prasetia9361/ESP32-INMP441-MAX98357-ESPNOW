@@ -14,15 +14,20 @@ Transport::Transport(OutputBuffer *output_buffer, size_t buffer_size) {
 void Transport::add_sample(int16_t sample) {
     bufferValue[m_index + m_header_size] = (sample + 4096) >> 5;
     // bufferValue[m_index + m_header_size] = (sample + 16384) >> 7;
+    messageData.m_buffer = bufferValue;
+    // memcpy(messageData.m_buffer, bufferValue, m_index + m_header_size);
     m_index++;
+    // messageData.dataLen = m_index + m_header_size;
 
     if ((m_index + m_header_size) == m_buffer_size) {
+
         send();
         m_index = 0;
     }
 }
 
 void Transport::flush() {
+    // messageData.dataLen = m_index;
     if (m_index > 0) {
         send();
         m_index = 0;

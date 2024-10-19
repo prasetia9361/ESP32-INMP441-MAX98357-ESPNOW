@@ -17,8 +17,7 @@ class OutputBuffer {
     bool m_buffering;
 
    public:
-    OutputBuffer(int number_samples_to_buffer)
-        : m_number_samples_to_buffer(number_samples_to_buffer) {
+    OutputBuffer(int number_samples_to_buffer) : m_number_samples_to_buffer(number_samples_to_buffer) {
         m_semaphore = xSemaphoreCreateBinary();
         xSemaphoreGive(m_semaphore);
 
@@ -60,8 +59,8 @@ class OutputBuffer {
             } else {
                 m_buffering = false;
                 int16_t sample = m_buffer[m_read_head];
-                // samples[i] = (sample - 128) << 5;
-                samples[i] = (sample - 128) << 7;
+                samples[i] = (sample - 128) << 5;
+                // samples[i] = (sample - 128) << 7;
                 m_read_head = (m_read_head + 1) % m_buffer_size;
                 m_available_samples--;
             }

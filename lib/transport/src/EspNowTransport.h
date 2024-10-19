@@ -6,16 +6,17 @@
 class OutputBuffer;
 class spiffsHandler;
 
+typedef struct message {
+    uint8_t *m_buffer = NULL;
+    const char *data;
+    int dataLen;
+} message;
+
 class EspNowTransport: public Transport {
 private:
   spiffsHandler* spiffs;
   uint8_t m_wifi_channel;
   uint8_t transmitterMAC[6];
-  typedef struct message {
-      uint8_t *m_buffer;
-      const char *data;
-      int dataLen;
-  } message;
   message messageData;
 
  protected:

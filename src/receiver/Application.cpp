@@ -9,8 +9,12 @@
 #include "OutputBuffer.h"
 #include "spiffsHandler.h" 
 #include "config.h"
+#include "OneButton.h"
 
-SemaphoreHandle_t bindingSemaphore;
+// SemaphoreHandle_t bindingSemaphore;
+
+OneButton bindingButton(BINDING_BUTTON, true);
+bool mode = false;
 
 static void application_task(void *param)
 {
@@ -32,6 +36,12 @@ Application::Application()
     }
 }
 
+void doubleClick(){
+    Serial.println("diklik dua kali");
+    mode = true;
+    // m_transport->statusBinding();
+}
+
 void Application::begin()
 {
     Serial.print("My IDF Version is: ");
@@ -47,11 +57,11 @@ void Application::begin()
     m_output->start(SAMPLE_RATE);
 
     // bindingSemaphore = xSemaphoreCreateMutex();
+    bindingButton.attachDoubleClick(doubleClick);
     pinMode(BINDING_BUTTON,INPUT_PULLUP);
 
     TaskHandle_t task_handle;
-    xTaskCreate(application_task, "application_task", 8192, this, 1,
-                &task_handle);
+    xTaskCreate(application_task, "application_task", 8192, this, 1, &task_handle);
 }
 
 void Application::loop()
@@ -61,47 +71,36 @@ void Application::loop()
     int pressCount = 0;
     while (true)
     {
-        
-        Serial.println("Started Receiving");
-
-        if (I2S_SPEAKER_SD_PIN != -1)
+        if (mode)
         {
-            digitalWrite(I2S_SPEAKER_SD_PIN, HIGH);
+            Serial.println("Proses binding dimulai");
+            m_transport->statusBinding();
+            stateBinding = true;
+            m_transport->setBinding(stateBinding);
+            mode = false;
         }
-
-        unsigned long start_time = millis();
-        while (millis() - start_time < 1000)
-        {
-            int buttonState = digitalRead(BINDING_BUTTON);
-            if (buttonState == LOW) 
+        stateBinding = m_transport->getBinding();
+        if(stateBinding == false){
+            if (I2S_SPEAKER_SD_PIN != -1)
             {
-                unsigned long currentTime = millis();
-                if (currentTime - lastPress > 300) 
-                {
-                    pressCount++;
-                    lastPress = currentTime;
-                    Serial.print("tombol ditekan: ");
-                    Serial.println(pressCount);
-                    if (pressCount == 2) 
-                    {
-                        Serial.println("Proses binding dimulai");
-                        m_transport->statusBinding();
-                        stateBinding = true;
-                        m_transport->setBinding(stateBinding);
-                        pressCount = 0;
-                    }
-                }
+                digitalWrite(I2S_SPEAKER_SD_PIN, HIGH);
             }
-            
-            stateBinding = m_transport->getBinding();
+
+            unsigned long start_time = millis();
+            if(millis() - start_time < 500){
             m_output_buffer->remove_samples(samples, 128);
             m_output->write(samples, 128);
+            }
+
+            if (I2S_SPEAKER_SD_PIN != -1)
+            {
+                digitalWrite(I2S_SPEAKER_SD_PIN, LOW);
+            }
         }
+        // Serial.println("Current mode: " + String(mode));
+     
+        bindingButton.tick();
         
-        if (I2S_SPEAKER_SD_PIN != -1)
-        {
-            digitalWrite(I2S_SPEAKER_SD_PIN, LOW);
-        }
-        Serial.println("Finished Receiving");
     }
 }
+

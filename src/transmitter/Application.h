@@ -14,6 +14,7 @@ private:
     spiffsHandler *spiffs;
     
     unsigned long currentTime;
+    
 
 public:
     Application();

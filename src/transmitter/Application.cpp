@@ -9,6 +9,10 @@
 #include "OutputBuffer.h"
 #include "config.h"
 #include "spiffsHandler.h"
+#include "OneButton.h"
+
+OneButton bindingButton(BINDING_BUTTON, true);
+bool mode = false;
 
 static void application_task(void *param) {
     Application *application = reinterpret_cast<Application *>(param);
@@ -18,11 +22,15 @@ static void application_task(void *param) {
 Application::Application() {
     m_output_buffer = new OutputBuffer(300 * 16);
     m_input = new I2SMEMSSampler(I2S_NUM_0, i2s_mic_pins, i2s_mic_Config, 128);
-    spiffs =
-        new spiffsHandler();  // Changed from spiffs_handler to spiffsHandler
-    m_transport =
-        new EspNowTransport(m_output_buffer, spiffs, ESP_NOW_WIFI_CHANNEL);
+    spiffs = new spiffsHandler();  // Changed from spiffs_handler to spiffsHandler
+    m_transport = new EspNowTransport(m_output_buffer, spiffs, ESP_NOW_WIFI_CHANNEL);
     m_transport->set_header(TRANSPORT_HEADER_SIZE, transport_header);
+}
+
+void doubleClick(){
+    Serial.println("diklik dua kali");
+    mode = true;
+    // m_transport->statusBinding();
 }
 
 void Application::begin() {
@@ -38,8 +46,8 @@ void Application::begin() {
     m_transport->begin();
 
     pinMode(GPIO_TRANSMIT_BUTTON, INPUT_PULLUP);
+    bindingButton.attachDoubleClick(doubleClick);
     pinMode(BINDING_BUTTON, INPUT_PULLUP);
-
     TaskHandle_t task_handle;
     xTaskCreate(application_task, "application_task", 10192, this, 1,
                 &task_handle);
@@ -53,35 +61,44 @@ void Application::loop() {
     unsigned long lastDebounceTime = 0;  // last time the button state changed
     int lastButtonState = HIGH;          // previous reading from the input pin
     int buttonState;                     // current reading from the input pin
+    
 
     while (true) {
-        int reading = digitalRead(BINDING_BUTTON);
-
-        if (reading != lastButtonState) {
-            lastDebounceTime = millis();  // reset the debouncing timer
+        if (mode)
+        {
+            Serial.println("Proses binding dimulai");
+            m_transport->statusBinding();
+            mode = false;
         }
+        
+   
+        // int reading = digitalRead(BINDING_BUTTON);
+        // if (reading != lastButtonState) {
+        //     lastDebounceTime = millis();  // reset the debouncing timer
+        // }
 
-        if ((millis() - lastDebounceTime) > 50) {
-            if (reading != buttonState) {
-                buttonState = reading;
-                if (buttonState == LOW) {
-                    currentTime = millis();
-                    if (currentTime - lastPress > 200) {
-                        lastPress = currentTime;
-                        pressCount++;
-                        Serial.print("tombol ditekan: ");
-                        Serial.println(pressCount);
-                        if (pressCount == 2) {
-                            Serial.println("Proses binding dimulai");
-                            m_transport->statusBinding();
-                            pressCount = 0;
-                        }
-                    }
-                }
-            }
-        }
+        // if ((millis() - lastDebounceTime) > 50) {
+        //     if (reading != buttonState) {
+        //         buttonState = reading;
+        //         if (buttonState == LOW) {
+        //             currentTime = millis();
+        //             if (currentTime - lastPress > 200) {
+        //                 lastPress = currentTime;
+        //                 pressCount++;
+        //                 Serial.print("tombol ditekan: ");
+        //                 Serial.println(pressCount);
+        //                 if (pressCount == 2) {
+        //                     Serial.println("Proses binding dimulai");
+        //                     m_transport->statusBinding();
+        //                     pressCount = 0;
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
 
-        lastButtonState = reading;
+        // lastButtonState = reading;
+
         m_transport->peerReady();
 
         if (!digitalRead(GPIO_TRANSMIT_BUTTON)) {
@@ -103,6 +120,7 @@ void Application::loop() {
             Serial.println("Finished transmitting");
             m_input->stop();
         }
+        bindingButton.tick();
     }
     // free(samples);
     delay(50);
