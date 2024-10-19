@@ -17,7 +17,7 @@ private:
   spiffsHandler* spiffs;
   uint8_t m_wifi_channel;
   uint8_t transmitterMAC[6];
-  message messageData;
+  message messageReceiver;
 
  protected:
   void addPeer();

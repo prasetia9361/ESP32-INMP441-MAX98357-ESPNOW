@@ -123,5 +123,5 @@ void Application::loop() {
         bindingButton.tick();
     }
     // free(samples);
-    delay(50);
+    // delay(50);
 }
