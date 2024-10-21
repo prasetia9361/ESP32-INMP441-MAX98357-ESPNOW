@@ -16,6 +16,7 @@ void Transport::add_sample(int16_t sample) {
     // bufferValue[m_index + m_header_size] = (sample + 4096) >> 5;
     messageData.m_buffer[m_index + m_header_size] = (sample + 4096) >> 5;
     // bufferValue[m_index + m_header_size] = (sample + 16384) >> 7;
+    // Serial.println(messageData.m_buffer[m_index + m_header_size]);
     // messageData.m_buffer = bufferValue;
     // memcpy(messageData.m_buffer, bufferValue, m_index + m_header_size);
     m_index++;

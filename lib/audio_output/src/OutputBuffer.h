@@ -50,7 +50,7 @@ class OutputBuffer {
         for (int i = 0; i < count; i++) {
             samples[i] = 0;
             if (m_available_samples == 0 && !m_buffering) {
-                Serial.println("Buffering");
+                // Serial.println("Buffering");
                 m_buffering = true;
                 samples[i] = 0;
             }

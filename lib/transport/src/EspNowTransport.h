@@ -8,7 +8,7 @@ class spiffsHandler;
 
 typedef struct message {
     uint8_t *m_buffer = NULL;
-    const char *data;
+    char data[12];
     int dataLen;
 } message;
 

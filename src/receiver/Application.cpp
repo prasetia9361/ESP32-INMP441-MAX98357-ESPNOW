@@ -80,23 +80,23 @@ void Application::loop()
             mode = false;
         }
         stateBinding = m_transport->getBinding();
-        if(stateBinding == false){
-            if (I2S_SPEAKER_SD_PIN != -1)
-            {
-                digitalWrite(I2S_SPEAKER_SD_PIN, HIGH);
-            }
-
-            unsigned long start_time = millis();
-            if(millis() - start_time < 500){
-            m_output_buffer->remove_samples(samples, 128);
-            m_output->write(samples, 128);
-            }
-
-            if (I2S_SPEAKER_SD_PIN != -1)
-            {
-                digitalWrite(I2S_SPEAKER_SD_PIN, LOW);
-            }
+        // if(stateBinding == false){
+        if (I2S_SPEAKER_SD_PIN != -1)
+        {
+            digitalWrite(I2S_SPEAKER_SD_PIN, HIGH);
         }
+
+        unsigned long start_time = millis();
+        if(millis() - start_time < 500){
+        m_output_buffer->remove_samples(samples, 128);
+        m_output->write(samples, 128);
+        }
+
+        if (I2S_SPEAKER_SD_PIN != -1)
+        {
+            digitalWrite(I2S_SPEAKER_SD_PIN, LOW);
+        }
+        // }
         // Serial.println("Current mode: " + String(mode));
      
         bindingButton.tick();

@@ -33,36 +33,36 @@ void receiveCallback(const uint8_t *macAddr, const uint8_t *data, int dataLen) {
         //     instance->m_output_buffer->add_samples(data + header_size, dataLen - header_size);
         //     }
 
-        // memcpy(&messageReceiver, data, sizeof(messageReceiver));
-        memcpy(&instance->messageData, data, sizeof(instance->messageData));
+        memcpy(&messageReceiver, data, sizeof(messageReceiver));
+        // memcpy(&instance->messageData, data, sizeof(instance->messageData));
         int header_size = instance->m_header_size;
 
-        // Serial.printf("Size of messageData.m_buffer: %d\n", messageReceiver.m_buffer);
+        // Serial.printf("data received: %d\n", instance->messageData.data);
+
+        // Serial.printf("data received: %d\n", messageReceiver.data);
+
         // Serial.printf("header_size: %d, messageReceiver.dataLen: %d\n", header_size, messageReceiver.dataLen);
         // Serial.printf("header_size: %d, messageReceiver.dataLen: %d\n", header_size, dataLen);
         // Check Memory Usage
         // Serial.printf("Free Heap: %d\n", ESP.getFreeHeap());
         // Serial.printf("Free Stack: %d\n", uxTaskGetStackHighWaterMark(NULL));
 
-        // // // Periksa apakah buffer valid sebelum membandingkan
-        // if (messageReceiver.dataLen > header_size &&
-        //     messageReceiver.dataLen <= MAX_ESP_NOW_PACKET_SIZE /*&&
-        //     (memcmp(messageReceiver.m_buffer, instance->bufferValue, header_size) == 0)*/) {
-        //     instance->m_output_buffer->add_samples(
-        //         messageReceiver.m_buffer + header_size,
-        //         messageReceiver.dataLen - header_size);
-        // } else {
-        //     Serial.println("Ukuran buffer atau pointer tidak valid.");
-        // }
-
-        if (instance->messageData.dataLen > header_size &&
-            instance->messageData.dataLen <= MAX_ESP_NOW_PACKET_SIZE) {
-            instance->m_output_buffer->add_samples(
-                instance->messageData.m_buffer + header_size,
-                instance->messageData.dataLen - header_size);
+        // Periksa apakah buffer valid sebelum membandingkan
+        if (messageReceiver.dataLen > header_size && messageReceiver.dataLen <= MAX_ESP_NOW_PACKET_SIZE && (memcmp(messageReceiver.m_buffer, instance->messageData.m_buffer, header_size) == 0)) {
+            instance->m_output_buffer->add_samples(messageReceiver.m_buffer + header_size, messageReceiver.dataLen - header_size);
         } else {
             Serial.println("Ukuran buffer atau pointer tidak valid.");
         }
+        // Serial.println(memcmp(messageReceiver.m_buffer, instance->messageData.m_buffer, header_size));
+
+        // if (instance->messageData.dataLen > header_size &&
+        //     instance->messageData.dataLen <= MAX_ESP_NOW_PACKET_SIZE) {
+        //     instance->m_output_buffer->add_samples(
+        //         instance->messageData.m_buffer + header_size,
+        //         instance->messageData.dataLen - header_size);
+        // } else {
+        //     Serial.println("Ukuran buffer atau pointer tidak valid.");
+        // }
     }
 #endif
 }
@@ -111,20 +111,20 @@ void EspNowTransport::addPeer() {
 
     if (!esp_now_is_peer_exist(spiffs->getMac())) {
         esp_err_t result = esp_now_add_peer(&peerInfo);
-        if (result == ESP_OK) {
-            Serial.println("Receiver ditambahkan sebagai peer");
+        // if (result == ESP_OK) {
+        //     Serial.println("Receiver ditambahkan sebagai peer");
 
-            char macStr[18];
-            snprintf(macStr, sizeof(macStr), "%02X:%02X:%02X:%02X:%02X:%02X",
-                     spiffs->getMac()[0], spiffs->getMac()[1],
-                     spiffs->getMac()[2], spiffs->getMac()[3],
-                     spiffs->getMac()[4], spiffs->getMac()[5]);
-            Serial.printf("mac address: %s\n", macStr);
-        } else {
-            Serial.print(
-                "Gagal menambahkan Receiver sebagai peer. Error code: ");
-            Serial.println(result);
-        }
+            // char macStr[18];
+            // snprintf(macStr, sizeof(macStr), "%02X:%02X:%02X:%02X:%02X:%02X",
+            //          spiffs->getMac()[0], spiffs->getMac()[1],
+            //          spiffs->getMac()[2], spiffs->getMac()[3],
+            //          spiffs->getMac()[4], spiffs->getMac()[5]);
+            // Serial.printf("mac address: %s\n", macStr);
+        // } else {
+        //     Serial.print(
+        //         "Gagal menambahkan Receiver sebagai peer. Error code: ");
+        //     Serial.println(result);
+        // }
     }
 }
 void EspNowTransport::send() {
@@ -139,7 +139,7 @@ void EspNowTransport::send() {
     esp_err_t send = esp_now_send(spiffs->getMac(), (uint8_t *)&messageData, sizeof(messageData));
     // if (send == ESP_OK)
     // {
-    Serial.printf("Status pengiriman: %s\n", esp_err_to_name(send));
+    // Serial.printf("Status pengiriman: %s\n", esp_err_to_name(send));
     // Serial.printf("Mengirim data dengan ukuran: %d\n", messageData.dataLen);
     // Serial.printf("mesageData len: %d\n", sizeof(messageData));
     // }
