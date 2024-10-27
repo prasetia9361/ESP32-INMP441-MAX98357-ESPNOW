@@ -70,34 +70,6 @@ void Application::loop() {
             m_transport->statusBinding();
             mode = false;
         }
-        
-   
-        // int reading = digitalRead(BINDING_BUTTON);
-        // if (reading != lastButtonState) {
-        //     lastDebounceTime = millis();  // reset the debouncing timer
-        // }
-
-        // if ((millis() - lastDebounceTime) > 50) {
-        //     if (reading != buttonState) {
-        //         buttonState = reading;
-        //         if (buttonState == LOW) {
-        //             currentTime = millis();
-        //             if (currentTime - lastPress > 200) {
-        //                 lastPress = currentTime;
-        //                 pressCount++;
-        //                 Serial.print("tombol ditekan: ");
-        //                 Serial.println(pressCount);
-        //                 if (pressCount == 2) {
-        //                     Serial.println("Proses binding dimulai");
-        //                     m_transport->statusBinding();
-        //                     pressCount = 0;
-        //                 }
-        //             }
-        //         }
-        //     }
-        // }
-
-        // lastButtonState = reading;
 
         m_transport->peerReady();
 
