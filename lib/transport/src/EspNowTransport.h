@@ -7,7 +7,7 @@ class OutputBuffer;
 class spiffsHandler;
 
 typedef struct message {
-    uint8_t *m_buffer = NULL;
+    uint8_t m_buffer[127];
     char data[12];
     int dataLen;
 } message;
@@ -17,12 +17,13 @@ private:
   spiffsHandler* spiffs;
   uint8_t m_wifi_channel;
   uint8_t transmitterMAC[6];
-  message messageReceiver;
+  // message messageData;
 
  protected:
   void addPeer();
   void send();
   void bindingMode();
+  
 
 public:
   EspNowTransport(OutputBuffer *output_buffer,spiffsHandler *_spiffs, uint8_t wifi_channel);

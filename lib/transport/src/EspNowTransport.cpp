@@ -7,7 +7,7 @@
 
 #include "OutputBuffer.h"
 
-const int MAX_ESP_NOW_PACKET_SIZE = 250;
+const int MAX_ESP_NOW_PACKET_SIZE = 127;
 
 const char *messaging = "hello binding started!";
 
@@ -48,7 +48,7 @@ void receiveCallback(const uint8_t *macAddr, const uint8_t *data, int dataLen) {
         // Serial.printf("Free Stack: %d\n", uxTaskGetStackHighWaterMark(NULL));
 
         // Periksa apakah buffer valid sebelum membandingkan
-        if (messageReceiver.dataLen > header_size && messageReceiver.dataLen <= MAX_ESP_NOW_PACKET_SIZE && (memcmp(messageReceiver.m_buffer, instance->messageData.m_buffer, header_size) == 0)) {
+        if (messageReceiver.dataLen > header_size && messageReceiver.dataLen <= MAX_ESP_NOW_PACKET_SIZE /*&& (memcmp(messageReceiver.m_buffer, instance->bufferValue, header_size) == 0)*/) {
             instance->m_output_buffer->add_samples(messageReceiver.m_buffer + header_size, messageReceiver.dataLen - header_size);
         } else {
             Serial.println("Ukuran buffer atau pointer tidak valid.");
@@ -127,6 +127,7 @@ void EspNowTransport::addPeer() {
         // }
     }
 }
+
 void EspNowTransport::send() {
     if (spiffs->getMac()[0] == 0) {
         return;
@@ -142,7 +143,11 @@ void EspNowTransport::send() {
     // Serial.printf("Status pengiriman: %s\n", esp_err_to_name(send));
     // Serial.printf("Mengirim data dengan ukuran: %d\n", messageData.dataLen);
     // Serial.printf("mesageData len: %d\n", sizeof(messageData));
+    // }else
+    // {
+    //     Serial.printf("Status pengiriman: %s\n", esp_err_to_name(send));
     // }
+    
 }
 
 void EspNowTransport::bindingMode() {

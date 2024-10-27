@@ -1,5 +1,5 @@
 #pragma once
-// #include <Arduino.h>
+#include <Arduino.h>
 #include <driver/i2s.h>
 #include <freertos/FreeRTOS.h>
 

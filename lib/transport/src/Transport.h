@@ -8,12 +8,9 @@ class Transport
 {
 protected:
   typedef struct message{
-    uint8_t *m_buffer = NULL;
+    uint8_t m_buffer[127];
     char data[12] = "hello_world"; // Specify the size of the array
     int dataLen;
-
-    // Constructor to initialize dataLen
-    message() : dataLen(sizeof(data) - 1) {} // Exclude null terminator
   }message;
   message messageData;
   uint8_t *bufferValue = NULL;
