@@ -14,30 +14,35 @@ const char *messaging = "hello binding started!";
 static EspNowTransport *instance = NULL;
 
 void receiveCallback(const uint8_t *macAddr, const uint8_t *data, int dataLen) {
-#ifdef TRANSMITTER
-    // Serial.print("Receiver Address: ");
-    instance->spiffs->writeMacAddress(macAddr);
-#else
+#ifdef RECEIVER
     message messageReceiver;
     // bool binding = instance->stateBinding;
     if (instance->stateBinding) {
-        instance->spiffs->writeMacAddress(macAddr);
-        Serial.println("binding transport true");
+        instance->spiffs->writeMacAddress(macAddr, 2);
+        // Serial.println("binding transport true");
         instance->stateBinding = false;
     } else {
         memcpy(&messageReceiver, data, sizeof(messageReceiver));
         int header_size = instance->m_header_size;
-
-        messageReceiver.data[12] = '\0';
-        Serial.print("data received: ");
-        Serial.println(messageReceiver.data);
-
-        if (messageReceiver.dataLen > header_size && messageReceiver.dataLen <= MAX_ESP_NOW_PACKET_SIZE /*&& (memcmp(messageReceiver.m_buffer, instance->bufferValue, header_size) == 0)*/) {
-            instance->m_output_buffer->add_samples(messageReceiver.m_buffer + header_size, messageReceiver.dataLen - header_size);
-        } else {
-            Serial.println("Ukuran buffer atau pointer tidak valid.");
+        if (memcmp(macAddr, instance->spiffs->getMac(), 6) == 0) {
+            messageReceiver.data[12] = '\0';
+            Serial.print("data from: ");
+            Serial.println(messageReceiver.data);
+            
+        }else if (memcmp(macAddr, instance->spiffs->getMac1(), 6) == 0)
+        {
+            
+            if (messageReceiver.dataLen > header_size && messageReceiver.dataLen <= MAX_ESP_NOW_PACKET_SIZE /*&& (memcmp(messageReceiver.m_buffer, instance->bufferValue, header_size) == 0)*/) {
+                instance->m_output_buffer->add_samples(messageReceiver.m_buffer + header_size, messageReceiver.dataLen - header_size);
+            } else {
+                Serial.println("Ukuran buffer atau pointer tidak valid.");
+            }
         }
+        
     }
+#else
+    // Serial.print("Receiver Address: ");
+    instance->spiffs->writeMacAddress(macAddr, 1);
 #endif
 }
 

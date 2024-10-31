@@ -9,7 +9,7 @@ class Transport
 protected:
   typedef struct message{
     uint8_t m_buffer[127];
-    char data[12] = "hello_world"; // Specify the size of the array
+    char data[12] = "esp32remote"; // Specify the size of the array
     int dataLen;
   }message;
   message messageData;

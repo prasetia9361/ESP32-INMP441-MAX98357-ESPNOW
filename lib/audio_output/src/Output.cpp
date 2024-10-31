@@ -33,7 +33,7 @@ void Output::write(int16_t *samples, int count)
         for (int i = 0; i < NUM_FRAMES_TO_SEND && sample_index < count; i++)
         {
             int sample = process_sample(samples[sample_index]);
-            Serial.println(samples[sample_index]);
+            // Serial.println(samples[sample_index]);
             m_frames[i * 2] = sample;     // left channel
             m_frames[i * 2 + 1] = sample; // right channel
 

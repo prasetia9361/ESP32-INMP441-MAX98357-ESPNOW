@@ -11,6 +11,7 @@ class spiffsHandler{
 private:
     typedef struct config {
         uint8_t macAddress[6] = {0,0,0,0,0,0};
+        uint8_t macAddress1[6] = {0,0,0,0,0,0};
     } config;
     config configData;
 
@@ -21,8 +22,9 @@ public:
     spiffsHandler();
 
     uint8_t *getMac(){return configData.macAddress;}
+    uint8_t *getMac1(){return configData.macAddress1;}
 
     void init();
-    void writeMacAddress(const uint8_t *mac);
+    void writeMacAddress(const uint8_t *mac, int count);
 };
 #endif

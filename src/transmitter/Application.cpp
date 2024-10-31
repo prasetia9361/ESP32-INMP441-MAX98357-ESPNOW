@@ -22,9 +22,10 @@ static void application_task(void *param) {
 Application::Application() {
     m_output_buffer = new OutputBuffer(300 * 16);
     m_input = new I2SMEMSSampler(I2S_NUM_0, i2s_mic_pins, i2s_mic_Config, 128);
+    spiffs = new spiffsHandler();  
     m_transport = new EspNowTransport(m_output_buffer, spiffs, ESP_NOW_WIFI_CHANNEL);
     m_transport->set_header(TRANSPORT_HEADER_SIZE, transport_header);
-    spiffs = new spiffsHandler();  // Changed from spiffs_handler to spiffsHandler
+    
 }
 
 void doubleClick(){

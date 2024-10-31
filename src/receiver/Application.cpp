@@ -11,8 +11,6 @@
 #include "config.h"
 #include "OneButton.h"
 
-// SemaphoreHandle_t bindingSemaphore;
-
 OneButton bindingButton(BINDING_BUTTON, true);
 bool mode = false;
 
@@ -26,7 +24,7 @@ Application::Application()
 {
     m_output_buffer = new OutputBuffer(300 * 16);
     m_output = new I2SOutput(I2S_NUM_0, i2s_speaker_pins);
-    spiffs = new spiffsHandler(); // Changed from spiffs_handler to spiffsHandler
+    spiffs = new spiffsHandler();
     m_transport = new EspNowTransport(m_output_buffer, spiffs, ESP_NOW_WIFI_CHANNEL);
     m_transport->set_header(TRANSPORT_HEADER_SIZE, transport_header);
 
@@ -56,7 +54,6 @@ void Application::begin()
     spiffs->init();
     m_output->start(SAMPLE_RATE);
 
-    // bindingSemaphore = xSemaphoreCreateMutex();
     bindingButton.attachDoubleClick(doubleClick);
     pinMode(BINDING_BUTTON,INPUT_PULLUP);
 
@@ -80,7 +77,7 @@ void Application::loop()
             mode = false;
         }
         stateBinding = m_transport->getBinding();
-        // if(stateBinding == false){
+        
         if (I2S_SPEAKER_SD_PIN != -1)
         {
             digitalWrite(I2S_SPEAKER_SD_PIN, HIGH);
@@ -96,8 +93,6 @@ void Application::loop()
         {
             digitalWrite(I2S_SPEAKER_SD_PIN, LOW);
         }
-        // }
-        // Serial.println("Current mode: " + String(mode));
      
         bindingButton.tick();
         
