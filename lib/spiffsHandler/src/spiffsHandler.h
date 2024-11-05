@@ -26,5 +26,6 @@ public:
 
     void init();
     void writeMacAddress(const uint8_t *mac, int count);
+    void deleteAddress();
 };
 #endif

@@ -9,7 +9,7 @@
 
 const int MAX_ESP_NOW_PACKET_SIZE = 127;
 
-const char *messaging = "hello binding started!";
+const char messaging[12] = "bindingMode";
 
 static EspNowTransport *instance = NULL;
 
@@ -18,31 +18,44 @@ void receiveCallback(const uint8_t *macAddr, const uint8_t *data, int dataLen) {
     message messageReceiver;
     // bool binding = instance->stateBinding;
     if (instance->stateBinding) {
-        instance->spiffs->writeMacAddress(macAddr, 2);
+        // char dataStr[12];
+        // memcpy(dataStr, data, dataLen);
+        // dataStr[dataLen] = '\0';
+        if (strcmp((char *)data, messaging) == 0) {
+            instance->spiffs->writeMacAddress(macAddr, 2);
+            instance->stateBinding = false;
+        }
+        // instance->spiffs->writeMacAddress(macAddr, 2);
         // Serial.println("binding transport true");
-        instance->stateBinding = false;
+        
     } else {
-        memcpy(&messageReceiver, data, sizeof(messageReceiver));
+        
         int header_size = instance->m_header_size;
         if (memcmp(macAddr, instance->spiffs->getMac(), 6) == 0) {
+            memcpy(&messageReceiver, data, sizeof(messageReceiver));
             messageReceiver.data[12] = '\0';
             Serial.print("data from: ");
             Serial.println(messageReceiver.data);
             
-        }else if (memcmp(macAddr, instance->spiffs->getMac1(), 6) == 0)
-        {
-            
+        }
+        
+        if (memcmp(macAddr, instance->spiffs->getMac1(), 6) == 0){
+            memcpy(&messageReceiver, data, sizeof(messageReceiver));
             if (messageReceiver.dataLen > header_size && messageReceiver.dataLen <= MAX_ESP_NOW_PACKET_SIZE /*&& (memcmp(messageReceiver.m_buffer, instance->bufferValue, header_size) == 0)*/) {
                 instance->m_output_buffer->add_samples(messageReceiver.m_buffer + header_size, messageReceiver.dataLen - header_size);
             } else {
                 Serial.println("Ukuran buffer atau pointer tidak valid.");
             }
         }
-        
     }
 #else
     // Serial.print("Receiver Address: ");
-    instance->spiffs->writeMacAddress(macAddr, 1);
+    // char dataStr[MAX_ESP_NOW_PACKET_SIZE];
+    // memcpy(dataStr, data, dataLen);
+    // dataStr[dataLen] = '\0';
+    if (strcmp((char *)data, messaging) == 0) {
+        instance->spiffs->writeMacAddress(macAddr, 1);
+    }
 #endif
 }
 
@@ -76,6 +89,12 @@ bool EspNowTransport::begin() {
 
 void EspNowTransport::addPeer() {
     if (spiffs->getMac()[0] == 0) {
+        // Serial.print("MAC Address0: ");
+        // for(int i=0; i<6; i++) {
+        //     Serial.print(instance->spiffs->getMac()[i], HEX);
+        //     if(i<5) Serial.print(":");
+        // }
+        // Serial.println();
         return;
     }
 
@@ -113,7 +132,7 @@ void EspNowTransport::bindingMode() {
     }
 
     if (esp_now_add_peer(&peerInfo) == ESP_OK) {
-        esp_now_send(peerInfo.peer_addr, (uint8_t *)messaging, 6);
+        esp_now_send(peerInfo.peer_addr, (uint8_t *)messaging, 12);
         esp_now_del_peer(peerInfo.peer_addr);
     }
 }

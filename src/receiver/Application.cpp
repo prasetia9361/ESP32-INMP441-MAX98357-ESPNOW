@@ -13,6 +13,7 @@
 
 OneButton bindingButton(BINDING_BUTTON, true);
 bool mode = false;
+bool removeData = false;
 
 static void application_task(void *param)
 {
@@ -40,6 +41,10 @@ void doubleClick(){
     // m_transport->statusBinding();
 }
 
+void longPress(){
+    removeData = true;
+}
+
 void Application::begin()
 {
     Serial.print("My IDF Version is: ");
@@ -55,6 +60,7 @@ void Application::begin()
     m_output->start(SAMPLE_RATE);
 
     bindingButton.attachDoubleClick(doubleClick);
+    bindingButton.attachLongPressStop(longPress);
     pinMode(BINDING_BUTTON,INPUT_PULLUP);
 
     TaskHandle_t task_handle;
@@ -77,6 +83,12 @@ void Application::loop()
             mode = false;
         }
         stateBinding = m_transport->getBinding();
+
+        if (removeData)
+        {
+            spiffs->deleteAddress();
+            removeData = false;
+        }
         
         if (I2S_SPEAKER_SD_PIN != -1)
         {

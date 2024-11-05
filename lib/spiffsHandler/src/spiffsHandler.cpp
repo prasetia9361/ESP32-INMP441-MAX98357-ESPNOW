@@ -137,6 +137,7 @@ void spiffsHandler::writeMacAddress(const uint8_t *mac, int count){
     }
     
 
+
     // const char *address = doc["address"];
     // if (strlen(address) != 17)
     // {
@@ -175,4 +176,24 @@ void spiffsHandler::writeMacAddress(const uint8_t *mac, int count){
     // memcpy(configData.macAddress,mac,6);
 
 
+}
+
+
+
+void spiffsHandler::deleteAddress() {
+    File file = SPIFFS.open("/config.json", FILE_WRITE);
+    if (!file) {
+        Serial.println("- failed to open file for writing");
+        return;
+    }
+    
+    JsonDocument doc;
+    doc["address0"] = "";
+    doc["address1"] = "";
+    
+    serializeJson(doc, file);
+    file.close();
+    memset(configData.macAddress, 0, 6);
+    memset(configData.macAddress1, 0, 6);
+    Serial.println("Addresses cleared successfully");
 }

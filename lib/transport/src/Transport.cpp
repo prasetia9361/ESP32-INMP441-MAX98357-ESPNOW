@@ -22,6 +22,12 @@ void Transport::add_sample(int16_t sample) {
     }
 }
 
+void Transport::sendChar(const char *data){
+    strcpy(messageData.data, data);
+    Serial.println(messageData.data);
+    send();
+}
+
 void Transport::flush() {
     if (m_index > 0) {
         send();

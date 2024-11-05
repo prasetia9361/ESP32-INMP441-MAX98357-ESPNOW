@@ -9,7 +9,7 @@ class Transport
 protected:
   typedef struct message{
     uint8_t m_buffer[127];
-    char data[12] = "esp32remote"; // Specify the size of the array
+    char data[12]; // Specify the size of the array
     int dataLen;
   }message;
   message messageData;
@@ -33,8 +33,10 @@ public:
   bool getBinding(){return stateBinding;}
 
   void add_sample(int16_t sample);
+  void sendChar(const char *data);
   void flush();
   void statusBinding();
   void peerReady();
+
 
 };
