@@ -54,7 +54,7 @@ void Application::begin() {
     
 
     pinMode(GPIO_TRANSMIT_BUTTON, INPUT_PULLUP);
-    bindingButton.attachClick(doubleClick);
+    bindingButton.attachDoubleClick(doubleClick);
     bindingButton.attachLongPressStop(longPress);
     pinMode(BINDING_BUTTON, INPUT_PULLUP);
     TaskHandle_t task_handle;
