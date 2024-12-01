@@ -15,6 +15,6 @@ void setup()
 
 void loop()
 {
-    application->tick();
-    vTaskDelay(pdMS_TO_TICKS(5));
+    // application->tick();
+    vTaskDelay(pdMS_TO_TICKS(1000));
 }

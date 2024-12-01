@@ -15,7 +15,7 @@
 
 #define TFT_HOR_RES SCREEN_WIDTH
 #define TFT_VER_RES SCREEN_HEIGHT
-#define DRAW_BUF_SIZE (TFT_HOR_RES * TFT_VER_RES / 6 * (LV_COLOR_DEPTH / 8))
+#define DRAW_BUF_SIZE (TFT_HOR_RES * TFT_VER_RES / 10 * (LV_COLOR_DEPTH / 8))
 
 LGFX tft;
 
@@ -42,6 +42,15 @@ bool removeData = false;
 static void application_task(void *param) {
     Application *application = reinterpret_cast<Application *>(param);
     application->loop();
+}
+
+static void application_tick(void *param){
+    while (true)
+    {
+        lv_task_handler();
+        ui_tick();
+        vTaskDelay(pdMS_TO_TICKS(5));
+    }
 }
 
 Application::Application() {
@@ -141,7 +150,7 @@ void Application::begin() {
 
     if (disp_draw_buf == NULL)
     {
-        Serial.print("Failed");
+        Serial.println("Failed");
         return;
     }
     
@@ -163,9 +172,12 @@ void Application::begin() {
     bindingButton.attachDoubleClick(doubleClick);
     bindingButton.attachLongPressStop(longPress);
     pinMode(BINDING_BUTTON, INPUT_PULLUP);
-    TaskHandle_t task_handle;
-    xTaskCreate(application_task, "application_task", 16384, this, 5,
-                &task_handle);
+    TaskHandle_t task_handler;
+    TaskHandle_t task_tick;
+    xTaskCreate(application_task, "application_task", 16384, this, 4,
+                &task_handler);
+    xTaskCreate(application_tick, "application_tick", 10000, this, 5, 
+                &task_tick);
 }
 
 void Application::loop() {
@@ -176,6 +188,8 @@ void Application::loop() {
     int buttonState;                     // current reading from the input pin
     
     while (true) {
+        // lv_task_handler(); /* Let LVGL do its work */
+        // ui_tick();
         if (mode)
         {
             Serial.println("Proses binding dimulai");
@@ -214,7 +228,7 @@ void Application::loop() {
     delay(50);
 }
 
-void Application::tick(){
-    lv_task_handler(); /* Let LVGL do its work */
-    ui_tick();
-}
+// void Application::tick(){
+//     lv_task_handler(); /* Let LVGL do its work */
+//     ui_tick();
+// }

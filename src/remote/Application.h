@@ -20,5 +20,5 @@ public:
     Application();
     void begin();
     void loop();
-    void tick();
+    // void tick();
 };
