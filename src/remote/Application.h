@@ -1,10 +1,8 @@
 #pragma once
 
-// class I2SMEMSSampler;
 class Transport;
 class OutputBuffer;
 class spiffsHandler;
-// class LGFX;
 
 class Application
 {

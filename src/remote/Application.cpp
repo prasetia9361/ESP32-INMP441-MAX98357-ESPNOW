@@ -11,7 +11,6 @@
 #include "OutputBuffer.h"
 #include "config.h"
 #include "spiffsHandler.h"
-#include "OneButton.h"
 
 #define TFT_HOR_RES SCREEN_WIDTH
 #define TFT_VER_RES SCREEN_HEIGHT
@@ -35,22 +34,9 @@ void my_print(lv_log_level_t level, const char *buf)
 }
 #endif
 
-OneButton bindingButton(BINDING_BUTTON, true);
-bool mode = false;
-bool removeData = false;
-
 static void application_task(void *param) {
     Application *application = reinterpret_cast<Application *>(param);
     application->loop();
-}
-
-static void application_tick(void *param){
-    while (true)
-    {
-        lv_task_handler();
-        ui_tick();
-        vTaskDelay(pdMS_TO_TICKS(5));
-    }
 }
 
 Application::Application() {
@@ -115,16 +101,6 @@ void my_touchpad_read(lv_indev_t *indev, lv_indev_data_t *data)
   }
 }
 
-void doubleClick(){
-    Serial.println("diklik dua kali");
-    mode = true;
-    // m_transport->statusBinding();
-}
-
-void longPress(){
-    removeData = true;
-}
-
 void Application::begin() {
     Serial.print("My IDF Version is: ");
     Serial.println(esp_get_idf_version());
@@ -168,67 +144,39 @@ void Application::begin() {
 
     ui_init();
 
-    pinMode(GPIO_TRANSMIT_BUTTON, INPUT_PULLUP);
-    bindingButton.attachDoubleClick(doubleClick);
-    bindingButton.attachLongPressStop(longPress);
-    pinMode(BINDING_BUTTON, INPUT_PULLUP);
     TaskHandle_t task_handler;
-    TaskHandle_t task_tick;
     xTaskCreate(application_task, "application_task", 16384, this, 4,
                 &task_handler);
-    xTaskCreate(application_tick, "application_tick", 10000, this, 5, 
-                &task_tick);
 }
 
 void Application::loop() {
-    unsigned long lastPress = 0;  // Ensure this is initialized
-    int pressCount = 0;
-    unsigned long lastDebounceTime = 0;  // last time the button state changed
-    int lastButtonState = HIGH;          // previous reading from the input pin
-    int buttonState;                     // current reading from the input pin
-    
     while (true) {
-        // lv_task_handler(); /* Let LVGL do its work */
-        // ui_tick();
-        if (mode)
-        {
+        lv_timer_handler();
+        ui_tick();
+
+        if (g_binding){
+            // lv_obj_t *obj = lv_event_get_target_obj(&g_event_binding);
+            // Serial.printf("Received event from obj: %u\n", obj);
             Serial.println("Proses binding dimulai");
             m_transport->statusBinding();
-            mode = false;
+            g_binding = false;
         }
 
-        if (removeData)
-        {
-            // Serial.println("mengkosongkan file spiffs");
+        if (g_delete){
+            // lv_obj_t *obj = lv_event_get_target_obj(&g_event_delete);
+            // Serial.printf("Received event from obj: %u\n", obj);
             spiffs->deleteAddress();
-            removeData = false;
+            g_delete = false;
         }
-        
 
-       m_transport->peerReady();
-
-        // if (!digitalRead(GPIO_TRANSMIT_BUTTON)) {
-            // Serial.println("Started transmitting");
-            // m_input->start();
-
-        // unsigned long start_time = millis();
-        // if (millis() - start_time >= 1000) {
-        m_transport->sendChar("esp32remote");
-        delay(1000);
-        //     start_time = millis(); // Reset timer
-        // }
-
-            // m_transport->flush();
-            // Serial.println("Finished transmitting");
-            // m_input->stop();
-        // }
-        bindingButton.tick();
+        if (g_sending){
+            // lv_obj_t *obj = lv_event_get_target_obj(&g_event_sending);
+            // Serial.printf("Received event from obj: %u\n", obj);
+            m_transport->peerReady();
+            m_transport->sendChar("esp32remote");
+            g_sending = false;
+        }
+  
+        vTaskDelay(pdMS_TO_TICKS(5));
     }
-    // free(samples);
-    delay(50);
 }
-
-// void Application::tick(){
-//     lv_task_handler(); /* Let LVGL do its work */
-//     ui_tick();
-// }
