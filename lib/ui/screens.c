@@ -36,13 +36,13 @@ void create_screen_main() {
     lv_obj_t *obj = lv_obj_create(0);
     objects.main = obj;
     lv_obj_set_pos(obj, 0, 0);
-    lv_obj_set_size(obj, 800, 480);
+    lv_obj_set_size(obj, 480, 272);
     lv_obj_clear_flag(obj, LV_OBJ_FLAG_PRESS_LOCK|LV_OBJ_FLAG_CLICK_FOCUSABLE|LV_OBJ_FLAG_GESTURE_BUBBLE|LV_OBJ_FLAG_SNAPPABLE|LV_OBJ_FLAG_SCROLLABLE|LV_OBJ_FLAG_SCROLL_ELASTIC|LV_OBJ_FLAG_SCROLL_MOMENTUM|LV_OBJ_FLAG_SCROLL_CHAIN);
     {
         lv_obj_t *parent_obj = obj;
         {
             lv_obj_t *obj = lv_label_create(parent_obj);
-            lv_obj_set_pos(obj, 18, 22);
+            lv_obj_set_pos(obj, 15, 13);
             lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
             lv_label_set_text(obj, "ESP32-S3-REMOTE");
             lv_obj_clear_flag(obj, LV_OBJ_FLAG_PRESS_LOCK|LV_OBJ_FLAG_CLICK_FOCUSABLE|LV_OBJ_FLAG_GESTURE_BUBBLE|LV_OBJ_FLAG_SNAPPABLE|LV_OBJ_FLAG_SCROLLABLE|LV_OBJ_FLAG_SCROLL_ELASTIC|LV_OBJ_FLAG_SCROLL_MOMENTUM|LV_OBJ_FLAG_SCROLL_CHAIN);
@@ -52,7 +52,7 @@ void create_screen_main() {
         {
             lv_obj_t *obj = lv_btn_create(parent_obj);
             objects.obj0 = obj;
-            lv_obj_set_pos(obj, 340, 201);
+            lv_obj_set_pos(obj, 363, 211);
             lv_obj_set_size(obj, 100, 50);
             lv_obj_add_event_cb(obj, event_handler_cb_main_obj0, LV_EVENT_ALL, 0);
             lv_obj_add_flag(obj, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
@@ -74,7 +74,7 @@ void create_screen_main() {
         {
             lv_obj_t *obj = lv_btn_create(parent_obj);
             objects.obj1 = obj;
-            lv_obj_set_pos(obj, 18, 201);
+            lv_obj_set_pos(obj, 15, 211);
             lv_obj_set_size(obj, 69, 50);
             lv_obj_add_event_cb(obj, event_handler_cb_main_obj1, LV_EVENT_ALL, 0);
             lv_obj_add_flag(obj, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
@@ -96,7 +96,7 @@ void create_screen_main() {
         {
             lv_obj_t *obj = lv_btn_create(parent_obj);
             objects.obj2 = obj;
-            lv_obj_set_pos(obj, 340, 13);
+            lv_obj_set_pos(obj, 363, 13);
             lv_obj_set_size(obj, 100, 50);
             lv_obj_add_event_cb(obj, event_handler_cb_main_obj2, LV_EVENT_ALL, 0);
             lv_obj_add_flag(obj, LV_OBJ_FLAG_SCROLL_ON_FOCUS);

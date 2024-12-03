@@ -8,8 +8,11 @@
 #include "OutputBuffer.h"
 
 const int MAX_ESP_NOW_PACKET_SIZE = 127;
-
+#ifdef RECEIVER
 const char messaging[12] = "bindingMode";
+#else
+const char messaging[12] = "bindingSend";
+#endif
 
 static EspNowTransport *instance = NULL;
 
@@ -21,7 +24,7 @@ void receiveCallback(const uint8_t *macAddr, const uint8_t *data, int dataLen) {
         // char dataStr[12];
         // memcpy(dataStr, data, dataLen);
         // dataStr[dataLen] = '\0';
-        if (strcmp((char *)data, messaging) == 0) {
+        if (strcmp((char *)data, "bindingSend") == 0) {
             instance->spiffs->writeMacAddress(macAddr, 2);
             instance->stateBinding = false;
         }
@@ -53,7 +56,7 @@ void receiveCallback(const uint8_t *macAddr, const uint8_t *data, int dataLen) {
     // char dataStr[MAX_ESP_NOW_PACKET_SIZE];
     // memcpy(dataStr, data, dataLen);
     // dataStr[dataLen] = '\0';
-    if (strcmp((char *)data, messaging) == 0) {
+    if (strcmp((char *)data, "bindingMode") == 0) {
         instance->spiffs->writeMacAddress(macAddr, 1);
     }
 #endif

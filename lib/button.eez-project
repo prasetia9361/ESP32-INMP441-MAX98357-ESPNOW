@@ -156,8 +156,8 @@
             {
               "objID": "6b272cb8-48b4-467f-c130-a1edc1f930b7",
               "type": "LVGLLabelWidget",
-              "left": 18,
-              "top": 22,
+              "left": 15,
+              "top": 13,
               "width": 132,
               "height": 16,
               "customInputs": [],
@@ -200,8 +200,8 @@
             {
               "objID": "243a1108-3f58-4134-f514-a8b3d570ec40",
               "type": "LVGLButtonWidget",
-              "left": 340,
-              "top": 201,
+              "left": 363,
+              "top": 211,
               "width": 100,
               "height": 50,
               "customInputs": [],
@@ -290,8 +290,8 @@
             {
               "objID": "2982bf94-99b4-4d68-cacb-39f70ee29e77",
               "type": "LVGLButtonWidget",
-              "left": 18,
-              "top": 201,
+              "left": 15,
+              "top": 211,
               "width": 69,
               "height": 50,
               "customInputs": [],
@@ -379,7 +379,7 @@
             {
               "objID": "2f6ad364-7a1b-4796-cfd6-a8a807a16ccc",
               "type": "LVGLButtonWidget",
-              "left": 340,
+              "left": 363,
               "top": 13,
               "width": 100,
               "height": 50,
@@ -484,8 +484,8 @@
       "name": "Main",
       "left": 0,
       "top": 0,
-      "width": 800,
-      "height": 480
+      "width": 480,
+      "height": 272
     }
   ],
   "userWidgets": [],

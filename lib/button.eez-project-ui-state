@@ -105,6 +105,7 @@
                   "type": "tabset",
                   "id": "#93bbed3d-5ab2-45dc-9f5c-dd13bb460079",
                   "weight": 1,
+                  "selected": 2,
                   "enableClose": false,
                   "children": [
                     {
@@ -171,6 +172,7 @@
               "type": "tabset",
               "id": "EDITORS",
               "weight": 58.785764131193304,
+              "selected": 1,
               "enableDeleteWhenEmpty": false,
               "enableClose": false,
               "children": [
@@ -903,7 +905,9 @@
   "objects": {
     "[button.eez-project]:/userPages/0[flow-state]": {
       "selection": {
-        "0": {}
+        "0": {
+          "1": {}
+        }
       },
       "transform": {
         "translate": {
