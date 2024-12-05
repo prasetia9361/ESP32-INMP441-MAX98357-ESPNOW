@@ -10,11 +10,11 @@
 #include "EspNowTransport.h"
 #include "OutputBuffer.h"
 #include "config.h"
-#include "spiffsHandler.h"
+#include "memory.h"
 
 Transport *m_transport;
 OutputBuffer *m_output_buffer;
-spiffsHandler *spiffs;
+memory *m_memory; 
 Screen *m_screen;
 
 extern lv_event_t g_event_sending;
@@ -34,8 +34,8 @@ void setup()
     m_output_buffer = new OutputBuffer(300 * 16);
     m_screen = new Screen();
     // tft = new LGFX();
-    spiffs = new spiffsHandler();  
-    m_transport = new EspNowTransport(m_output_buffer, spiffs, ESP_NOW_WIFI_CHANNEL);
+    m_memory = new memory(); 
+    m_transport = new EspNowTransport(m_output_buffer, m_memory, ESP_NOW_WIFI_CHANNEL);
     m_transport->set_header(TRANSPORT_HEADER_SIZE, transport_header);
     Serial.println("Application started");
 
@@ -48,7 +48,7 @@ void setup()
     Serial.println(WiFi.macAddress());
 
     m_transport->begin();
-    spiffs->init();
+    m_memory->init();
 
     m_screen->begin();
 
@@ -74,7 +74,7 @@ void application_task(void *param) {
         ui_tick();
 
         if (g_binding){
-            // lv_obj_t *obj = lv_event_get_target_obj(&g_event_binding);
+            lv_obj_t *obj = lv_event_get_target_obj(&g_event_binding);
             // Serial.printf("Received event from obj: %u\n", obj);
             Serial.println("Proses binding dimulai");
             m_transport->statusBinding();
@@ -84,7 +84,7 @@ void application_task(void *param) {
         if (g_delete){
             // lv_obj_t *obj = lv_event_get_target_obj(&g_event_delete);
             // Serial.printf("Received event from obj: %u\n", obj);
-            spiffs->deleteAddress();
+            m_memory->deleteAddress(); 
             g_delete = false;
         }
 

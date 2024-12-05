@@ -7,15 +7,15 @@
 #include "audio.h"
 #include "OutputBuffer.h"
 #include "config.h"
-#include "spiffsHandler.h"
+#include "memory.h"
 #include "button/button.h"
 
 // our application
 Transport *m_transport;
 OutputBuffer *m_output_buffer;
-spiffsHandler *spiffs;
-audio *m_input; // Diubah dari _input menjadi m_input
-button *m_button; // Diubah dari myButton menjadi m_button
+memory *m_memory; 
+audio *m_input; 
+button *m_button; 
 unsigned long currentTime;
 
 void application_task(void *param);
@@ -25,11 +25,11 @@ void setup()
     Serial.begin(115200);
     // start up the application
     m_output_buffer = new OutputBuffer(300 * 16);
-    m_input = new audio(I2S_NUM_0, i2s_mic_pins, 128); // Diubah dari _input menjadi m_input
-    spiffs = new spiffsHandler();  
-    m_transport = new EspNowTransport(m_output_buffer, spiffs, ESP_NOW_WIFI_CHANNEL);
+    m_input = new audio(I2S_NUM_0, i2s_mic_pins, 128); 
+    m_memory = new memory();  
+    m_transport = new EspNowTransport(m_output_buffer, m_memory, ESP_NOW_WIFI_CHANNEL);
     m_transport->set_header(TRANSPORT_HEADER_SIZE, transport_header);
-    m_button = new button(BINDING_BUTTON); // Diubah dari myButton menjadi m_button
+    m_button = new button(BINDING_BUTTON); 
     
     Serial.print("My IDF Version is: ");
     Serial.println(esp_get_idf_version());
@@ -39,9 +39,9 @@ void setup()
     Serial.print("My MAC Address is: ");
     Serial.println(WiFi.macAddress());
 
-    spiffs->init();
+    m_memory->init(); 
     m_transport->begin();
-    m_button->begin(); // Diubah dari myButton menjadi m_button
+    m_button->begin(); 
 
     pinMode(GPIO_TRANSMIT_BUTTON, INPUT_PULLUP);
 
@@ -62,29 +62,29 @@ void application_task(void *param){
         reinterpret_cast<int16_t *>(malloc(sizeof(int16_t) * 128));
 
     while (true) {
-        if (m_button->getMode()) // Diubah dari myButton menjadi m_button
+        if (m_button->getMode()) 
         {
             Serial.println("Proses binding dimulai");
             m_transport->statusBinding();
-            m_button->setMode(false); // Diubah dari myButton menjadi m_button
+            m_button->setMode(false); 
         }
 
-        if (m_button->getRemove()) // Diubah dari myButton menjadi m_button
+        if (m_button->getRemove()) 
         {
-            spiffs->deleteAddress();
-            m_button->setRemove(false); // Diubah dari myButton menjadi m_button
+            m_memory->deleteAddress();
+            m_button->setRemove(false); 
         }
    
         m_transport->peerReady();
 
         if (!digitalRead(GPIO_TRANSMIT_BUTTON)) {
             Serial.println("Started transmitting");
-            m_input->startMic(44100); // Diubah dari _input menjadi m_input
+            m_input->startMic(44100); 
 
             unsigned long start_time = millis();
             while (millis() - start_time < 1000 ||
                    !digitalRead(GPIO_TRANSMIT_BUTTON)) {
-                int samples_read = m_input->read(samples, 128); // Diubah dari _input menjadi m_input
+                int samples_read = m_input->read(samples, 128); 
 
                 for (int i = 0; i < samples_read; i++) {
                     m_transport->add_sample(samples[i]);
@@ -93,8 +93,8 @@ void application_task(void *param){
 
             m_transport->flush();
             Serial.println("Finished transmitting");
-            m_input->stopAudio(); // Diubah dari _input menjadi m_input
+            m_input->stopAudio(); 
         }
-        m_button->tick(); // Diubah dari myButton menjadi m_button
+        m_button->tick(); 
     }
 }

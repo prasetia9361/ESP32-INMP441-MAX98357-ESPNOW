@@ -1,10 +1,10 @@
 #pragma once
 
 #include "Transport.h"
-#include "spiffsHandler.h"
+#include "memory.h"
 
 class OutputBuffer;
-class spiffsHandler;
+class memory;
 
 typedef struct message {
     uint8_t m_buffer[127];
@@ -14,7 +14,7 @@ typedef struct message {
 
 class EspNowTransport: public Transport {
 private:
-  spiffsHandler* spiffs;
+  memory* m_memory;
   uint8_t m_wifi_channel;
   uint8_t transmitterMAC[6];
   // message messageData;
@@ -26,7 +26,7 @@ private:
   
 
 public:
-  EspNowTransport(OutputBuffer *output_buffer,spiffsHandler *_spiffs, uint8_t wifi_channel);
+  EspNowTransport(OutputBuffer *output_buffer,memory *_memory, uint8_t wifi_channel);
   virtual bool begin() override;
   friend void receiveCallback(const uint8_t *macAddr, const uint8_t *data, int dataLen);
 };

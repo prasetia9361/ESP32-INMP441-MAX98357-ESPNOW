@@ -25,16 +25,16 @@ void receiveCallback(const uint8_t *macAddr, const uint8_t *data, int dataLen) {
         // memcpy(dataStr, data, dataLen);
         // dataStr[dataLen] = '\0';
         if (strcmp((char *)data, "bindingSend") == 0) {
-            instance->spiffs->writeMacAddress(macAddr, 2);
+            instance->m_memory->writeMacAddress(macAddr, 2);
             instance->stateBinding = false;
         }
-        // instance->spiffs->writeMacAddress(macAddr, 2);
+        // instance->m_memory->writeMacAddress(macAddr, 2);
         // Serial.println("binding transport true");
         
     } else {
         
         int header_size = instance->m_header_size;
-        if (memcmp(macAddr, instance->spiffs->getMac(), 6) == 0) {
+        if (memcmp(macAddr, instance->m_memory->getMac(), 6) == 0) {
             memcpy(&messageReceiver, data, sizeof(messageReceiver));
             messageReceiver.data[12] = '\0';
             Serial.print("data from: ");
@@ -42,7 +42,7 @@ void receiveCallback(const uint8_t *macAddr, const uint8_t *data, int dataLen) {
             
         }
         
-        if (memcmp(macAddr, instance->spiffs->getMac1(), 6) == 0){
+        if (memcmp(macAddr, instance->m_memory->getMac1(), 6) == 0){
             memcpy(&messageReceiver, data, sizeof(messageReceiver));
             if (messageReceiver.dataLen > header_size && messageReceiver.dataLen <= MAX_ESP_NOW_PACKET_SIZE /*&& (memcmp(messageReceiver.m_buffer, instance->bufferValue, header_size) == 0)*/) {
                 instance->m_output_buffer->add_samples(messageReceiver.m_buffer + header_size, messageReceiver.dataLen - header_size);
@@ -57,20 +57,20 @@ void receiveCallback(const uint8_t *macAddr, const uint8_t *data, int dataLen) {
     // memcpy(dataStr, data, dataLen);
     // dataStr[dataLen] = '\0';
     if (strcmp((char *)data, "bindingMode") == 0) {
-        instance->spiffs->writeMacAddress(macAddr, 1);
+        instance->m_memory->writeMacAddress(macAddr, 1);
     }
 #endif
 }
 
-EspNowTransport::EspNowTransport(OutputBuffer *output_buffer, spiffsHandler *_spiffs, uint8_t wifi_channel) : Transport(output_buffer, MAX_ESP_NOW_PACKET_SIZE) {
+EspNowTransport::EspNowTransport(OutputBuffer *output_buffer, memory *_memory, uint8_t wifi_channel) : Transport(output_buffer, MAX_ESP_NOW_PACKET_SIZE) {
     instance = this;
-    spiffs = _spiffs;
+    m_memory = _memory;
     m_wifi_channel = wifi_channel;
 }
 
 bool EspNowTransport::begin() {
-    if (spiffs == nullptr) {
-        Serial.println("Error: spiffs tidak terinisialisasi");
+    if (m_memory == nullptr) {
+        Serial.println("Error: m_memory tidak terinisialisasi");
         return false;
     }
 
@@ -91,10 +91,10 @@ bool EspNowTransport::begin() {
 }
 
 void EspNowTransport::addPeer() {
-    if (spiffs->getMac()[0] == 0) {
+    if (m_memory->getMac()[0] == 0) {
         // Serial.print("MAC Address0: ");
         // for(int i=0; i<6; i++) {
-        //     Serial.print(instance->spiffs->getMac()[i], HEX);
+        //     Serial.print(instance->m_memory->getMac()[i], HEX);
         //     if(i<5) Serial.print(":");
         // }
         // Serial.println();
@@ -103,24 +103,24 @@ void EspNowTransport::addPeer() {
 
     esp_now_peer_info_t peerInfo;
     memset(&peerInfo, 0, sizeof(peerInfo));
-    memcpy(peerInfo.peer_addr, spiffs->getMac(), 6);
+    memcpy(peerInfo.peer_addr, m_memory->getMac(), 6);
     peerInfo.channel = 0;
     peerInfo.encrypt = false;
     peerInfo.ifidx = WIFI_IF_STA;
 
-    if (!esp_now_is_peer_exist(spiffs->getMac())) {
+    if (!esp_now_is_peer_exist(m_memory->getMac())) {
         esp_err_t result = esp_now_add_peer(&peerInfo);
     }
 }
 
 void EspNowTransport::send() {
-    if (spiffs->getMac()[0] == 0) {
+    if (m_memory->getMac()[0] == 0) {
         return;
     }
 
     messageData.dataLen = m_index + m_header_size;
 
-    esp_err_t send = esp_now_send(spiffs->getMac(), (uint8_t *)&messageData, sizeof(messageData));
+    esp_err_t send = esp_now_send(m_memory->getMac(), (uint8_t *)&messageData, sizeof(messageData));
 }
 
 void EspNowTransport::bindingMode() {

@@ -1,8 +1,8 @@
-#include "spiffsHandler.h"
+#include "memory.h"
 
-spiffsHandler::spiffsHandler(){}
+memory::memory(){}
 
-void spiffsHandler::init(){
+void memory::init(){
     if (!SPIFFS.begin(true)) {
         Serial.println("Gagal menginisialisasi SPIFFS");
         return;
@@ -31,15 +31,6 @@ void spiffsHandler::init(){
 
         const char* dataMac0 = doc["address0"];
         const char* dataMac1 = doc["address1"];
-        // if (dataMac == nullptr) {
-        //     Serial.println("Output is null, invalid JSON structure");
-        //     // return;
-        // }
-       
-        // if (strlen(dataMac) != 17) {// 3 * sizeof uint8_t - 1
-        //     Serial.println("Invalid MAC address length");
-        //     // return;
-        // }
 
         for (int i = 0; i < 6; i++) {
             char byteStr[3];
@@ -60,17 +51,8 @@ void spiffsHandler::init(){
         Serial.println("MAC address converted successfully");
     }
 }
-/*buat dua data json yaitu address dan address1
-di dalam function writeMacAddress nanti di deserialisation dulu
-kemudian cek apakah address kosong 
-jika kosong maka data di simpan ke dalam address
-jika addess terisi maka data disimpan ke address1
-jika keduanya sudah terisi data tidak akan disimpan
 
-buat function untuk menghapus data yang di address dan address1
-nanti panggil di aplication saat kondisi tertentu misal saat button di tekan 3 kali
-*/
-void spiffsHandler::writeMacAddress(const uint8_t *mac, int count){
+void memory::writeMacAddress(const uint8_t *mac, int count){
     JsonDocument doc;
     char macStr[18];
     char dataMac[128];
@@ -132,55 +114,11 @@ void spiffsHandler::writeMacAddress(const uint8_t *mac, int count){
         {
             Serial.print(docName);
             Serial.println(" is available");
-            // continue;
         }
     }
-    
-
-
-    // const char *address = doc["address"];
-    // if (strlen(address) != 17)
-    // {
-    //     doc["address"] = macStr;
-    //     file = SPIFFS.open("/config.json", FILE_WRITE);
-    //     if (!file) {
-    //         Serial.println("- failed to open file for writing");
-    //     }
-
-    //     serializeJson(doc, file);
-    //     file.close();
-    //     memcpy(configData.macAddress,mac,6);
-    //     for (int i = 0; i < 6; i++) {
-    //         Serial.print(configData.macAddress[i], HEX);
-    //         if (i < 5) {
-    //             Serial.print(":");
-    //         }
-    //     }
-    //     Serial.println();
-    // }else{
-    //     doc["address1"] = macStr;
-    //     file = SPIFFS.open("/config.json", FILE_WRITE);
-    // }
-    
-    
-    
-    // doc["address"] = macStr;
-    // File file = SPIFFS.open("/config.json", FILE_WRITE);
-    // if (!file) {
-    //     Serial.println("- failed to open file for writing");
-    // }
-
-    // 
-    // serializeJson(doc, file);
-    // file.close();
-    // memcpy(configData.macAddress,mac,6);
-
-
 }
 
-
-
-void spiffsHandler::deleteAddress() {
+void memory::deleteAddress() {
     File file = SPIFFS.open("/config.json", FILE_WRITE);
     if (!file) {
         Serial.println("- failed to open file for writing");

@@ -1,5 +1,5 @@
-#ifndef SPIFFSHANDLER_H
-#define SPIFFSHANDLER_H
+#ifndef MEMORY_H
+#define MEMORY_H
 
 #include <Arduino.h>
 #include <SPIFFS.h>
@@ -7,7 +7,7 @@
 #include "FS.h"
 #include "SD.h"
 
-class spiffsHandler{
+class memory{
 private:
     typedef struct config {
         uint8_t macAddress[6] = {0,0,0,0,0,0};
@@ -19,7 +19,7 @@ private:
     uint8_t macAddr[6];
 
 public:
-    spiffsHandler();
+    memory();
 
     uint8_t *getMac(){return configData.macAddress;}
     uint8_t *getMac1(){return configData.macAddress1;}
