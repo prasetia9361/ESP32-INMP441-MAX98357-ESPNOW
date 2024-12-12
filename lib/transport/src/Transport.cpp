@@ -42,7 +42,7 @@ void Transport::peerReady() { addPeer(); }
 int Transport::set_header(const int header_size, const uint8_t *header) {
     if ((header_size < m_buffer_size) && (header)) {
         m_header_size = header_size;
-        memcpy(bufferValue, header, header_size);
+        memcpy(messageData.m_buffer, header, header_size);
         return 0;
     } else {
         return -1;

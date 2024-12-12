@@ -18,6 +18,9 @@
     "*.tcc": "cpp",
     "memory": "cpp",
     "random": "cpp",
-    "new": "cpp"
+    "new": "cpp",
+    "bitset": "cpp",
+    "chrono": "cpp",
+    "algorithm": "cpp"
   }
 }

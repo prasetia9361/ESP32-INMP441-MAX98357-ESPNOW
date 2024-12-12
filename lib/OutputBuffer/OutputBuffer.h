@@ -1,6 +1,6 @@
 #pragma once
 
-// #include <Arduino.h>
+#include <Arduino.h>
 #include <freertos/FreeRTOS.h>
 
 class OutputBuffer {
@@ -38,7 +38,7 @@ class OutputBuffer {
         xSemaphoreTake(m_semaphore, portMAX_DELAY);
         for (int i = 0; i < count; i++) {
             m_buffer[m_write_head] = samples[i];
-            // Serial.println(samples[i]);
+            Serial.println(samples[i]);
             m_write_head = (m_write_head + 1) % m_buffer_size;
         }
         m_available_samples += count;
@@ -60,8 +60,8 @@ class OutputBuffer {
             } else {
                 m_buffering = false;
                 int16_t sample = m_buffer[m_read_head];
-                samples[i] = (sample - 128) << 5;
-                // samples[i] = (sample - 128) << 7;
+                // samples[i] = (sample - 128) << 5;
+                samples[i] = (sample - 128) << 7;
                 m_read_head = (m_read_head + 1) % m_buffer_size;
                 m_available_samples--;
             }

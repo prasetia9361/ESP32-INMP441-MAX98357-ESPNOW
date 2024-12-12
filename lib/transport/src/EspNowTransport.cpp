@@ -7,7 +7,7 @@
 
 #include "OutputBuffer.h"
 
-const int MAX_ESP_NOW_PACKET_SIZE = 127;
+const int MAX_ESP_NOW_PACKET_SIZE = 250;
 #ifdef RECEIVER
 const char messaging[12] = "bindingMode";
 #else
@@ -36,19 +36,19 @@ void receiveCallback(const uint8_t *macAddr, const uint8_t *data, int dataLen) {
         int header_size = instance->m_header_size;
         if (memcmp(macAddr, instance->m_memory->getMac(), 6) == 0) {
             memcpy(&messageReceiver, data, sizeof(messageReceiver));
-            messageReceiver.data[12] = '\0';
-            Serial.print("data from: ");
-            Serial.println(messageReceiver.data);
-            
-        }
-        
-        if (memcmp(macAddr, instance->m_memory->getMac1(), 6) == 0){
-            memcpy(&messageReceiver, data, sizeof(messageReceiver));
             if (messageReceiver.dataLen > header_size && messageReceiver.dataLen <= MAX_ESP_NOW_PACKET_SIZE /*&& (memcmp(messageReceiver.m_buffer, instance->bufferValue, header_size) == 0)*/) {
                 instance->m_output_buffer->add_samples(messageReceiver.m_buffer + header_size, messageReceiver.dataLen - header_size);
             } else {
                 Serial.println("Ukuran buffer atau pointer tidak valid.");
             }
+            
+        }
+        
+        if (memcmp(macAddr, instance->m_memory->getMac1(), 6) == 0){
+            memcpy(&messageReceiver, data, sizeof(messageReceiver));
+            messageReceiver.data[12] = '\0';
+            Serial.print("data from: ");
+            Serial.println(messageReceiver.data);
         }
     }
 #else
@@ -135,6 +135,7 @@ void EspNowTransport::bindingMode() {
     }
 
     if (esp_now_add_peer(&peerInfo) == ESP_OK) {
+        Serial.println(messaging);
         esp_now_send(peerInfo.peer_addr, (uint8_t *)messaging, 12);
         esp_now_del_peer(peerInfo.peer_addr);
     }

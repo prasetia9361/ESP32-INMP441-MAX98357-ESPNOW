@@ -1,7 +1,7 @@
 #ifndef MEMORY_H
 #define MEMORY_H
 
-#include <Arduino.h>
+// #include <Arduino.h>
 #include <SPIFFS.h>
 #include <ArduinoJson.h>
 #include "FS.h"
@@ -20,6 +20,7 @@ private:
 
 public:
     memory();
+    ~memory();
 
     uint8_t *getMac(){return configData.macAddress;}
     uint8_t *getMac1(){return configData.macAddress1;}

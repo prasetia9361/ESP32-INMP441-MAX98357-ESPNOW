@@ -87,7 +87,9 @@ void application_task(void *param){
                 int samples_read = m_input->read(samples, 128); 
 
                 for (int i = 0; i < samples_read; i++) {
+                    // Serial.println(samples[i]);
                     m_transport->add_sample(samples[i]);
+                    // m_transport->sendChar("esp32display");
                 }
             }
 

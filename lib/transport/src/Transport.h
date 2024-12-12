@@ -1,6 +1,7 @@
 #pragma once
 #include <stdlib.h>
 #include <stdint.h>
+#include <ArduinoJson.h>
 
 class OutputBuffer;
 
@@ -13,6 +14,8 @@ protected:
     int dataLen;
   }message;
   message messageData;
+  char jsonData[1024];
+  String _jsonData;
   uint8_t *bufferValue = NULL;
   int m_buffer_size = 0;
   int m_index = 0;

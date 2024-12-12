@@ -13,7 +13,7 @@ lv_obj_t *tick_value_change_obj;
 
 static void event_handler_cb_main_obj0(lv_event_t *e) {
     lv_event_code_t event = lv_event_get_code(e);
-    if (event == LV_EVENT_PRESSED) {
+    if (event == LV_EVENT_CLICKED) {
         action_mode_binding(e);
     }
 }

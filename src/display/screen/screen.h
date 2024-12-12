@@ -37,8 +37,8 @@ private:
         uint32_t w = lv_area_get_width(area);
         uint32_t h = lv_area_get_height(area);
 
-        Serial.printf("Flush Area: x1=%d, y1=%d, x2=%d, y2=%d, w=%d, h=%d\n", 
-                    area->x1, area->y1, area->x2, area->y2, w, h);
+        // Serial.printf("Flush Area: x1=%d, y1=%d, x2=%d, y2=%d, w=%d, h=%d\n", 
+        //             area->x1, area->y1, area->x2, area->y2, w, h);
 
         if (area->x1 >= SCREEN_WIDTH || area->y1 >= SCREEN_HEIGHT) {
             lv_disp_flush_ready(disp);

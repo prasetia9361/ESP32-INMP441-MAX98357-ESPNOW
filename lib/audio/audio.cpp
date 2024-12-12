@@ -1,6 +1,7 @@
 #include "audio.h"
 #include "soc/i2s_reg.h"
 #include <esp_log.h>
+#include <Arduino.h>
 
 static const char *TAG = "OUT";
 

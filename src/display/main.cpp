@@ -76,7 +76,7 @@ void application_task(void *param) {
         if (g_binding){
             lv_obj_t *obj = lv_event_get_target_obj(&g_event_binding);
             // Serial.printf("Received event from obj: %u\n", obj);
-            Serial.println("Proses binding dimulai");
+            // Serial.println("Proses binding dimulai");
             m_transport->statusBinding();
             g_binding = false;
         }
@@ -92,7 +92,7 @@ void application_task(void *param) {
             // lv_obj_t *obj = lv_event_get_target_obj(&g_event_sending);
             // Serial.printf("Received event from obj: %u\n", obj);
             m_transport->peerReady();
-            m_transport->sendChar("esp32remote");
+            m_transport->sendChar("esp32display");
             g_sending = false;
         }
   
