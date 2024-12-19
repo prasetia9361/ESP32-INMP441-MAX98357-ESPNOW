@@ -17,6 +17,7 @@ private:
   memory* m_memory;
   uint8_t m_wifi_channel;
   uint8_t transmitterMAC[6];
+  uint8_t bufferAudio[50];
   // message messageData;
 
  protected:
