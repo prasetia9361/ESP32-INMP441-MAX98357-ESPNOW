@@ -14,7 +14,7 @@ protected:
     int dataLen;
   }message;
   message messageData;
-  char jsonData[1024];
+  char jsonData[250];
   String _jsonData;
   uint8_t *bufferValue = NULL;
   int m_buffer_size = 0;

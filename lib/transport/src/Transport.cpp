@@ -24,6 +24,8 @@ void Transport::add_sample(int16_t sample) {
     }
 }
 
+
+
 void Transport::sendChar(const char *data){
     JsonDocument doc;
     doc["d"] = data;
