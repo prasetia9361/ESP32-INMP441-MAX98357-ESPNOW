@@ -35,16 +35,6 @@ void receiveCallback(const uint8_t *macAddr, const uint8_t *data, int dataLen) {
 
         
         int header_size = instance->m_header_size;
-        const char* sender = jsonDoc["s"];
-        const char* messageButton = jsonDoc["b"];
-        int len = jsonDoc["d"];
-        JsonArray audio = jsonDoc["a"].as<JsonArray>();
-        for (size_t i = 0; i < (len - header_size); i++)
-        {
-            instance->bufferAudio[i] = audio[i].as<uint8_t>();
-        }
-        
-        
         if (memcmp(macAddr, instance->m_memory->getMac(), 6) == 0) {
             memcpy(&messageReceiver, data, sizeof(messageReceiver));
             // Serial.println(messageReceiver.data);
@@ -155,31 +145,13 @@ void EspNowTransport::addPeer() {
 }
 
 void EspNowTransport::send() {
-    JsonDocument doc;
     if (m_memory->getMac()[0] == 0) {
         return;
     }
 
-    doc["s"] = "esp32";
-    doc["b"] = "";
-    doc["d"] = m_index + m_header_size;
-    JsonArray audio = doc["a"].to<JsonArray>();
-    for (int i = m_header_size; i < m_buffer_size; i++)
-    {
-        // Serial.println(i);
-        audio.add(bufferValue[i]);
-    }
-    
-    
-    serializeJson(doc, jsonData);
-    // messageData.dataLen = m_index + m_header_size;
+    messageData.dataLen = m_index + m_header_size;
 
-    // esp_err_t send = esp_now_send(m_memory->getMac(), (uint8_t *)&messageData, sizeof(messageData));
-    // esp_err_t send = esp_now_send(m_memory->getMac(), (const uint8_t *)_jsonData.c_str(), _jsonData.length());
-    esp_err_t send = esp_now_send(m_memory->getMac(), (const uint8_t *)jsonData, sizeof(jsonData));
-    
-    // Serial.print("Ukuran char jsonData yang terpakai: ");
-    // Serial.println(strlen(jsonData));
+    esp_err_t send = esp_now_send(m_memory->getMac(), (uint8_t *)&messageData, sizeof(messageData));
 }
 
 void EspNowTransport::bindingMode() {
