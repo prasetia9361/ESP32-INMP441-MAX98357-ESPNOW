@@ -8,7 +8,7 @@ class memory;
 
 typedef struct message {
     uint8_t m_buffer[127];
-    char data[12];
+    char data[20] = "";
     int dataLen;
 } message;
 

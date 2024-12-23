@@ -26,7 +26,7 @@
 // applications or walkie talkie sets), specify TRANSPORT_HEADER_SIZE (the
 // length in bytes of the header) in the next line, and define the transport
 // header in config.cpp
-#define TRANSPORT_HEADER_SIZE 10
+#define TRANSPORT_HEADER_SIZE 0
 extern uint8_t transport_header[TRANSPORT_HEADER_SIZE];
 
 // i2s speaker pins

@@ -10,7 +10,7 @@ class Transport
 protected:
   typedef struct message{
     uint8_t m_buffer[127];
-    char data[12]; // Specify the size of the array
+    char data[20] = ""; // Initialize with an empty string
     int dataLen;
   }message;
   message messageData;

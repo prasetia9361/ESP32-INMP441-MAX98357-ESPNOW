@@ -7,7 +7,7 @@
 
 #include "OutputBuffer.h"
 
-const int MAX_ESP_NOW_PACKET_SIZE = 250;
+const int MAX_ESP_NOW_PACKET_SIZE = 127;
 #ifdef RECEIVER
 const char messaging[12] = "bindingMode";
 #else
@@ -32,23 +32,54 @@ void receiveCallback(const uint8_t *macAddr, const uint8_t *data, int dataLen) {
         // Serial.println("binding transport true");
         
     } else {
+
         
         int header_size = instance->m_header_size;
         if (memcmp(macAddr, instance->m_memory->getMac(), 6) == 0) {
             memcpy(&messageReceiver, data, sizeof(messageReceiver));
-            if (messageReceiver.dataLen > header_size && messageReceiver.dataLen <= MAX_ESP_NOW_PACKET_SIZE /*&& (memcmp(messageReceiver.m_buffer, instance->bufferValue, header_size) == 0)*/) {
+            // Serial.println(messageReceiver.data);
+            
+
+
+                // const char* messageButton = jsonDoc["data"];
+            if (messageReceiver.data == "" || strlen(messageReceiver.data) == 0) {
                 instance->m_output_buffer->add_samples(messageReceiver.m_buffer + header_size, messageReceiver.dataLen - header_size);
             } else {
-                Serial.println("Ukuran buffer atau pointer tidak valid.");
+                // messageReceiver.data[12] = '\0';
+                JsonDocument jsonDoc;
+                DeserializationError error = deserializeJson(jsonDoc, messageReceiver.data);
+                if (error)
+                {
+                    Serial.println("deserialization failed!");
+                    Serial.println(error.c_str());
+                    return;
+                }
+                const char* messageButton = jsonDoc["d"];
+                Serial.print("data: ");
+                Serial.println(messageButton);
             }
             
         }
         
         if (memcmp(macAddr, instance->m_memory->getMac1(), 6) == 0){
             memcpy(&messageReceiver, data, sizeof(messageReceiver));
-            messageReceiver.data[12] = '\0';
-            Serial.print("data from: ");
-            Serial.println(messageReceiver.data);
+            // Serial.println(messageReceiver.data);
+            if (messageReceiver.data == "" || strlen(messageReceiver.data) == 0) {
+                instance->m_output_buffer->add_samples(messageReceiver.m_buffer + header_size, messageReceiver.dataLen - header_size);
+            } else {
+                // messageReceiver.data[12] = '\0';
+                JsonDocument jsonDoc;
+                DeserializationError error = deserializeJson(jsonDoc, messageReceiver.data);
+                if (error)
+                {
+                    Serial.println("deserialization failed!");
+                    Serial.println(error.c_str());
+                    return;
+                }
+                const char* messageButton = jsonDoc["d"];
+                Serial.print("data: ");
+                Serial.println(messageButton);
+            }
         }
     }
 #else
