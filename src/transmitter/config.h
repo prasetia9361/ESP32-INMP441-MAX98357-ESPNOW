@@ -23,8 +23,12 @@
 #define ADC_MIC_CHANNEL ADC1_CHANNEL_7
 
 // transmit button
-#define GPIO_TRANSMIT_BUTTON 23
-#define BINDING_BUTTON 0
+#define GPIO_TRANSMIT_BUTTON 5
+#define PIN_1 33
+#define PIN_2 25
+#define PIN_3 26
+#define PIN_4 27
+// #define BINDING_BUTTON 0
 
 // On which wifi channel (1-11) should ESP-Now transmit? The default ESP-Now
 // channel on ESP32 is channel 1

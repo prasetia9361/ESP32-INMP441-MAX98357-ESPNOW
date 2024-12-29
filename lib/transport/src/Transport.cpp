@@ -26,13 +26,17 @@ void Transport::add_sample(int16_t sample) {
 
 
 
-void Transport::sendChar(const char *data){
+void Transport::sendChar(byte data){
+    // static byte lastData = 0;
+    // if (data != 0 && data != 66 && data != 67 && data != lastData) 
+    // {
     JsonDocument doc;
     doc["d"] = data;
-    serializeJson(doc,messageData.data);
-    // strcpy(messageData.data, data);
-    // Serial.println(messageData.data);
+    serializeJson(doc, messageData.data);
+    Serial.println(data);
     send();
+        // lastData = data;
+    // }
 }
 
 void Transport::flush() {

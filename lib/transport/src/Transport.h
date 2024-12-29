@@ -36,7 +36,7 @@ public:
   bool getBinding(){return stateBinding;}
 
   void add_sample(int16_t sample);
-  void sendChar(const char *data);
+  void sendChar(byte data);
   void flush();
   void statusBinding();
   void peerReady();

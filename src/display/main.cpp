@@ -92,7 +92,7 @@ void application_task(void *param) {
             // lv_obj_t *obj = lv_event_get_target_obj(&g_event_sending);
             // Serial.printf("Received event from obj: %u\n", obj);
             m_transport->peerReady();
-            m_transport->sendChar("esp32display");
+            m_transport->sendChar('1');
             g_sending = false;
         }
   

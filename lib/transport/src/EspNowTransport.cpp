@@ -54,7 +54,8 @@ void receiveCallback(const uint8_t *macAddr, const uint8_t *data, int dataLen) {
                     Serial.println(error.c_str());
                     return;
                 }
-                const char* messageButton = jsonDoc["d"];
+                // const char* messageButton = jsonDoc["d"];
+                int messageButton = jsonDoc["d"];
                 Serial.print("data: ");
                 Serial.println(messageButton);
             }
@@ -76,7 +77,8 @@ void receiveCallback(const uint8_t *macAddr, const uint8_t *data, int dataLen) {
                     Serial.println(error.c_str());
                     return;
                 }
-                const char* messageButton = jsonDoc["d"];
+                // const char* messageButton = jsonDoc["d"];
+                byte messageButton = jsonDoc["d"];
                 Serial.print("data: ");
                 Serial.println(messageButton);
             }
