@@ -27,7 +27,10 @@
 #define PIN_1 33
 #define PIN_2 25
 #define PIN_3 26
-#define PIN_4 27
+#define PIN_4 15
+#define PIN_5 4
+#define PIN_6 22
+#define PIN_7 23
 // #define BINDING_BUTTON 0
 
 // On which wifi channel (1-11) should ESP-Now transmit? The default ESP-Now

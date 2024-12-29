@@ -29,11 +29,11 @@ void setup()
     Serial.begin(115200);
     // start up the application
     m_output_buffer = new OutputBuffer(300 * 16);
-    m_input = new audio(I2S_NUM_0, i2s_mic_pins, 128); 
-    m_memory = new memory();  
+    m_input = new audio(I2S_NUM_0, i2s_mic_pins, 128);
+    m_memory = new memory();
     m_transport = new EspNowTransport(m_output_buffer, m_memory, ESP_NOW_WIFI_CHANNEL);
     m_transport->set_header(TRANSPORT_HEADER_SIZE, transport_header);
-    m_button = new button(PIN_1, PIN_2, PIN_3, 15, 4, 22, 23);
+    m_button = new button(PIN_1, PIN_2, PIN_3, PIN_4, PIN_5, PIN_6, PIN_7);
     Serial.print("My IDF Version is: ");
     Serial.println(esp_get_idf_version());
 
@@ -44,7 +44,7 @@ void setup()
 
     m_memory->init(); 
     m_transport->begin();
-    m_button->begin(); 
+    m_button->begin();
     
     pinMode(GPIO_TRANSMIT_BUTTON, INPUT_PULLUP);
 
@@ -80,13 +80,13 @@ void application_task(void *param){
             lastByte = dataByte;
             // m_button->setButton();
             // m_button->setMode(false); 
-        }else if (dataByte == 52 && dataByte != lastByte ) 
+        }else if (dataByte == 67 && dataByte != lastByte ) 
         {
             m_memory->deleteAddress();
             lastByte = dataByte;
             // m_button->setButton();
             // m_button->setRemove(false); 
-        }else if (dataByte != lastByte && dataByte != 66 && dataByte != 52)
+        }else if (dataByte != lastByte && dataByte != 66 && dataByte != 67)
         {
             // Serial.println(m_button->getButton());
             m_transport->sendChar(m_button->getButton());

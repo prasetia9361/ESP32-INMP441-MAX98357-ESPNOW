@@ -98,26 +98,32 @@ void button::checkKey(){
         for (int row = 0; row < 3; row++)
         {
 
-            if (row == 2 && col == 2) {
-                if (digitalRead(rowPins[row]) == LOW) {
-                    buttonAudio = true; 
-                    // Serial.println(buttonAudio);
-                } else {
-                    buttonAudio = false; 
-                    // Serial.println(buttonAudio);
-                }
-                
-            }else {
-                if (digitalRead(rowPins[row]) == LOW)
+          if (digitalRead(rowPins[row]) == LOW)
                 {
                     massage = getKey(row, col);
                     // Serial.println(massage);
-                }
-                
-                // Serial.print(row);
-                // Serial.print(",");
-                // Serial.println(col);
             }
+
+            // if (row == 2 && col == 2) {
+            //     if (digitalRead(rowPins[row]) == LOW) {
+            //         buttonAudio = true; 
+            //         // Serial.println(buttonAudio);
+            //     } else {
+            //         buttonAudio = false; 
+            //         // Serial.println(buttonAudio);
+            //     }
+                
+            // }else {
+            //     if (digitalRead(rowPins[row]) == LOW)
+            //     {
+            //         massage = getKey(row, col);
+            //         // Serial.println(massage);
+            //     }
+                
+            //     // Serial.print(row);
+            //     // Serial.print(",");
+            //     // Serial.println(col);
+            // }
         }
         digitalWrite(colPins[col], HIGH);
     }
