@@ -15,8 +15,7 @@ OutputBuffer *m_output_buffer;
 memory *m_memory; 
 audio *m_input; 
 button *m_button;
-// myButton 
-// oneButton *myButton;
+
 unsigned long currentTime;
 
 void application_task(void *param);
@@ -69,56 +68,22 @@ void application_task(void *param){
 
     while (true) {
         m_button->checkKey();
-        // Serial.println(m_button->getButton());
 
         byte dataByte = static_cast<byte>(m_button->getButton());
         
         if (dataByte == 66 && dataByte != lastByte) 
         {
-            // Serial.println(dataByte);
             m_transport->statusBinding();
             lastByte = dataByte;
-            // m_button->setButton();
-            // m_button->setMode(false); 
         }else if (dataByte == 67 && dataByte != lastByte ) 
         {
             m_memory->deleteAddress();
             lastByte = dataByte;
-            // m_button->setButton();
-            // m_button->setRemove(false); 
         }else if (dataByte != lastByte && dataByte != 66 && dataByte != 67)
         {
-            // Serial.println(m_button->getButton());
             m_transport->sendChar(m_button->getButton());
             lastByte = dataByte;
-            // m_button->setButton();
         }
-
-        // Serial.println(m_button->getAudio());
-        // m_transport->peerReady();
-
-        // if (m_button->getAudio() != lastButton)
-        // {
-        //     Serial.println("Started transmitting");
-        //     m_input->startMic(44100); 
-
-        //     unsigned long start_time = millis();
-        //     while (millis() - start_time < 1000 || m_button->getAudio() == true) {
-        //         int samples_read = m_input->read(samples, 128); 
-
-        //         for (int i = 0; i < samples_read; i++) {
-        //             // Serial.println(samples[i]);
-        //             m_transport->add_sample(samples[i]);
-        //             // m_transport->sendChar("esp32display");
-        //         }
-        //     }
-
-        //     m_transport->flush();
-        //     Serial.println("Finished transmitting");
-        //     m_input->stopAudio(); 
-        // }
-        
-//    Serial.println(!digitalRead(GPIO_TRANSMIT_BUTTON));
         m_transport->peerReady();
 
         if (!digitalRead(GPIO_TRANSMIT_BUTTON)) {
@@ -131,9 +96,8 @@ void application_task(void *param){
                 int samples_read = m_input->read(samples, 128); 
 
                 for (int i = 0; i < samples_read; i++) {
-                    Serial.println(samples[i]);
+                    // Serial.println(samples[i]);
                     m_transport->add_sample(samples[i]);
-                    // m_transport->sendChar("esp32display");
                 }
             }
 
@@ -141,6 +105,5 @@ void application_task(void *param){
             Serial.println("Finished transmitting");
             m_input->stopAudio(); 
         }
-        // m_button->ticks();
     }
 }

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "OneButton.h"
-// #include "config.h"
 
 class button
 {
@@ -10,32 +9,12 @@ private:
     bool removeData;
     bool buttonAudio;
     char massage;
-    OneButton bindingButton;
-    OneButton button1;
-    OneButton button2;
-    OneButton button3;
-    OneButton button4;
+
     static button* instance;
     const int rowPins[3];
     const int colPins[4];
 
     char getKey(int row, int col);
-    // void checkKey();
-
-    // void button_1();
-    // void button_2();
-    // void button_3();
-    // void button_4();
-    // void button_5();
-    void onDelete();
-    void onBinding();
-    // static void button_1_wrapper();
-    // static void button_2_wrapper();
-    // static void button_3_wrapper();
-    // static void button_4_wrapper();
-    // static void button_5_wrapper();
-    // static void doubleClick();
-    // static void longPress();
 
 public:
     button(int pin1, int pin2, int pin3, int pin4, int pin5, int pin6, int pin7)
@@ -53,18 +32,6 @@ public:
     void setButton() { massage = '\0'; }
 
     bool getAudio() {return buttonAudio;}
-
-    bool getMode() { return mode; }
-    bool getRemove() { return removeData; }
-    bool setMode(bool value) {
-        mode = value;
-        return mode;
-    }
-    bool setRemove(bool value) {
-        removeData = value;
-        return removeData;
-    }
-    // void ticks();
 };
 
 button* button::instance = nullptr;
@@ -103,43 +70,8 @@ void button::checkKey(){
                     massage = getKey(row, col);
                     // Serial.println(massage);
             }
-
-            // if (row == 2 && col == 2) {
-            //     if (digitalRead(rowPins[row]) == LOW) {
-            //         buttonAudio = true; 
-            //         // Serial.println(buttonAudio);
-            //     } else {
-            //         buttonAudio = false; 
-            //         // Serial.println(buttonAudio);
-            //     }
-                
-            // }else {
-            //     if (digitalRead(rowPins[row]) == LOW)
-            //     {
-            //         massage = getKey(row, col);
-            //         // Serial.println(massage);
-            //     }
-                
-            //     // Serial.print(row);
-            //     // Serial.print(",");
-            //     // Serial.println(col);
-            // }
         }
         digitalWrite(colPins[col], HIGH);
     }
     
-}
-
-void button::onBinding(){
-    if (massage = 'C')
-    {
-        mode = true;
-    }
-}
-
-void button::onDelete(){
-    if (massage == 'B')
-    {
-        removeData = true;
-    }
 }
