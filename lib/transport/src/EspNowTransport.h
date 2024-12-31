@@ -18,12 +18,16 @@ private:
   uint8_t m_wifi_channel;
   uint8_t transmitterMAC[6];
   uint8_t bufferAudio[50];
+  
   // message messageData;
 
  protected:
   void addPeer();
   void send();
   void bindingMode();
+
+
+  
   
 
 public:

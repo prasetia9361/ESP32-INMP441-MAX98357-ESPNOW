@@ -465,6 +465,95 @@
               "localStyles": {
                 "objID": "e5d93bed-b922-4ab7-fbe1-cb42329de511"
               }
+            },
+            {
+              "objID": "23981500-e6e4-41d5-dd08-fcf864e1a113",
+              "type": "LVGLLabelWidget",
+              "left": 194,
+              "top": 110,
+              "width": 92,
+              "height": 16,
+              "customInputs": [],
+              "customOutputs": [],
+              "style": {
+                "objID": "0a3fc83a-2fcb-4322-bea9-479b7fb1bd8a",
+                "useStyle": "default",
+                "conditionalStyles": [],
+                "childStyles": []
+              },
+              "timeline": [],
+              "eventHandlers": [],
+              "leftUnit": "px",
+              "topUnit": "px",
+              "widthUnit": "content",
+              "heightUnit": "content",
+              "children": [],
+              "flags": "",
+              "hiddenFlagType": "literal",
+              "clickableFlagType": "literal",
+              "checkedStateType": "literal",
+              "disabledStateType": "literal",
+              "states": "",
+              "localStyles": {
+                "objID": "d4269542-aa1d-4b06-83e0-d7e59f99cf7f",
+                "definition": {
+                  "MAIN": {
+                    "DEFAULT": {
+                      "text_opa": 255,
+                      "text_font": "MONTSERRAT_14"
+                    }
+                  }
+                }
+              },
+              "text": "Mac Address",
+              "textType": "literal",
+              "longMode": "WRAP",
+              "recolor": false
+            },
+            {
+              "objID": "668691b7-3680-4f93-bd3f-c132956303de",
+              "type": "LVGLLabelWidget",
+              "left": 186,
+              "top": 147,
+              "width": 108,
+              "height": 16,
+              "customInputs": [],
+              "customOutputs": [],
+              "style": {
+                "objID": "a9cf815f-1ed2-42e0-eb65-bf865ff85d27",
+                "useStyle": "default",
+                "conditionalStyles": [],
+                "childStyles": []
+              },
+              "timeline": [],
+              "eventHandlers": [],
+              "identifier": "data_from_receiver",
+              "leftUnit": "px",
+              "topUnit": "px",
+              "widthUnit": "content",
+              "heightUnit": "content",
+              "children": [],
+              "flags": "",
+              "hiddenFlagType": "literal",
+              "clickableFlagType": "literal",
+              "checkedStateType": "literal",
+              "disabledStateType": "literal",
+              "states": "",
+              "localStyles": {
+                "objID": "17a0295c-434a-41d4-d287-d3ac31f6fc18",
+                "definition": {
+                  "MAIN": {
+                    "DEFAULT": {
+                      "text_opa": 255,
+                      "text_font": "MONTSERRAT_14"
+                    }
+                  }
+                }
+              },
+              "text": "not connected",
+              "textType": "literal",
+              "longMode": "WRAP",
+              "recolor": false
             }
           ],
           "flags": "",

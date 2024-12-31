@@ -91,6 +91,9 @@ void receiveCallback(const uint8_t *macAddr, const uint8_t *data, int dataLen) {
     // dataStr[dataLen] = '\0';
     if (strcmp((char *)data, "bindingMode") == 0) {
         instance->m_memory->writeMacAddress(macAddr, 1);
+        memcpy(instance->dataFormReceive, data, dataLen);
+        // instance->dataFormReceive = data;
+        
     }
 #endif
 }

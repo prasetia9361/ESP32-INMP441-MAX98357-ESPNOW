@@ -72,9 +72,12 @@ void application_task(void *param) {
         // lv_timer_handler();
         m_screen->lvHandler();
         ui_tick();
+        // m_transport->getChar();
+        lv_label_set_text(objects.data_from_receiver, m_transport->getChar());
+
 
         if (g_binding){
-            lv_obj_t *obj = lv_event_get_target_obj(&g_event_binding);
+            // lv_obj_t *obj = lv_event_get_target_obj(&g_event_binding);
             // Serial.printf("Received event from obj: %u\n", obj);
             // Serial.println("Proses binding dimulai");
             m_transport->statusBinding();

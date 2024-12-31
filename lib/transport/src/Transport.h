@@ -21,6 +21,7 @@ protected:
   int m_index = 0;
   int m_header_size;
   bool stateBinding = false;
+  char dataFormReceive[12] = "";
 
   OutputBuffer *m_output_buffer = NULL;
   virtual void addPeer() = 0;
@@ -34,6 +35,7 @@ public:
   virtual bool begin() = 0;
   bool setBinding(bool bindingState);
   bool getBinding(){return stateBinding;}
+  const char* getChar(){return dataFormReceive;}
 
   void add_sample(int16_t sample);
   void sendChar(byte data);

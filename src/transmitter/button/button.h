@@ -28,7 +28,7 @@ public:
 
     void begin();
     void checkKey();
-    const char getButton() { return massage; }
+    char getButton() { return massage; }
     void setButton() { massage = '\0'; }
 
     bool getAudio() {return buttonAudio;}
