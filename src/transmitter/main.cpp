@@ -50,7 +50,7 @@ void setup()
     Serial.println("Application started");
 
     TaskHandle_t task_handle;
-    xTaskCreate(application_task, "application_task", 10192, NULL, 1,
+    xTaskCreate(application_task, "application_task", 10192, NULL, 4,
                 &task_handle);
     
     

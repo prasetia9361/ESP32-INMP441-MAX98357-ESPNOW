@@ -35,6 +35,7 @@ void Transport::sendChar(byte data){
     serializeJson(doc, messageData.data);
     Serial.println(data);
     send();
+    messageData.data[0] = '\0'; // Mengosongkan nilai messageData.data
         // lastData = data;
     // }
 }
