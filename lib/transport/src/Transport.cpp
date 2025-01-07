@@ -13,7 +13,7 @@ Transport::Transport(OutputBuffer *output_buffer, size_t buffer_size) {
 }
 
 void Transport::add_sample(int16_t sample) {
-    messageData.m_buffer[m_index + m_header_size] = (sample + 32768) >> 8;
+    messageData.m_buffer[m_index + m_header_size] = (sample + 8192) >> 6;
     // messageData.m_buffer[m_index + m_header_size] = (sample + 32768) * 255 / 65536;
     // Serial.println(messageData.m_buffer[m_index + m_header_size]);
     m_index++;

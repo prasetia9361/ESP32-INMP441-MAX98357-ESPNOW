@@ -88,7 +88,7 @@ void application_task(void *param){
 
         if (!digitalRead(GPIO_TRANSMIT_BUTTON)) {
             Serial.println("Started transmitting");
-            m_input->startMic(44100); 
+            m_input->startMic(SAMPLE_RATE); 
 
             unsigned long start_time = millis();
             while (millis() - start_time < 1000 ||
