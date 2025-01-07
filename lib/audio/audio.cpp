@@ -73,7 +73,13 @@ void audio::write(int16_t *samples, int count){
         for (int i = 0; i < m_raw_samples_size && sample_index < count; i++)
         {
             int sample = process_sample(samples[sample_index]);
-            // Serial.println(samples[sample_index]);
+
+            // Mengurangi noise dengan mengaplikasikan filter sederhana
+            static float prev_sample = 0;
+            const float alpha = 0.8; // Faktor filter (0-1)
+            sample = alpha * sample + (1-alpha) * prev_sample;
+            prev_sample = sample;// Menggunakan weighted average untuk mengurangi noise
+
             m_frames[i * 2] = sample;     // left channel
             m_frames[i * 2 + 1] = sample; // right channel
 
@@ -127,6 +133,7 @@ int audio::read(int16_t *samples, int count){
     for (int i = 0; i < samples_read; i++)
     {
         samples[i] = m_raw_samples[i];
+        // Serial.println(samples[i]);
     }
     return samples_read;
 }

@@ -35,12 +35,9 @@ void receiveCallback(const uint8_t *macAddr, const uint8_t *data, int dataLen) {
 
         
         int header_size = instance->m_header_size;
-        if (memcmp(macAddr, instance->m_memory->getMac(), 6) == 0) {
-            memcpy(&messageReceiver, data, sizeof(messageReceiver));
+        memcpy(&messageReceiver, data, sizeof(messageReceiver));
+        if (memcmp(macAddr, instance->m_memory->getMac(), 6) == 0 || memcmp(macAddr, instance->m_memory->getMac1(), 6) == 0) {
             // Serial.println(messageReceiver.data);
-            
-
-
                 // const char* messageButton = jsonDoc["data"];
             if (messageReceiver.data == "" || strlen(messageReceiver.data) == 0) {
                 instance->m_output_buffer->add_samples(messageReceiver.m_buffer + header_size, messageReceiver.dataLen - header_size);
@@ -62,27 +59,27 @@ void receiveCallback(const uint8_t *macAddr, const uint8_t *data, int dataLen) {
             
         }
         
-        if (memcmp(macAddr, instance->m_memory->getMac1(), 6) == 0){
-            memcpy(&messageReceiver, data, sizeof(messageReceiver));
-            // Serial.println(messageReceiver.data);
-            if (messageReceiver.data == "" || strlen(messageReceiver.data) == 0) {
-                instance->m_output_buffer->add_samples(messageReceiver.m_buffer + header_size, messageReceiver.dataLen - header_size);
-            } else {
-                // messageReceiver.data[12] = '\0';
-                JsonDocument jsonDoc;
-                DeserializationError error = deserializeJson(jsonDoc, messageReceiver.data);
-                if (error)
-                {
-                    Serial.println("deserialization failed!");
-                    Serial.println(error.c_str());
-                    return;
-                }
-                // const char* messageButton = jsonDoc["d"];
-                byte messageButton = jsonDoc["d"];
-                Serial.print("data: ");
-                Serial.println(messageButton);
-            }
-        }
+        // if (memcmp(macAddr, instance->m_memory->getMac1(), 6) == 0){
+        //     memcpy(&messageReceiver, data, sizeof(messageReceiver));
+        //     // Serial.println(messageReceiver.data);
+        //     if (messageReceiver.data == "" || strlen(messageReceiver.data) == 0) {
+        //         instance->m_output_buffer->add_samples(messageReceiver.m_buffer + header_size, messageReceiver.dataLen - header_size);
+        //     } else {
+        //         // messageReceiver.data[12] = '\0';
+        //         JsonDocument jsonDoc;
+        //         DeserializationError error = deserializeJson(jsonDoc, messageReceiver.data);
+        //         if (error)
+        //         {
+        //             Serial.println("deserialization failed!");
+        //             Serial.println(error.c_str());
+        //             return;
+        //         }
+        //         // const char* messageButton = jsonDoc["d"];
+        //         byte messageButton = jsonDoc["d"];
+        //         Serial.print("data: ");
+        //         Serial.println(messageButton);
+        //     }
+        // }
     }
 #else
     // Serial.print("Receiver Address: ");
