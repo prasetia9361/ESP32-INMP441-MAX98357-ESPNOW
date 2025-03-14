@@ -16,12 +16,13 @@ memory *m_memory;
 audio *m_input; 
 button *m_button;
 
+byte lastByte = 0;
+bool lastButton = false;
 unsigned long currentTime;
 
 void application_task(void *param);
 
-byte lastByte = 0;
-bool lastButton = false;
+
 
 void setup()
 {
@@ -42,16 +43,17 @@ void setup()
     Serial.println(WiFi.macAddress());
 
     m_memory->init(); 
+    // m_input->startMic(SAMPLE_RATE);
     m_transport->begin();
     m_button->begin();
     
     pinMode(GPIO_TRANSMIT_BUTTON, INPUT_PULLUP);
 
     Serial.println("Application started");
+    m_transport->peerReady();
 
     TaskHandle_t task_handle;
-    xTaskCreate(application_task, "application_task", 10192, NULL, 4,
-                &task_handle);
+    xTaskCreate(application_task, "application_task", 10192, NULL, 2,&task_handle);
     
     
 }
@@ -64,46 +66,60 @@ void loop()
 void application_task(void *param){
     int16_t *samples =
         reinterpret_cast<int16_t *>(malloc(sizeof(int16_t) * 128));
-    
+
+    int dataByte;
+    const TickType_t xDelay = pdMS_TO_TICKS(5); // Delay kecil untuk memberi kesempatan task lain
 
     while (true) {
-        m_button->checkKey();
-
-        byte dataByte = static_cast<byte>(m_button->getButton());
+        // Beri kesempatan untuk task lain
+        vTaskDelay(xDelay);
         
-        if (dataByte == 66 && dataByte != lastByte) 
-        {
-            m_transport->statusBinding();
-            lastByte = dataByte;
-        }else if (dataByte == 67 && dataByte != lastByte ) 
-        {
-            m_memory->deleteAddress();
-            lastByte = dataByte;
-        }else if (dataByte != lastByte && dataByte != 66 && dataByte != 67)
-        {
-            m_transport->sendChar(m_button->getButton());
-            lastByte = dataByte;
-        }
-        m_transport->peerReady();
+        if (digitalRead(GPIO_TRANSMIT_BUTTON)) {
+            m_button->checkKey();
+            dataByte = m_button->getButton();
 
-        if (!digitalRead(GPIO_TRANSMIT_BUTTON)) {
+            if (dataByte == 10 && dataByte != lastByte) {
+                m_transport->statusBinding();
+                lastByte = dataByte;
+            } else if (dataByte == 11 && dataByte != lastByte) {
+                m_memory->deleteAddress();
+                lastByte = dataByte;
+            } else if (dataByte != 10 && dataByte != 11) {
+                m_transport->sendButton(dataByte);
+                m_button->setButton();
+            }
+        } else {
             Serial.println("Started transmitting");
-            m_input->startMic(SAMPLE_RATE); 
+            m_input->startMic(SAMPLE_RATE);
+  
 
             unsigned long start_time = millis();
-            while (millis() - start_time < 1000 ||
-                   !digitalRead(GPIO_TRANSMIT_BUTTON)) {
-                int samples_read = m_input->read(samples, 128); 
+            while (millis() - start_time < 100 || !digitalRead(GPIO_TRANSMIT_BUTTON)) {
+                // Tambahkan yield setiap beberapa sampel
+                int samples_read = m_input->read(samples, 128);
 
                 for (int i = 0; i < samples_read; i++) {
                     // Serial.println(samples[i]);
                     m_transport->add_sample(samples[i]);
+                    
+                    // // Setiap 32 sampel, beri kesempatan task lain
+                    // if (i % 127 == 0) {
+                    //     vTaskDelay(1);
+                    // }
                 }
+                
+                // Beri kesempatan watchdog
+                vTaskDelay(1);
             }
 
             m_transport->flush();
             Serial.println("Finished transmitting");
-            m_input->stopAudio(); 
+            m_input->stopAudio();
         }
+    }
+
+    // Kode di bawah ini sebaiknya tidak dijalankan dalam loop normal
+    if (samples != nullptr) {
+        free(samples);
     }
 }

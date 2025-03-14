@@ -8,6 +8,7 @@
 #include "OutputBuffer.h"
 
 const int MAX_ESP_NOW_PACKET_SIZE = 127;
+
 #ifdef RECEIVER
 const char messaging[12] = "bindingMode";
 #else
@@ -18,7 +19,6 @@ static EspNowTransport *instance = NULL;
 
 void receiveCallback(const uint8_t *macAddr, const uint8_t *data, int dataLen) {
 #ifdef RECEIVER
-    message messageReceiver;
     // bool binding = instance->stateBinding;
     if (instance->stateBinding) {
         // char dataStr[12];
@@ -34,27 +34,27 @@ void receiveCallback(const uint8_t *macAddr, const uint8_t *data, int dataLen) {
     } else {
 
         
+        
         int header_size = instance->m_header_size;
-        memcpy(&messageReceiver, data, sizeof(messageReceiver));
+        memcpy(&instance->messageData, data, sizeof(instance->messageData));
         if (memcmp(macAddr, instance->m_memory->getMac(), 6) == 0 || memcmp(macAddr, instance->m_memory->getMac1(), 6) == 0) {
             // Serial.println(messageReceiver.data);
                 // const char* messageButton = jsonDoc["data"];
-            if (messageReceiver.data == "" || strlen(messageReceiver.data) == 0) {
-                instance->m_output_buffer->add_samples(messageReceiver.m_buffer + header_size, messageReceiver.dataLen - header_size);
+            if (instance->messageData.dataLen > instance->m_header_size && (instance->messageData.dataLen <= MAX_ESP_NOW_PACKET_SIZE) && strlen(instance->messageData.data) == 0) {
+                instance->m_output_buffer->add_samples(instance->messageData.m_buffer + header_size, instance->messageData.dataLen - header_size);
             } else {
                 // messageReceiver.data[12] = '\0';
                 JsonDocument jsonDoc;
-                DeserializationError error = deserializeJson(jsonDoc, messageReceiver.data);
+                DeserializationError error = deserializeJson(jsonDoc, instance->messageData.data);
                 if (error)
                 {
                     Serial.println("deserialization failed!");
                     Serial.println(error.c_str());
                     return;
                 }
-                // const char* messageButton = jsonDoc["d"];
-                int messageButton = jsonDoc["d"];
-                Serial.print("data: ");
-                Serial.println(messageButton);
+                // const char* massageKey = jsonDoc["d"];
+                instance->massageButton = jsonDoc["d"];
+                Serial.println(instance->massageButton);
             }
             
         }

@@ -38,7 +38,7 @@ class OutputBuffer {
         xSemaphoreTake(m_semaphore, portMAX_DELAY);
         for (int i = 0; i < count; i++) {
             m_buffer[m_write_head] = samples[i];
-            // Serial.println(samples[i]);
+            // Serial.println(m_buffer[m_write_head]);
             m_write_head = (m_write_head + 1) % m_buffer_size;
         }
         m_available_samples += count;
@@ -50,22 +50,30 @@ class OutputBuffer {
         for (int i = 0; i < count; i++) {
             samples[i] = 0;
             if (m_available_samples == 0 && !m_buffering) {
-                // Serial.println("Buffering");
                 m_buffering = true;
                 samples[i] = 0;
+                // Serial.println(m_buffering);
             }
-            if (m_buffering &&
-                m_available_samples < m_number_samples_to_buffer) {
+            if (m_buffering && m_available_samples < m_number_samples_to_buffer) {
                 samples[i] = 0;
-            } else {
+                // m_buffering = true;
+                // Serial.println(m_buffering);
+            } else{
                 m_buffering = false;
-                int16_t sample = m_buffer[m_read_head];
-                // samples[i] = (sample - 128) << 5;
-                samples[i] = (sample - 128) << 8;
+                uint8_t sample = m_buffer[m_read_head];
+                
+                // samples[i] = map(sample, 0, 255, -32768, 32767);
+                samples[i] = ((int16_t)(sample - 127)) << 10;
+                // Serial.println(m_buffering);
+                // samples[i] = (int16_t)(sample - 127.0f) * 255.0f;
+                // samples[i] = ((int16_t)(sample) << 8) | ((int16_t)(sample));
+                
                 m_read_head = (m_read_head + 1) % m_buffer_size;
                 m_available_samples--;
             }
         }
         xSemaphoreGive(m_semaphore);
     }
+
+    bool getBuffering(){return m_buffering;}
 };

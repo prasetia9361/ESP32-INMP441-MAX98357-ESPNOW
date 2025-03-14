@@ -8,7 +8,7 @@ private:
     bool mode;
     bool removeData;
     bool buttonAudio;
-    char massage;
+    int massage;
 
     static button* instance;
     const int rowPins[3];
@@ -19,7 +19,7 @@ private:
 public:
     button(int pin1, int pin2, int pin3, int pin4, int pin5, int pin6, int pin7)
         : rowPins{pin1,pin2,pin3}, colPins{pin4,pin5,pin6,pin7} { 
-            massage = '\0';
+            massage = 0;
             mode = false;
             removeData = false;
             buttonAudio = false;
@@ -28,8 +28,8 @@ public:
 
     void begin();
     void checkKey();
-    char getButton() { return massage; }
-    void setButton() { massage = '\0'; }
+    int getButton() { return massage; }
+    void setButton() { massage = 0; }
 
     bool getAudio() {return buttonAudio;}
 };
@@ -50,10 +50,10 @@ void button::begin(){
 }
 
 char button::getKey(int row, int col){
-    char keys[3][4] = {
-        {'1', '2', '3', '4'},
-        {'5', '6', '7', '8'},
-        {'A', 'B', 'C', 'D'}
+    int keys[3][4] = {
+        {1, 2, 3, 4},
+        {5, 6, 7, 8},
+        {9, 10, 11, 12}
     };
     return keys[row][col];
 }
@@ -64,14 +64,14 @@ void button::checkKey(){
         digitalWrite(colPins[col], LOW);
         for (int row = 0; row < 3; row++)
         {
-
           if (digitalRead(rowPins[row]) == LOW)
-                {
-                    massage = getKey(row, col);
-                    // Serial.println(massage);
+            {
+                massage = getKey(row, col);
+                // massage = 0;
             }
+            
         }
+        // massage = 0;
         digitalWrite(colPins[col], HIGH);
     }
-    
 }

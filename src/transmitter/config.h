@@ -24,9 +24,11 @@
 
 // transmit button
 #define GPIO_TRANSMIT_BUTTON 5
+//banjar (kabel kuning)
 #define PIN_1 33
 #define PIN_2 25
 #define PIN_3 26
+////baris (kabel biru)
 #define PIN_4 15
 #define PIN_5 4
 #define PIN_6 22
@@ -42,6 +44,7 @@
 // length in bytes of the header) in the next line, and define the transport
 // header in config.cpp
 #define TRANSPORT_HEADER_SIZE 0
+
 extern uint8_t transport_header[TRANSPORT_HEADER_SIZE];
 
 // i2s config for reading from of I2S

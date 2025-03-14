@@ -20,6 +20,8 @@ protected:
   int m_buffer_size = 0;
   int m_index = 0;
   int m_header_size;
+  int lastData;
+  int massageButton;
   bool stateBinding = false;
   char dataFormReceive[12] = "";
 
@@ -27,6 +29,7 @@ protected:
   virtual void addPeer() = 0;
   virtual void send() = 0;
   virtual void bindingMode() = 0;
+  // virtual byte massageButton;
 
 public:
   Transport(OutputBuffer *output_buffer, size_t buffer_size);
@@ -36,9 +39,10 @@ public:
   bool setBinding(bool bindingState);
   bool getBinding(){return stateBinding;}
   const char* getChar(){return dataFormReceive;}
+  int getMode(){return massageButton;}
 
   void add_sample(int16_t sample);
-  void sendChar(byte data);
+  void sendButton(int data);
   void flush();
   void statusBinding();
   void peerReady();
