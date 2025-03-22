@@ -1,6 +1,14 @@
+#include <Arduino.h>
 #include <driver/gpio.h>
 #include <driver/i2s.h>
 #include <freertos/FreeRTOS.h>
+
+#include "Communication.h"
+#include "audio.h"
+#include "memory.h"
+#include "button/button.h"
+
+
 
 // sample rate for the system
 // #define SAMPLE_RATE 22050
@@ -22,12 +30,32 @@
 // channel on ESP32 is channel 1
 #define ESP_NOW_WIFI_CHANNEL 1
 
-// In case all transport packets need a header (to avoid interference with other
-// applications or walkie talkie sets), specify TRANSPORT_HEADER_SIZE (the
-// length in bytes of the header) in the next line, and define the transport
-// header in config.cpp
 #define TRANSPORT_HEADER_SIZE 0
 extern uint8_t transport_header[TRANSPORT_HEADER_SIZE];
 
 // i2s speaker pins
 extern i2s_pin_config_t i2s_speaker_pins;
+
+
+class receiverTask
+{
+private:
+    Communication *m_communication;
+    memory *m_memory; 
+    audio *m_output;
+    button *m_button; 
+
+    int16_t *samples = reinterpret_cast<int16_t *>(malloc(sizeof(int16_t) * 128));
+    
+    int mode = 0;
+
+    unsigned long currentTime;
+    volatile bool stateBinding = false;
+public:
+    receiverTask();
+    ~receiverTask();
+    void begin();
+    void processBinding();
+    void receiveData();
+    void clearSample();
+};

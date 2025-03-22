@@ -5,12 +5,8 @@
 class button
 {
 private:
-    bool mode;
-    bool removeData;
-    bool buttonAudio;
     int massage;
 
-    static button* instance;
     const int rowPins[3];
     const int colPins[4];
 
@@ -20,23 +16,15 @@ public:
     button(int pin1, int pin2, int pin3, int pin4, int pin5, int pin6, int pin7)
         : rowPins{pin1,pin2,pin3}, colPins{pin4,pin5,pin6,pin7} { 
             massage = 0;
-            mode = false;
-            removeData = false;
-            buttonAudio = false;
-            instance = this;
     }
 
-    void begin();
-    void checkKey();
+    inline void begin();
+    inline void checkKey();
     int getButton() { return massage; }
     void setButton() { massage = 0; }
-
-    bool getAudio() {return buttonAudio;}
 };
 
-button* button::instance = nullptr;
-
-void button::begin(){
+inline void button::begin(){
     for (int i = 0; i < 3; i++)
     {
         pinMode(rowPins[i], INPUT_PULLUP);
@@ -49,7 +37,7 @@ void button::begin(){
     }
 }
 
-char button::getKey(int row, int col){
+inline char button::getKey(int row, int col){
     int keys[3][4] = {
         {1, 2, 3, 4},
         {5, 6, 7, 8},
@@ -58,7 +46,7 @@ char button::getKey(int row, int col){
     return keys[row][col];
 }
 
-void button::checkKey(){
+inline void button::checkKey(){
     for (int col = 0; col < 4; col++)
     {
         digitalWrite(colPins[col], LOW);

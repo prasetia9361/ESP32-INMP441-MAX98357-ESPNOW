@@ -4,28 +4,21 @@
 
 
 static const char *TAG = "OUT";
-
-// // number of frames to try and send at once (a frame is a left and right sample)
-// // const int NUM_FRAMES_TO_SEND = 256;
-// audio::audio(){
 audio::audio(i2s_port_t i2s_port, i2s_pin_config_t &i2s_pins, int size){
     m_i2s_port = i2s_port;
     m_i2s_pins = i2s_pins;
     m_raw_samples_size = size;
-    m_read_head = 0;
-    //spekaer size = 256
+    m_mic_read_head = 0;
     m_frames = (int16_t *)malloc(sizeof(int16_t) * m_raw_samples_size);
-
-    //mic size = 128
     m_raw_samples = (int16_t *)malloc(sizeof(int16_t) * m_raw_samples_size);
 
 
 }
 
-// audio::~audio(){
-//     free(m_frames);
-//     free(m_raw_samples);
-// }
+audio::~audio(){
+    free(m_frames);
+    free(m_raw_samples);
+}
 
 void audio::startSpeaker(uint16_t sample_rate){
 
@@ -34,14 +27,11 @@ void audio::startSpeaker(uint16_t sample_rate){
       float combineWave;
       float toneWave;
       float airhornWave;
-      // float sinusWave = -1 + 2 * sin(t * M_PI);
-      // sinus_table[i] = (int16_t)(sinusWave * 32767.0f);
 
       float wave = (t < 0.5f) ? (2.0f * powf(2.0f * t, N_VALUE) - 1.0f) : (1.0f - 2.0f * powf(2.0f * (t - 0.5f), M_VALUE));
       wave_table[i] = (int16_t)(wave * 32767.0f);
 
       if (t < 0.3f) {
-        // combineWave = 2.5f * powf(2.0f * t, 1) - 1.0f;
         combineWave = 1 / 0.15 * (t - 0.15f);
       } else if (t >= 0.3 && t < 0.65) {
         combineWave = 2.0f * powf(2.0f * (t - 0.3f), 1) - 1.0f;
@@ -52,20 +42,15 @@ void audio::startSpeaker(uint16_t sample_rate){
       combine_table[i] = (int16_t)(combineWave * 32767.0f);
 
       if (t < 0.3f) {
-        // combineWave = 2.5f * powf(2.0f * t, 1) - 1.0f;
         airhornWave = 1 / 0.15 * (t - 0.15f);
       } else if (t >= 0.3f && t < 0.45f) {
         airhornWave = -1 + 10 * (t - 0.3f);
-        // combineWave = 2 * powf(2.0f * (t - 0.3f), 1) - 1.0f;
       } else if (t >= 0.45f && t < 0.6f) {
         airhornWave = -0.5f - 6.67f * (t - 0.6f);
-        // combineWave = -2 * powf(2.0f * (t - 0.6f), 1);
       } else if (t >= 0.6f && t < 0.75f) {
         airhornWave = -0.5f + 8.34f * (t - 0.6f);
-        // combineWave = 2 * powf(2.0f * (t - 0.6f), 1) - 1.0f;
       } else if (t >= 0.75f && t < 0.9f) {
         airhornWave = 0 - 5 * (t - 0.9f);
-        // combineWave = 1 - 2 * powf(2.0f * (t - 0.9f), 1);
       } else if (t >= 0.9f && t < 0.95f) {
         airhornWave = 5 * (t - 0.9f);
       } else {
@@ -143,25 +128,10 @@ void audio::write(int16_t *samples, int count){
         for (int i = 0; i < m_raw_samples_size && sampleIndex < count; i++)
         {
           int16_t sample = processSample(samples[sampleIndex]);
-          if (abs(sample) < 2048)
-          {
-            m_frames[i] = 0;
-          }else
-          {
-            // m_frames[i] = alpha * sample + (1.0f - alpha) * prev_sample;
-            // prev_sample = sample;
-            
+          m_frames[i] = (abs(sample) < 2048) ? 0 : sample;
 
-            // m_frames[i * 2] = sample;     // right channel
-            // m_frames[i * 2 + 1] = sample; // right channel
-            m_frames[i] = sample; 
-          }
-          
-          
-          
-
-            samplestoSend++;
-            sampleIndex++;
+          samplestoSend++;
+          sampleIndex++;
         }
         size_t bytes_written = 0;
         i2s_write(m_i2s_port, m_frames, samplestoSend * sizeof(int16_t), &bytes_written, portMAX_DELAY);
@@ -172,13 +142,60 @@ void audio::write(int16_t *samples, int count){
     }
 }
 
+void audio::startBuffering(int number_samples_to_buffer){
+    m_semaphore = xSemaphoreCreateBinary();
+    xSemaphoreGive(m_semaphore);
+    m_number_samples_to_buffer = number_samples_to_buffer;
+    m_read_head = 0;
+    m_write_head = 0;
+    m_available_samples = 0;
+    m_buffering = true;
+    m_buffer_size = 3 * number_samples_to_buffer;
+    m_buffer = (uint8_t *)malloc(m_buffer_size);
+
+    memset(m_buffer, 0, m_buffer_size);
+    if (!m_buffer) {
+        Serial.println("Failed to allocate buffer");
+    }
+}
+
+void audio::addBuffer(const uint8_t *samples, int count){
+  xSemaphoreTake(m_semaphore, portMAX_DELAY);
+  for (int i = 0; i < count; i++)
+  {
+    m_buffer[m_write_head] = samples[i];
+    m_write_head = (m_write_head + 1) % m_buffer_size;
+  }
+  m_available_samples += count;
+  xSemaphoreGive(m_semaphore);
+}
+
+void audio::removeBuffer(int16_t *samples, int count){
+  xSemaphoreTake(m_semaphore, portMAX_DELAY);
+  for (int i = 0; i < count; i++)
+  {
+    samples[i] = 0;
+    if (m_available_samples == 0 && !m_buffering)
+    {
+      m_buffering = true;
+      samples[i] = 0;
+    }
+
+    if (m_buffering && m_available_samples < m_number_samples_to_buffer){
+      samples[i] = 0;
+    } else
+    {
+      m_buffering = false;
+      uint8_t sample = m_buffer[m_read_head];
+      samples[i] = ((int16_t)(sample - 127)) << 10;
+      m_read_head = (m_read_head + 1) % m_buffer_size;
+      m_available_samples--;
+    }
+  }
+  xSemaphoreGive(m_semaphore);
+}
+
 void audio::startMic(uint16_t sample_rate){
-    // for (int i = 0; i < WAVE_TABLE_SIZE; i++) {
-    //     float t = i / (float)(WAVE_TABLE_SIZE - 1);
-    //     float wave = (t < 0.5f) ? (2.0f * powf(2.0f * t, N_VALUE) - 1.0f) : (1.0f - 2.0f * powf(2.0f * (t - 0.5f), M_VALUE));
-    //     wave_table[i] = (int16_t)(wave * 32767.0f);
-    // }
-    // i2s config for reading from I2S
 i2s_config_t i2s_mic_Config = {
     .mode = (i2s_mode_t)(I2S_MODE_MASTER | I2S_MODE_RX),
     .sample_rate = sample_rate,
@@ -205,8 +222,6 @@ i2s_config_t i2s_mic_Config = {
 
 int audio::read(int16_t *samples, int count){
     size_t bytes_read = 0;
-    // static int16_t prev_sample = 0;
-    // const float alpha = 0.2; 
     if (count > m_raw_samples_size)
     {
         count = m_raw_samples_size;
@@ -214,50 +229,15 @@ int audio::read(int16_t *samples, int count){
     i2s_read(m_i2s_port, m_raw_samples, count, &bytes_read, portMAX_DELAY);
     int samples_read = bytes_read / sizeof(int16_t);
     
-    // Tambahkan amplifikasi ke sampel
-    // const int16_t gain = 100; // Faktor amplifikasi, bisa disesuaikan (10x, 20x, 50x, 100x)
-    
     for (int i = 0; i < samples_read; i++)
-    {
-        // Amplifikasi sinyal dengan gain dan batasi nilai ke INT16_MAX
-        // int32_t amplified = (int32_t)m_raw_samples[i] * gain;
-        
-        // if (amplified > INT16_MAX) {
-        //     samples[i] = INT16_MAX;
-        // }
-        // else if (amplified < -INT16_MAX) {
-        //     samples[i] = -INT16_MAX;
-        // }
-        // else {
-        //     samples[i] = (int16_t)amplified;
-        // }
-
-        // int32_t amplified = (int32_t)m_raw_samples[i] * gain;
-        
-        
-        if (m_raw_samples[i] > INT16_MAX) {
-            samples[i] = INT16_MAX;
-        }
-        else if (m_raw_samples[i] < -INT16_MAX) {
-            samples[i] = -INT16_MAX;
-        }
-        // else if(abs(m_raw_samples[i]) < 50){
-        //   samples[i] = 0;
-        // }
-        else {
-            // samples[i] = alpha * m_raw_samples[i] + (1.0f - alpha) * prev_sample;
-            // prev_sample = m_raw_samples[i];
-            samples[i] = m_raw_samples[i];
-        }
-
-        // Serial.println(samples[i]);
+    {       
+        samples[i] = constrain(m_raw_samples[i], -INT16_MAX, INT16_MAX);
     }
     return samples_read;
 }
 
 
 void audio::i2sTone(uint8_t _mode){
-  // Update frequency berdasarkan mode
   float frequency;
   unsigned long currentMillis = millis();
   mode = _mode;
