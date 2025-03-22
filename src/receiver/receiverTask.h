@@ -5,7 +5,7 @@
 
 #include "Communication.h"
 #include "audio.h"
-#include "memory.h"
+#include "storage.h"
 #include "button/button.h"
 
 
@@ -41,7 +41,7 @@ class receiverTask
 {
 private:
     Communication *m_communication;
-    memory *m_memory; 
+    storage *m_memory; 
     audio *m_output;
     button *m_button; 
 

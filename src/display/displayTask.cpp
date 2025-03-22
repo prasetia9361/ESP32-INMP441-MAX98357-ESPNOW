@@ -7,7 +7,7 @@ displayTask::displayTask()
 {
     m_screen = new Screen();
     // tft = new LGFX();
-    m_memory = new memory(); 
+    m_memory = new storage(); 
     m_output_buffer = new audio(I2S_NUM_0,i2s_speaker_pins,128);
     m_communication = new Communication(m_output_buffer, m_memory, ESP_NOW_WIFI_CHANNEL);
     m_communication->setHeader(TRANSPORT_HEADER_SIZE, transport_header);

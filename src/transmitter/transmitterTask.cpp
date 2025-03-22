@@ -14,7 +14,7 @@ i2s_pin_config_t i2s_mic_pins = {
 transmitterTask::transmitterTask()
 {
     m_input = new audio(I2S_NUM_0, i2s_mic_pins, 128);
-    m_memory = new memory();
+    m_memory = new storage();
     m_communication = new Communication(m_input, m_memory, ESP_NOW_WIFI_CHANNEL);
     m_communication->setHeader(TRANSPORT_HEADER_SIZE, transport_header);
     m_button = new button(PIN_1, PIN_2, PIN_3, PIN_4, PIN_5, PIN_6, PIN_7);

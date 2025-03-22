@@ -5,7 +5,7 @@
 #include <esp_now.h>
 #include <esp_wifi.h>
 #include <ArduinoJson.h>
-#include "memory.h"
+#include "storage.h"
 #include "audio.h"
 
 const int MAX_ESP_NOW_PACKET_SIZE = 127;
@@ -20,7 +20,7 @@ private:
     
     message messageData;
     audio* m_audio;
-    memory* m_memory;
+    storage* m_memory;
     uint8_t m_wifi_channel;
     int m_buffer_size;
     int m_index;
@@ -31,7 +31,7 @@ private:
     char dataFromReceiver[12] = "";
 
 public:
-    Communication(audio* audio_buffer, memory* memory_storage, uint8_t wifi_channel);
+    Communication(audio* audio_buffer, storage* memory_storage, uint8_t wifi_channel);
     bool begin();
     void addPeer();
     void sendData();

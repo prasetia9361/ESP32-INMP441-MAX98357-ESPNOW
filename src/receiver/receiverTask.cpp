@@ -16,7 +16,7 @@ i2s_pin_config_t i2s_speaker_pins = {.bck_io_num = I2S_SPEAKER_SERIAL_CLOCK,
 receiverTask::receiverTask()
 {
     m_output = new audio(I2S_NUM_0,i2s_speaker_pins,128);// 256
-    m_memory = new memory();
+    m_memory = new storage();
     m_communication = new Communication(m_output, m_memory, ESP_NOW_WIFI_CHANNEL);
     m_communication->setHeader(TRANSPORT_HEADER_SIZE, transport_header);
     m_button = new button(BINDING_BUTTON); 

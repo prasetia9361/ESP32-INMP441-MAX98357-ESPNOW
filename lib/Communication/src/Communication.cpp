@@ -49,7 +49,7 @@ void transmitterCallback(const uint8_t* macAddr, const uint8_t* data, int dataLe
     }
 }
 
-Communication::Communication(audio* audio_buffer, memory* memory_storage, uint8_t wifi_channel) {
+Communication::Communication(audio* audio_buffer, storage* memory_storage, uint8_t wifi_channel) {
     instance = this;
     m_audio = audio_buffer;
     m_memory = memory_storage;

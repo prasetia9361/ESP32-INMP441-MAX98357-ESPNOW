@@ -1,11 +1,10 @@
-#ifdef DISP
 #include <Arduino.h>
 #include "./ui/ui.h"
 
 #include "./screen/screen.h"
 #include "Communication.h"
 #include "audio.h"
-#include "memory.h"
+#include "storage.h"
 
 #include <driver/gpio.h>
 #include <driver/i2s.h>
@@ -33,7 +32,7 @@ class displayTask
 private:
     Communication *m_communication;
     audio *m_output_buffer;
-    memory *m_memory; 
+    storage *m_memory;
     Screen *m_screen;
 
     lv_event_t g_event_sending;
@@ -53,4 +52,3 @@ public:
     void deleteAddress();
     void sendMassage();
 };
-#endif

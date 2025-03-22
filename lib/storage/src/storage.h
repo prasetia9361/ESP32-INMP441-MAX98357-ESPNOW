@@ -1,5 +1,5 @@
-#ifndef MEMORY_H
-#define MEMORY_H
+#ifndef STORAGE_H
+#define STORAGE_H
 
 // #include <Arduino.h>
 #include <SPIFFS.h>
@@ -7,7 +7,7 @@
 #include "FS.h"
 #include "SD.h"
 
-class memory{
+class storage{
 private:
     typedef struct config {
         uint8_t macAddress[6] = {0,0,0,0,0,0};
@@ -19,8 +19,8 @@ private:
     uint8_t macAddr[6];
 
 public:
-    memory();
-    ~memory();
+    storage();
+    ~storage();
 
     uint8_t *getMac(){return configData.macAddress;}
     uint8_t *getMac1(){return configData.macAddress1;}

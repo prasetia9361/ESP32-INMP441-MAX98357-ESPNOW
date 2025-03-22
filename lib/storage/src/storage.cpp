@@ -1,8 +1,8 @@
-#include "memory.h"
+#include "storage.h"
 
-memory::memory(){}
+storage::storage(){}
 
-void memory::init(){
+void storage::init(){
     if (!SPIFFS.begin(true)) {
         Serial.println("Gagal menginisialisasi SPIFFS");
         return;
@@ -52,7 +52,7 @@ void memory::init(){
     }
 }
 
-void memory::writeMacAddress(const uint8_t *mac, int count){
+void storage::writeMacAddress(const uint8_t *mac, int count){
     JsonDocument doc;
     char macStr[18];
     char dataMac[128];
@@ -118,7 +118,7 @@ void memory::writeMacAddress(const uint8_t *mac, int count){
     }
 }
 
-void memory::deleteAddress() {
+void storage::deleteAddress() {
     File file = SPIFFS.open("/config.json", FILE_WRITE);
     if (!file) {
         Serial.println("- failed to open file for writing");
