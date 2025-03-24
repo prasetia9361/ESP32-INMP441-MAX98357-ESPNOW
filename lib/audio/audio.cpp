@@ -4,9 +4,9 @@
 
 
 static const char *TAG = "OUT";
-audio::audio(i2s_port_t i2s_port, i2s_pin_config_t &i2s_pins, int size){
-    m_i2s_port = i2s_port;
-    m_i2s_pins = i2s_pins;
+audio::audio(int size){
+    // m_i2s_port = i2s_port;
+    // m_i2s_pins = i2s_pins;
     m_raw_samples_size = size;
     m_mic_read_head = 0;
     m_frames = (int16_t *)malloc(sizeof(int16_t) * m_raw_samples_size);
@@ -107,7 +107,7 @@ void audio::startSpeaker(uint16_t sample_rate){
 #endif
     };
     i2s_driver_install(m_i2s_port, &i2s_config, 0, NULL);
-    i2s_set_pin(m_i2s_port, &m_i2s_pins);
+    i2s_set_pin(m_i2s_port, &i2s_speaker_pins);
     i2s_zero_dma_buffer(m_i2s_port);
 
     i2s_start(m_i2s_port);
@@ -214,7 +214,7 @@ i2s_config_t i2s_mic_Config = {
     .fixed_mclk = 0};
 
     i2s_driver_install(m_i2s_port, &i2s_mic_Config, 0, NULL);
-    i2s_set_pin(m_i2s_port, &m_i2s_pins);
+    i2s_set_pin(m_i2s_port, &i2s_mic_pins);
     i2s_zero_dma_buffer(m_i2s_port);
 
     i2s_start(m_i2s_port);

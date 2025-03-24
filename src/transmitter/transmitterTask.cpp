@@ -3,21 +3,13 @@
 // Definisi variabel global
 uint8_t transport_header[TRANSPORT_HEADER_SIZE] = {};
 
-// i2s microphone pins
-i2s_pin_config_t i2s_mic_pins = {
-    .bck_io_num = I2S_MIC_SERIAL_CLOCK,
-    .ws_io_num = I2S_MIC_LEFT_RIGHT_CLOCK,
-    .data_out_num = I2S_PIN_NO_CHANGE,
-    .data_in_num = I2S_MIC_SERIAL_DATA
-};
-
 transmitterTask::transmitterTask()
 {
-    m_input = new audio(I2S_NUM_0, i2s_mic_pins, 128);
+    m_input = new audio(128);
     m_memory = new storage();
     m_communication = new Communication(m_input, m_memory, ESP_NOW_WIFI_CHANNEL);
     m_communication->setHeader(TRANSPORT_HEADER_SIZE, transport_header);
-    m_button = new button(PIN_1, PIN_2, PIN_3, PIN_4, PIN_5, PIN_6, PIN_7);
+    m_button = new button();
 }
 
 transmitterTask::~transmitterTask()

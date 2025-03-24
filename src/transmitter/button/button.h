@@ -1,10 +1,21 @@
 #pragma once
 
 #include "OneButton.h"
+#include <driver/gpio.h>
+
 
 class button
 {
 private:
+    //banjar (kabel kuning)
+    const int pin1 = GPIO_NUM_33;
+    const int pin2 = GPIO_NUM_25;
+    const int pin3 = GPIO_NUM_26;
+    ////baris (kabel biru)
+    const int pin4 = GPIO_NUM_15;
+    const int pin5 = GPIO_NUM_4;
+    const int pin6 = GPIO_NUM_22;
+    const int pin7 = GPIO_NUM_23;
     int massage;
 
     const int rowPins[3];
@@ -13,7 +24,7 @@ private:
     char getKey(int row, int col);
 
 public:
-    button(int pin1, int pin2, int pin3, int pin4, int pin5, int pin6, int pin7)
+    button()
         : rowPins{pin1,pin2,pin3}, colPins{pin4,pin5,pin6,pin7} { 
             massage = 0;
     }

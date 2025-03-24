@@ -6,15 +6,6 @@
 #include "audio.h"
 #include "storage.h"
 
-#include <driver/gpio.h>
-#include <driver/i2s.h>
-#include <freertos/FreeRTOS.h>
-
-
-// transmit button
-#define GPIO_TRANSMIT_BUTTON 4
-#define BINDING_BUTTON 0
-
 // On which wifi channel (1-11) should ESP-Now transmit? The default ESP-Now
 // channel on ESP32 is channel 1
 #define ESP_NOW_WIFI_CHANNEL 1
