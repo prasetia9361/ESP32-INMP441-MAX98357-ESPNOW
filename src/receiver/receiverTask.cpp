@@ -1,23 +1,25 @@
 #include "receiverTask.h"
 
-uint8_t transport_header[TRANSPORT_HEADER_SIZE] = {};
+uint8_t transportHeader[TRANSPORT_HEADER_SIZE] = {};
 
 
 receiverTask::receiverTask()
 {
-    m_output = new audio(128);// 256
-    m_memory = new storage();
-    m_communication = new Communication(m_output, m_memory, ESP_NOW_WIFI_CHANNEL);
-    m_communication->setHeader(TRANSPORT_HEADER_SIZE, transport_header);
-    m_button = new button(BINDING_BUTTON); 
+    mOutput = new speaker(128);// 256
+    mSirine = new sirine();
+    outBuffer = new Buffer(300 * 16);
+    mMemory = new storage();
+    mCommunication = new commEspNow(outBuffer, mMemory, ESP_NOW_WIFI_CHANNEL);
+    mCommunication->setHeader(TRANSPORT_HEADER_SIZE, transportHeader);
+    mButton = new button(BINDING_BUTTON); 
 }
 
 receiverTask::~receiverTask()
 {
-        if (m_communication) delete m_communication;
-        if (m_memory) delete m_memory;
-        if (m_output) delete m_output;
-        if (m_button) delete m_button;
+    if (mCommunication) delete mCommunication;
+    if (mMemory) delete mMemory;
+    if (mOutput) delete mOutput;
+    if (mButton) delete mButton;
 }
 
 void receiverTask::begin(){
@@ -30,60 +32,61 @@ void receiverTask::begin(){
     Serial.println(esp_get_idf_version());
     
     // Inisialisasi komunikasi dan komponen lain
-    m_memory->init(); 
+    mMemory->init(); 
 
-    if (!m_communication->begin()) {
+    if (!mCommunication->begin()) {
         Serial.println("Komunikasi gagal dimulai!");
     }
-   
-    m_output->startSpeaker(SAMPLE_RATE); 
 
-    m_button->begin(); 
+    mSirine->generateWaveTable();
+    mOutput->startSpeaker(SAMPLE_RATE); 
+
+    mButton->begin(); 
     Serial.println("Application started");
 }
 
 void receiverTask::processBinding(){
 
     // Proses binding jika tombol double-click ditekan
-    if (m_button->getMode()) 
+    if (mButton->getMode()) 
     {
         Serial.println("Proses binding dimulai");
-        m_communication->statusBinding();
-        m_communication->setBinding(true);
-        m_button->setMode(false); 
+        mCommunication->statusBinding();
+        mCommunication->setBinding(true);
+        mButton->setMode(false); 
     }
-    stateBinding = m_communication->getBinding();
+    stateBinding = mCommunication->getBinding();
 
     //Proses penghapusan alamat jika tombol long-press ditekan
-    if (m_button->getRemove()) 
+    if (mButton->getRemove()) 
     {
-        m_memory->deleteAddress(); 
-        m_button->setRemove(false); 
+        mMemory->deleteAddress(); 
+        mButton->setRemove(false); 
     }
 }
 
 // Dapatkan nilai tombol yang ditekan
 void receiverTask::receiveData(){
-    mode = m_communication->getButtonValue();
+    mode = mCommunication->getButtonValue();
     if (mode > 0)
     {
         // Mainkan nada berdasarkan nilai tombol
-        m_output->i2sTone(mode);
-        m_output->generateSineWave();
+        mSirine->generateI2sTone(mode);
+        mSirine->generateSineWave();
     }
     else
     {
         // Proses audio normal
         unsigned long start_time = millis();
-        while (millis() - start_time < 100 || !m_output->getBuffer())
+        while (millis() - start_time < 100 || !outBuffer->getBuffer())
         {
             if (I2S_SPEAKER_SD_PIN != -1)
             {
                 digitalWrite(I2S_SPEAKER_SD_PIN, HIGH);
             }
 
-            m_output->removeBuffer(samples, 128);
-            m_output->write(samples, 128);
+            outBuffer->removeBuffer(samples, 128, volSpeaker);
+            mOutput->write(samples, 128, volSpeaker);
 
             if (I2S_SPEAKER_SD_PIN != -1)
             {
@@ -92,7 +95,7 @@ void receiverTask::receiveData(){
         }
     }
 
-    m_button->tick();
+    mButton->tick();
 }
 
 // memberishkan data yang tersisia pada sample setelah nilai sample tidak digunakan

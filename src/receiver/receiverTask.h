@@ -1,8 +1,10 @@
 #include <Arduino.h>
 #include <driver/gpio.h>
 
-#include "Communication.h"
-#include "audio.h"
+#include "commEspNow.h"
+#include "speaker.h"
+#include "sirine.h"
+#include "buffer.h"
 #include "storage.h"
 #include "button/button.h"
 
@@ -18,19 +20,22 @@
 // channel on ESP32 is channel 1
 #define ESP_NOW_WIFI_CHANNEL 1
 
-#define TRANSPORT_HEADER_SIZE 0
-extern uint8_t transport_header[TRANSPORT_HEADER_SIZE];
+#define TRANSPORT_HEADER_SIZE 10
+extern uint8_t transportHeader[TRANSPORT_HEADER_SIZE];
 
 class receiverTask{
 private:
-    Communication *m_communication;
-    storage *m_memory; 
-    audio *m_output;
-    button *m_button; 
+    commEspNow *mCommunication;
+    storage *mMemory; 
+    speaker *mOutput;
+    sirine *mSirine;
+    Buffer *outBuffer;
+    button *mButton; 
 
     int16_t *samples = reinterpret_cast<int16_t *>(malloc(sizeof(int16_t) * 128));
     
     int mode = 0;
+    int volSpeaker = 11;
 
     unsigned long currentTime;
     volatile bool stateBinding = false;

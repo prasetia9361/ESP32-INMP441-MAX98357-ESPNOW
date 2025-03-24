@@ -6,32 +6,32 @@
 #include <esp_wifi.h>
 #include <ArduinoJson.h>
 #include "storage.h"
-#include "audio.h"
+#include "buffer.h"
 
-const int MAX_ESP_NOW_PACKET_SIZE = 127;
+const int maxEspNowPacketSize = 127;
 
-class Communication {
+class commEspNow {
 private:
     typedef struct message {
-        uint8_t buffer[MAX_ESP_NOW_PACKET_SIZE];
+        uint8_t buffer[maxEspNowPacketSize];
         char data[20] = "";
         int dataLen;
     } message;
     
     message messageData;
-    audio* m_audio;
-    storage* m_memory;
-    uint8_t m_wifi_channel;
-    int m_buffer_size;
-    int m_index;
-    int m_header_size;
+    Buffer* audioBuffer;
+    storage* memoryStorage;
+    uint8_t wifiChannel;
+    int bufferSize;
+    int index;
+    int headerSize;
     int lastData;
     int buttonValue = 0;
     bool stateBinding = false;
     char dataFromReceiver[12] = "";
 
 public:
-    Communication(audio* audio_buffer, storage* memory_storage, uint8_t wifi_channel);
+    commEspNow(Buffer* audioBuffer, storage* memoryStorage, uint8_t wifiChannel);
     bool begin();
     void addPeer();
     void sendData();
@@ -53,7 +53,7 @@ public:
     const char* getReceivedMessage() { return dataFromReceiver; }
     
     // Header settings
-    int setHeader(const int header_size, const uint8_t* header);
+    int setHeader(const int headerSize, const uint8_t* header);
     
     // Friend fungsi untuk callback
     friend void receiverCallback(const uint8_t* macAddr, const uint8_t* data, int dataLen);

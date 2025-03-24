@@ -1,4 +1,4 @@
-#include "Communication.h"
+#include "commEspNow.h"
 
 #ifdef RECEIVER
 const char messaging[12] = "bindingMode";
@@ -6,28 +6,28 @@ const char messaging[12] = "bindingMode";
 const char messaging[12] = "bindingSend";
 #endif
 
-static Communication* instance = NULL;
+static commEspNow* instance = NULL;
 
 // Callback untuk receiver
 void receiverCallback(const uint8_t* macAddr, const uint8_t* data, int dataLen) {
     if (instance->stateBinding) {
         if (strcmp((char*)data, "bindingSend") == 0) {
-            instance->m_memory->writeMacAddress(macAddr, 2);
+            instance->memoryStorage->writeMacAddress(macAddr, 2);
             instance->stateBinding = false;
         }
     } else {
-        int header_size = instance->m_header_size;
+        int headerSize = instance->headerSize;
         memcpy(&instance->messageData, data, sizeof(instance->messageData));
         
-        if (memcmp(macAddr, instance->m_memory->getMac(), 6) == 0 || 
-            memcmp(macAddr, instance->m_memory->getMac1(), 6) == 0) {
+        if (memcmp(macAddr, instance->memoryStorage->getMac(), 6) == 0 || 
+            memcmp(macAddr, instance->memoryStorage->getMac1(), 6) == 0) {
             
-            if (instance->messageData.dataLen > instance->m_header_size && 
-                (instance->messageData.dataLen <= MAX_ESP_NOW_PACKET_SIZE) && 
+            if (instance->messageData.dataLen > instance->headerSize && 
+                (instance->messageData.dataLen <= maxEspNowPacketSize) && 
                 strlen(instance->messageData.data) == 0) {
                 // Audio data
-                instance->m_audio->addBuffer(instance->messageData.buffer + header_size, 
-                                           instance->messageData.dataLen - header_size);
+                instance->audioBuffer->addBuffer(instance->messageData.buffer + headerSize, 
+                                           instance->messageData.dataLen - headerSize);
             } else {
                 // Button data
                 JsonDocument jsonDoc;
@@ -44,25 +44,25 @@ void receiverCallback(const uint8_t* macAddr, const uint8_t* data, int dataLen) 
 // Callback untuk transmitter
 void transmitterCallback(const uint8_t* macAddr, const uint8_t* data, int dataLen) {
     if (strcmp((char*)data, "bindingMode") == 0) {
-        instance->m_memory->writeMacAddress(macAddr, 1);
+        instance->memoryStorage->writeMacAddress(macAddr, 1);
         memcpy(instance->dataFromReceiver, data, dataLen);
     }
 }
 
-Communication::Communication(audio* audio_buffer, storage* memory_storage, uint8_t wifi_channel) {
+commEspNow::commEspNow(Buffer* audioBuffer, storage* memoryStorage, uint8_t wifiChannel) {
     instance = this;
-    m_audio = audio_buffer;
-    m_memory = memory_storage;
-    m_wifi_channel = wifi_channel;
-    m_buffer_size = MAX_ESP_NOW_PACKET_SIZE;
-    m_index = 0;
-    m_header_size = 0;
-    lastData = 0;
+    this->audioBuffer = audioBuffer;
+    this->memoryStorage = memoryStorage;
+    this->wifiChannel = wifiChannel;
+    this->bufferSize = maxEspNowPacketSize;
+    this->index = 0;
+    this->headerSize = 0;
+    this->lastData = 0;
 }
 
-bool Communication::begin() {
-    if (m_memory == nullptr) {
-        Serial.println("Error: m_memory tidak terinisialisasi");
+bool commEspNow::begin() {
+    if (memoryStorage == nullptr) {
+        Serial.println("Error: memoryStorage tidak terinisialisasi");
         return false;
     }
 
@@ -73,14 +73,14 @@ bool Communication::begin() {
 
     // Setup WiFi channel
     esp_wifi_set_promiscuous(true);
-    esp_wifi_set_channel(m_wifi_channel, WIFI_SECOND_CHAN_NONE);
+    esp_wifi_set_channel(wifiChannel, WIFI_SECOND_CHAN_NONE);
     esp_wifi_set_promiscuous(false);
 
     // Initialize ESP-NOW
     esp_err_t result = esp_now_init();
     if (result == ESP_OK) {
         #ifdef RECEIVER
-            m_audio->startBuffering(300 * 16);
+            // m_audio->startBuffering(300 * 16);
             Serial.println("ESPNow Init in Receiver Success");
             esp_now_register_recv_cb(receiverCallback);
         #endif
@@ -102,62 +102,43 @@ bool Communication::begin() {
     return true;
 }
 
-void Communication::addPeer() {
-    if (m_memory->getMac()[0] == 0) {
+void commEspNow::addPeer() {
+    if (memoryStorage->getMac()[0] == 0) {
         return;
     }
 
     esp_now_peer_info_t peerInfo;
     memset(&peerInfo, 0, sizeof(peerInfo));
-    memcpy(peerInfo.peer_addr, m_memory->getMac(), 6);
+    memcpy(peerInfo.peer_addr, memoryStorage->getMac(), 6);
     peerInfo.channel = 0;
     peerInfo.encrypt = false;
     peerInfo.ifidx = WIFI_IF_STA;
 
-    if (!esp_now_is_peer_exist(m_memory->getMac())) {
+    if (!esp_now_is_peer_exist(memoryStorage->getMac())) {
         esp_now_add_peer(&peerInfo);
     }
 }
 
-void Communication::sendData() {
-    if (m_memory->getMac()[0] == 0) {
+void commEspNow::sendData() {
+    if (memoryStorage->getMac()[0] == 0) {
         return;
     }
 
-    messageData.dataLen = m_index + m_header_size;
-    esp_now_send(m_memory->getMac(), (uint8_t*)&messageData, sizeof(messageData));
+    messageData.dataLen = index + headerSize;
+    esp_now_send(memoryStorage->getMac(), (uint8_t*)&messageData, sizeof(messageData));
 }
 
-// void Communication::bindingMode() {
-//     esp_now_peer_info_t peerInfo;
-//     memset(&peerInfo, 0, sizeof(peerInfo));
-//     peerInfo.channel = 0;
-//     peerInfo.encrypt = false;
-//     peerInfo.ifidx = WIFI_IF_STA;
+void commEspNow::addSample(int16_t sample) {
+    messageData.buffer[index + headerSize] = (sample + 2048) * 256 / 4096;
+    index++;
 
-//     // Set broadcast address
-//     for (int i = 0; i < 6; i++) {
-//         peerInfo.peer_addr[i] = 0xFF;
-//     }
-
-//     if (esp_now_add_peer(&peerInfo) == ESP_OK) {
-//         Serial.println(messaging);
-//         esp_now_send(peerInfo.peer_addr, (uint8_t*)messaging, 12);
-//         esp_now_del_peer(peerInfo.peer_addr);
-//     }
-// }
-
-void Communication::addSample(int16_t sample) {
-    messageData.buffer[m_index + m_header_size] = (sample + 2048) * 256 / 4096;
-    m_index++;
-
-    if ((m_index + m_header_size) == m_buffer_size) {
+    if ((index + headerSize) == bufferSize) {
         sendData();
-        m_index = 0;
+        index = 0;
     }
 }
 
-void Communication::sendButton(int data) {
+void commEspNow::sendButton(int data) {
     if (data != lastData) {
         JsonDocument doc;
         doc["d"] = data;
@@ -168,14 +149,14 @@ void Communication::sendButton(int data) {
     }
 }
 
-void Communication::flush() {
-    if (m_index > 0) {
+void commEspNow::flush() {
+    if (index > 0) {
         sendData();
-        m_index = 0;
+        index = 0;
     }
 }
 
-void Communication::statusBinding() {
+void commEspNow::statusBinding() {
     esp_now_peer_info_t peerInfo;
     memset(&peerInfo, 0, sizeof(peerInfo));
     peerInfo.channel = 0;
@@ -194,17 +175,17 @@ void Communication::statusBinding() {
     }
 }
 
-int Communication::setHeader(const int header_size, const uint8_t* header) {
-    if ((header_size < m_buffer_size) && (header)) {
-        m_header_size = header_size;
-        memcpy(messageData.buffer, header, header_size);
+int commEspNow::setHeader(const int headerSize, const uint8_t* header) {
+    if ((headerSize < bufferSize) && (header)) {
+        this->headerSize = headerSize;
+        memcpy(messageData.buffer, header, headerSize);
         return 0;
     } else {
         return -1;
     }
 }
 
-bool Communication::setBinding(bool bindingState) {
+bool commEspNow::setBinding(bool bindingState) {
     stateBinding = bindingState;
     return stateBinding;
 }

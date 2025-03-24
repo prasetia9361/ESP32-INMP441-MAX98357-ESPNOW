@@ -1,27 +1,13 @@
-#include "audio.h"
-#include "soc/i2s_reg.h"
-#include <esp_log.h>
+#include "sirine.h"
 
-
-static const char *TAG = "OUT";
-audio::audio(int size){
-    // m_i2s_port = i2s_port;
-    // m_i2s_pins = i2s_pins;
-    m_raw_samples_size = size;
-    m_mic_read_head = 0;
-    m_frames = (int16_t *)malloc(sizeof(int16_t) * m_raw_samples_size);
-    m_raw_samples = (int16_t *)malloc(sizeof(int16_t) * m_raw_samples_size);
-
-
+sirine::sirine(){
+    volume = 100;       // Volume 0-100%
+    mode = 0;      
+    envelopeVolume = 100;  // Envelope volume untuk Mode 4
+    phaseAccumulator = 0;
 }
 
-audio::~audio(){
-    free(m_frames);
-    free(m_raw_samples);
-}
-
-void audio::startSpeaker(uint16_t sample_rate){
-
+void sirine::generateWaveTable(){
     for (int i = 0; i < WAVE_TABLE_SIZE; i++) {
       float t = i / (float)(WAVE_TABLE_SIZE - 1);
       float combineWave;
@@ -29,7 +15,7 @@ void audio::startSpeaker(uint16_t sample_rate){
       float airhornWave;
 
       float wave = (t < 0.5f) ? (2.0f * powf(2.0f * t, N_VALUE) - 1.0f) : (1.0f - 2.0f * powf(2.0f * (t - 0.5f), M_VALUE));
-      wave_table[i] = (int16_t)(wave * 32767.0f);
+      waveTable[i] = (int16_t)(wave * 32767.0f);
 
       if (t < 0.3f) {
         combineWave = 1 / 0.15 * (t - 0.15f);
@@ -39,7 +25,7 @@ void audio::startSpeaker(uint16_t sample_rate){
         combineWave = 1.01f - 2.0f * powf(2.0f * (t - 1.0f), 1);
       }
 
-      combine_table[i] = (int16_t)(combineWave * 32767.0f);
+      combineTable[i] = (int16_t)(combineWave * 32767.0f);
 
       if (t < 0.3f) {
         airhornWave = 1 / 0.15 * (t - 0.15f);
@@ -57,7 +43,7 @@ void audio::startSpeaker(uint16_t sample_rate){
         airhornWave = -1 - 25 * (t - 1);
       }
 
-      airhorn_table[i] = (int16_t)(airhornWave * 32767.0f);
+      airhornTable[i] = (int16_t)(airhornWave * 32767.0f);
 
       if (t < 0.1f) {
         toneWave = -0.2f + 12.0f * t;
@@ -77,167 +63,11 @@ void audio::startSpeaker(uint16_t sample_rate){
         toneWave = -1.0f + 10.0f * (t - 0.9f);
       }
 
-      tone_table[i] = (int16_t)(toneWave * 32767.0f);
-    }
-
-
-    i2s_config_t i2s_config = {
-        .mode = (i2s_mode_t)(I2S_MODE_MASTER | I2S_MODE_TX),
-#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 4, 1)
-        .sample_rate = sample_rate,
-#else
-        .sample_rate = (int)sample_rate,
-#endif
-        .bits_per_sample = I2S_BITS_PER_SAMPLE_16BIT,
-        .channel_format = I2S_CHANNEL_FMT_ONLY_RIGHT, //  I2S_CHANNEL_FMT_RIGHT_LEFT
-#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0)
-        .communication_format = (i2s_comm_format_t)(I2S_COMM_FORMAT_STAND_I2S),
-#else
-        .communication_format = (i2s_comm_format_t)(I2S_COMM_FORMAT_I2S),
-#endif
-        .intr_alloc_flags = ESP_INTR_FLAG_LEVEL1,
-        .dma_buf_count = 4,
-        .dma_buf_len = 128,
-        .use_apll = true,
-        .tx_desc_auto_clear = true,
-        .fixed_mclk = 0,
-#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 4, 1)
-        .mclk_multiple = I2S_MCLK_MULTIPLE_DEFAULT,  // Unused
-        .bits_per_chan = I2S_BITS_PER_CHAN_DEFAULT   // Use bits per sample
-#endif
-    };
-    i2s_driver_install(m_i2s_port, &i2s_config, 0, NULL);
-    i2s_set_pin(m_i2s_port, &i2s_speaker_pins);
-    i2s_zero_dma_buffer(m_i2s_port);
-
-    i2s_start(m_i2s_port);
-}
-
-void audio::stopAudio(){
-    i2s_stop(m_i2s_port);
-    i2s_driver_uninstall(m_i2s_port);
-}
-
-void audio::write(int16_t *samples, int count){
-    int sampleIndex = 0;
-    static int16_t prev_sample = 0;
-    const float alpha = 0.1; 
-    while (sampleIndex < count)
-    {
-        int samplestoSend = 0;
-        for (int i = 0; i < m_raw_samples_size && sampleIndex < count; i++)
-        {
-          int16_t sample = processSample(samples[sampleIndex]);
-          m_frames[i] = (abs(sample) < 2048) ? 0 : sample;
-
-          samplestoSend++;
-          sampleIndex++;
-        }
-        size_t bytes_written = 0;
-        i2s_write(m_i2s_port, m_frames, samplestoSend * sizeof(int16_t), &bytes_written, portMAX_DELAY);
-        if (bytes_written != samplestoSend * sizeof(int16_t))
-        {
-            ESP_LOGE(TAG, "Did not write all bytes");
-        }
+      toneTable[i] = (int16_t)(toneWave * 32767.0f);
     }
 }
 
-void audio::startBuffering(int number_samples_to_buffer){
-    m_semaphore = xSemaphoreCreateBinary();
-    xSemaphoreGive(m_semaphore);
-    m_number_samples_to_buffer = number_samples_to_buffer;
-    m_read_head = 0;
-    m_write_head = 0;
-    m_available_samples = 0;
-    m_buffering = true;
-    m_buffer_size = 3 * number_samples_to_buffer;
-    m_buffer = (uint8_t *)malloc(m_buffer_size);
-
-    memset(m_buffer, 0, m_buffer_size);
-    if (!m_buffer) {
-        Serial.println("Failed to allocate buffer");
-    }
-}
-
-void audio::addBuffer(const uint8_t *samples, int count){
-  xSemaphoreTake(m_semaphore, portMAX_DELAY);
-  for (int i = 0; i < count; i++)
-  {
-    m_buffer[m_write_head] = samples[i];
-    m_write_head = (m_write_head + 1) % m_buffer_size;
-  }
-  m_available_samples += count;
-  xSemaphoreGive(m_semaphore);
-}
-
-void audio::removeBuffer(int16_t *samples, int count){
-  xSemaphoreTake(m_semaphore, portMAX_DELAY);
-  for (int i = 0; i < count; i++)
-  {
-    samples[i] = 0;
-    if (m_available_samples == 0 && !m_buffering)
-    {
-      m_buffering = true;
-      samples[i] = 0;
-    }
-
-    if (m_buffering && m_available_samples < m_number_samples_to_buffer){
-      samples[i] = 0;
-    } else
-    {
-      m_buffering = false;
-      uint8_t sample = m_buffer[m_read_head];
-      samples[i] = ((int16_t)(sample - 127)) << 10;
-      m_read_head = (m_read_head + 1) % m_buffer_size;
-      m_available_samples--;
-    }
-  }
-  xSemaphoreGive(m_semaphore);
-}
-
-void audio::startMic(uint16_t sample_rate){
-i2s_config_t i2s_mic_Config = {
-    .mode = (i2s_mode_t)(I2S_MODE_MASTER | I2S_MODE_RX),
-    .sample_rate = sample_rate,
-    .bits_per_sample = I2S_BITS_PER_SAMPLE_16BIT,
-    .channel_format = I2S_CHANNEL_FMT_ONLY_LEFT,//I2S_CHANNEL_FMT_ONLY_LEFT
-#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0)
-    .communication_format = (i2s_comm_format_t)(I2S_COMM_FORMAT_STAND_I2S),
-#else
-    .communication_format = (i2s_comm_format_t)(I2S_COMM_FORMAT_I2S),
-#endif
-    .intr_alloc_flags = ESP_INTR_FLAG_LEVEL1,
-    .dma_buf_count = 8,
-    .dma_buf_len = 64,
-    .use_apll = true,
-    .tx_desc_auto_clear = false,
-    .fixed_mclk = 0};
-
-    i2s_driver_install(m_i2s_port, &i2s_mic_Config, 0, NULL);
-    i2s_set_pin(m_i2s_port, &i2s_mic_pins);
-    i2s_zero_dma_buffer(m_i2s_port);
-
-    i2s_start(m_i2s_port);
-}
-
-int audio::read(int16_t *samples, int count){
-    size_t bytes_read = 0;
-    if (count > m_raw_samples_size)
-    {
-        count = m_raw_samples_size;
-    }
-    i2s_read(m_i2s_port, m_raw_samples, count, &bytes_read, portMAX_DELAY);
-    int samples_read = bytes_read / sizeof(int16_t);
-    
-    for (int i = 0; i < samples_read; i++)
-    {       
-        samples[i] = constrain(m_raw_samples[i], -INT16_MAX, INT16_MAX);
-    }
-    return samples_read;
-}
-
-
-void audio::i2sTone(uint8_t _mode){
+void sirine::generateI2sTone(uint8_t _mode){
   float frequency;
   unsigned long currentMillis = millis();
   mode = _mode;
@@ -883,10 +713,10 @@ void audio::i2sTone(uint8_t _mode){
       break;
   }
 
-  phase_step = (uint32_t)(frequency * (1UL << 24) * WAVE_TABLE_SIZE / SAMPLE_RATE);
+  phaseStep = (uint32_t)(frequency * (1UL << 24) * WAVE_TABLE_SIZE / SAMPLE_RATE);
 }
 
-const uint8_t audio::modeTableMap(int mode){
+const uint8_t sirine::modeTableMap(int mode){
     static const uint8_t map[63] = {
       0, 0, 0, 0, 0, 0,  // Mode 0-5
       0, 3, 3, 0, 0,     // Mode 6-10
@@ -907,36 +737,35 @@ const uint8_t audio::modeTableMap(int mode){
 
   }
 
-void audio::generateSineWave() {
-    uint32_t index = (phase_accumulator >> 24) & (WAVE_TABLE_SIZE - 1);
+void sirine::generateSineWave() {
+    uint32_t index = (phaseAccumulator >> 24) & (WAVE_TABLE_SIZE - 1);
 
     // Pilih tabel berdasarkan mode lookup
-    int16_t raw_sample;
-    uint8_t table_type = (mode < 63) ? modeTableMap(mode) : 0;
+    int16_t rawSample;
+    uint8_t tableType = (mode < 63) ? modeTableMap(mode) : 0;
 
-    switch (table_type) {
+    switch (tableType) {
       case 1:
-        raw_sample = combine_table[index];
+        rawSample = combineTable[index];
         break;
       case 2:
-        raw_sample = tone_table[index];
+        rawSample = toneTable[index];
         break;
       case 3:
-        raw_sample = airhorn_table[index];
+        rawSample = airhornTable[index];
         break;
       default:
-        raw_sample = wave_table[index];
+        rawSample = waveTable[index];
         break;
     }
 
     // Apply volume
-    int16_t scaled_sample = (int32_t(raw_sample) * vol * envelope) / (100 * 100);
+    int16_t scaledSample = (int32_t(rawSample) * volume * envelopeVolume) / (100 * 100);
 
-    phase_accumulator += phase_step;
+    phaseAccumulator += phaseStep;
 
-    int16_t buffer[2] = { scaled_sample, scaled_sample };
+    int16_t buffer[2] = { scaledSample, scaledSample };
 
-    size_t bytes_written;
-    i2s_write(I2S_NUM_0, buffer, sizeof(buffer), &bytes_written, portMAX_DELAY);
-
+    size_t bytesWritten;
+    i2s_write(i2sPort, buffer, sizeof(buffer), &bytesWritten, portMAX_DELAY);
 }

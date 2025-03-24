@@ -2,8 +2,8 @@
 #include "./ui/ui.h"
 
 #include "./screen/screen.h"
-#include "Communication.h"
-#include "audio.h"
+#include "commEspNow.h"
+#include "buffer.h"
 #include "storage.h"
 
 // On which wifi channel (1-11) should ESP-Now transmit? The default ESP-Now
@@ -15,27 +15,25 @@
 // length in bytes of the header) in the next line, and define the transport
 // header in config.cpp
 #define TRANSPORT_HEADER_SIZE 10
-extern uint8_t transport_header[TRANSPORT_HEADER_SIZE];
+extern uint8_t transportHeader[TRANSPORT_HEADER_SIZE];
 
 
 class displayTask
 {
 private:
-    Communication *m_communication;
-    audio *m_output_buffer;
-    storage *m_memory;
-    Screen *m_screen;
+    commEspNow *mCommunication;
+    Buffer *mOutputBuffer;
+    storage *mMemory;
+    Screen *mScreen;
 
-    lv_event_t g_event_sending;
-    lv_event_t g_event_binding;
-    lv_event_t g_event_delete;
-    bool g_binding;
-    bool g_sending;
-    bool g_delete;
-
-i2s_pin_config_t i2s_speaker_pins;
+    lv_event_t gEventSending;
+    lv_event_t gEventBinding;
+    lv_event_t gEventDelete;
+    bool gBinding;
+    bool gSending;
+    bool gDelete;
 public:
-    displayTask(/* args */);
+    displayTask();
     ~displayTask();
     void begin();
     void showDataReceive();

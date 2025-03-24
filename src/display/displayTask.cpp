@@ -1,14 +1,14 @@
 #include "displayTask.h"
 
-uint8_t transport_header[TRANSPORT_HEADER_SIZE] = {};
+uint8_t transportHeader[TRANSPORT_HEADER_SIZE] = {};
 
 displayTask::displayTask(){
-    m_screen = new Screen();
+    mScreen = new Screen();
     // tft = new LGFX();
-    m_memory = new storage(); 
-    m_output_buffer = new audio(128);
-    m_communication = new Communication(m_output_buffer, m_memory, ESP_NOW_WIFI_CHANNEL);
-    m_communication->setHeader(TRANSPORT_HEADER_SIZE, transport_header);
+    mMemory = new storage(); 
+    mOutputBuffer = new Buffer(300 * 16);
+    mCommunication = new commEspNow(mOutputBuffer, mMemory, ESP_NOW_WIFI_CHANNEL);
+    mCommunication->setHeader(TRANSPORT_HEADER_SIZE, transportHeader);
 }
 
 displayTask::~displayTask()
@@ -22,12 +22,12 @@ void displayTask::begin(){
     Serial.println(esp_get_idf_version());
 
     // Inisialisasi komunikasi dan komponen lain
-    if (!m_communication->begin()) {
+    if (!mCommunication->begin()) {
         Serial.println("Komunikasi gagal dimulai!");
     }
     
-    m_memory->init();
-    m_screen->begin();
+    mMemory->init();
+    mScreen->begin();
 
     Serial.println("Setup done");
 
@@ -35,33 +35,34 @@ void displayTask::begin(){
 }
 
 void displayTask::showDataReceive(){
-    m_screen->lvHandler();
+    mScreen->lvHandler();
     ui_tick();
     
     // Tampilkan pesan yang diterima
-    lv_label_set_text(objects.data_from_receiver, m_communication->getReceivedMessage());
+    lv_label_set_text(objects.data_from_receiver, mCommunication->getReceivedMessage());
 }
+
 void displayTask::binding(){
     // Proses binding jika diperlukan
-    if (g_binding) {
-        m_communication->statusBinding();
-        g_binding = false;
+    if (gBinding) {
+        mCommunication->statusBinding();
+        gBinding = false;
     }
 }
 
 void displayTask::deleteAddress(){
     // Proses penghapusan alamat jika diperlukan
-    if (g_delete) {
-        m_memory->deleteAddress(); 
-        g_delete = false;
+    if (gDelete) {
+        mMemory->deleteAddress(); 
+        gDelete = false;
     }
 }
 
 void displayTask::sendMassage(){
     // Proses pengiriman jika diperlukan
-    if (g_sending) {
-        m_communication->addPeer();
-        m_communication->sendButton(1);
-        g_sending = false;
+    if (gSending) {
+        mCommunication->addPeer();
+        mCommunication->sendButton(1);
+        gSending = false;
     }
 }
