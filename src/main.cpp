@@ -63,6 +63,7 @@ void applicationTask(void *param){
         lcd->binding();
         lcd->deleteAddress();
         lcd->sendMassage();
+        vTaskDelay(100);
     }
     
 #endif

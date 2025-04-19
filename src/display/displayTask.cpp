@@ -1,5 +1,7 @@
 #include "displayTask.h"
-
+extern bool gBinding;
+extern bool gSending;
+extern bool gDelete;
 uint8_t transportHeader[TRANSPORT_HEADER_SIZE] = {};
 
 displayTask::displayTask(){
@@ -47,6 +49,7 @@ void displayTask::binding(){
     if (gBinding) {
         mCommunication->statusBinding();
         gBinding = false;
+        Serial.println("binding");
     }
 }
 

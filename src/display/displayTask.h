@@ -29,9 +29,7 @@ private:
     lv_event_t gEventSending;
     lv_event_t gEventBinding;
     lv_event_t gEventDelete;
-    bool gBinding;
-    bool gSending;
-    bool gDelete;
+
 public:
     displayTask();
     ~displayTask();
