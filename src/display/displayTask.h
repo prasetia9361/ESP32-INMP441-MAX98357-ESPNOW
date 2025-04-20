@@ -38,4 +38,5 @@ public:
     void binding();
     void deleteAddress();
     void sendMassage();
+    void changeScreen();
 };

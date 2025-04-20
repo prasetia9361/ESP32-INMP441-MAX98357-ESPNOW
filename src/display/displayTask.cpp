@@ -2,6 +2,8 @@
 extern bool gBinding;
 extern bool gSending;
 extern bool gDelete;
+extern bool gMain;
+extern bool gSetting;
 uint8_t transportHeader[TRANSPORT_HEADER_SIZE] = {};
 
 displayTask::displayTask(){
@@ -67,5 +69,17 @@ void displayTask::sendMassage(){
         mCommunication->addPeer();
         mCommunication->sendButton(1);
         gSending = false;
+    }
+}
+
+void displayTask::changeScreen(){
+    if (gMain)
+    {
+        lv_scr_load(objects.main);
+        gMain = false;
+    }else if (gSetting)
+    {
+        lv_scr_load(objects.setting);
+        gSetting = false;
     }
 }

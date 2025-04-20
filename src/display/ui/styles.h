@@ -7,6 +7,8 @@
 extern "C" {
 #endif
 
+extern void apply_style_topbar(lv_obj_t *obj);
+extern void apply_style_homepress(lv_obj_t *obj);
 
 
 #ifdef __cplusplus

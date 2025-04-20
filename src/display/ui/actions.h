@@ -10,6 +10,8 @@ extern "C" {
 extern void action_mode_binding(lv_event_t * e);
 extern void action_sending_data_espnow(lv_event_t * e);
 extern void action_delete_mac_address(lv_event_t * e);
+extern void action_main_page(lv_event_t * e);
+extern void action_setting_page(lv_event_t * e);
 
 
 #ifdef __cplusplus
