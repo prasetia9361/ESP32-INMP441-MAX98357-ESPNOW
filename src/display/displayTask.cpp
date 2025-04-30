@@ -4,6 +4,8 @@ extern bool gSending;
 extern bool gDelete;
 extern bool gMain;
 extern bool gSetting;
+extern int32_t vol;
+// int32_t get_var_volume();
 uint8_t transportHeader[TRANSPORT_HEADER_SIZE] = {};
 
 displayTask::displayTask(){
@@ -67,7 +69,10 @@ void displayTask::sendMassage(){
     // Proses pengiriman jika diperlukan
     if (gSending) {
         mCommunication->addPeer();
-        mCommunication->sendButton(1);
+        mCommunication->sendButton(vol);
+        String presentase = String(vol) + "%";
+        // lv_label_set_text(objects.perentase, presentase.c_str());
+        Serial.println(vol);
         gSending = false;
     }
 }

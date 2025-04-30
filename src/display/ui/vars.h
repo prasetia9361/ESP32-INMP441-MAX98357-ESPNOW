@@ -15,11 +15,16 @@ extern "C" {
 // Flow global variables
 
 enum FlowGlobalVariables {
-    FLOW_GLOBAL_VARIABLE_NONE
+    FLOW_GLOBAL_VARIABLE_VOLUME = 0,
+    FLOW_GLOBAL_VARIABLE_MODE = 1
 };
 
 // Native global variables
 
+extern int32_t get_var_volume();
+extern void set_var_volume(int32_t value);
+extern int32_t get_var_mode();
+extern void set_var_mode(int32_t value);
 
 
 #ifdef __cplusplus

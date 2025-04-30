@@ -1,7 +1,6 @@
 {
   "navigation": {
     "selectedUserPageObject": "[button.eez-project]:/userPages/0",
-    "selectedUserWidgetObject": "[button.eez-project]:/userWidgets/-1",
     "selectedActionObject": "[button.eez-project]:/actions/4",
     "selectedFontObject": "[button.eez-project]:/fonts/1",
     "subnavigationSelectedItems": {}
@@ -24,7 +23,7 @@
           },
           {
             "type": "border",
-            "selected": 0,
+            "selected": 1,
             "size": 240,
             "location": "right",
             "children": [
@@ -176,33 +175,9 @@
               "type": "tabset",
               "id": "EDITORS",
               "weight": 56.02564102564103,
-              "selected": 1,
               "enableDeleteWhenEmpty": false,
               "enableClose": false,
               "children": [
-                {
-                  "type": "tab",
-                  "id": "#9be69f17-dc60-4299-986a-625fd6f03232",
-                  "name": "Cabin_Italic_20",
-                  "component": "editor",
-                  "config": {
-                    "objectPath": "[button.eez-project]:/fonts/1",
-                    "permanent": false
-                  },
-                  "icon": "material:font_download"
-                },
-                {
-                  "type": "tab",
-                  "id": "#b1a8f949-0a75-4e44-a48f-06e06c8e4aaf",
-                  "name": "Settings",
-                  "component": "editor",
-                  "config": {
-                    "objectPath": "[button.eez-project]:/settings",
-                    "subObjectPath": "[button.eez-project]:/settings",
-                    "permanent": false
-                  },
-                  "icon": "material:settings"
-                },
                 {
                   "type": "tab",
                   "id": "#3adafd7d-994f-4c68-987f-3cc08977bb85",
@@ -924,13 +899,11 @@
       "selection": {
         "0": {
           "0": {
+            "0": {},
             "1": {}
           },
-          "1": {
-            "0": {}
-          },
-          "2": {},
-          "3": {}
+          "1": {},
+          "2": {}
         }
       },
       "transform": {
@@ -951,10 +924,10 @@
       "selection": {
         "0": {
           "0": {
-            "0": {
-              "$selected": true
-            }
-          }
+            "0": {},
+            "1": {}
+          },
+          "1": {}
         }
       },
       "transform": {
@@ -1011,21 +984,8 @@
   "showComponentDescriptions": true,
   "logsPanelFilter": "all",
   "selectedStylePropertyName": "",
-  "lvglPart": "MAIN",
-  "lvglState": "DEFAULT",
-  "lvglExpandedPropertiesGroup": [
-    "TEXT",
-    "BACKGROUND",
-    "LAYOUT",
-    "PADDING",
-    "IMAGE",
-    "ARC",
-    "LINE",
-    "MARGIN",
-    "POSITION AND SIZE",
-    "BORDER",
-    "SHADOW",
-    "MISCELLANEOUS"
-  ],
+  "lvglPart": "INDICATOR",
+  "lvglState": "DISABLED",
+  "lvglExpandedPropertiesGroup": [],
   "showInactiveFlowsInDebugger": true
 }
