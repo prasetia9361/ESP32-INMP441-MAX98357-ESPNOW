@@ -60,6 +60,7 @@ void applicationTask(void *param){
     while (true)
     {
         lcd->showDataReceive();
+        lcd->loadPage();
         lcd->binding();
         lcd->deleteAddress();
         lcd->sendMassage();

@@ -17,7 +17,9 @@ extern "C" {
 enum FlowGlobalVariables {
     FLOW_GLOBAL_VARIABLE_VOLUME = 0,
     FLOW_GLOBAL_VARIABLE_MODE = 1,
-    FLOW_GLOBAL_VARIABLE_VOLUME_PERSENTAGE = 2
+    FLOW_GLOBAL_VARIABLE_VOLUME_PERSENTAGE = 2,
+    FLOW_GLOBAL_VARIABLE_LOAD = 3,
+    FLOW_GLOBAL_VARIABLE_SCREEN = 4
 };
 
 // Native global variables
@@ -28,6 +30,10 @@ extern int32_t get_var_mode();
 extern void set_var_mode(int32_t value);
 extern const char *get_var_volume_persentage();
 extern void set_var_volume_persentage(const char *value);
+extern int32_t get_var_load();
+extern void set_var_load(int32_t value);
+extern int32_t get_var_screen();
+extern void set_var_screen(int32_t value);
 
 
 #ifdef __cplusplus

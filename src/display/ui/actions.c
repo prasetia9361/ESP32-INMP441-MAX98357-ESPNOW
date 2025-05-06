@@ -9,6 +9,7 @@ bool gSending = false;
 bool gDelete = false;
 bool gMain = false;
 bool gSetting = false;
+bool loadSetting = false;
 
 void action_mode_binding(lv_event_t *e)
 {
@@ -33,4 +34,8 @@ extern void action_main_page(lv_event_t * e){
 }
 extern void action_setting_page(lv_event_t * e){
     gSetting = true;
+}
+
+void action_load_setting(lv_event_t * e){
+    loadSetting = true;
 }

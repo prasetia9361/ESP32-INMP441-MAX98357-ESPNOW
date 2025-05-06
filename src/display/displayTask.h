@@ -35,6 +35,7 @@ public:
     ~displayTask();
     void begin();
     void showDataReceive();
+    void loadPage();
     void binding();
     void deleteAddress();
     void sendMassage();

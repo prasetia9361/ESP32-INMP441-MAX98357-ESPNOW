@@ -192,8 +192,7 @@
                   },
                   "icon": "svg:page"
                 }
-              ],
-              "active": true
+              ]
             },
             {
               "type": "row",
@@ -213,7 +212,8 @@
                       "enableClose": false,
                       "icon": "svg:properties"
                     }
-                  ]
+                  ],
+                  "active": true
                 },
                 {
                   "type": "tabset",
@@ -901,7 +901,14 @@
     "[button.eez-project]:/userPages/0[flow-state]": {
       "selection": {
         "0": {
-          "0": {},
+          "0": {
+            "0": {
+              "$selected": true
+            },
+            "1": {
+              "0": {}
+            }
+          },
           "1": {},
           "2": {},
           "3": {}
@@ -925,14 +932,16 @@
       "selection": {
         "0": {
           "0": {
-            "0": {},
+            "0": {
+              "0": {
+                "$selected": true
+              }
+            },
             "1": {}
           },
           "1": {},
           "2": {},
-          "4": {
-            "$selected": true
-          }
+          "4": {}
         }
       },
       "transform": {
@@ -975,6 +984,24 @@
       "0": {
         "0": {}
       }
+    },
+    "[button.eez-project]:/userPages/2[flow-state]": {
+      "selection": {
+        "0": {}
+      },
+      "transform": {
+        "translate": {
+          "x": -220.62999999999994,
+          "y": -150.58499999999998
+        },
+        "scale": 1
+      },
+      "timeline": {
+        "isEditorActive": false,
+        "position": 0,
+        "secondToPx": 200,
+        "scrollLeft": 0
+      }
     }
   },
   "activeOutputSection": 0,
@@ -990,9 +1017,21 @@
   "logsPanelFilter": "all",
   "selectedStylePropertyName": "",
   "lvglPart": "MAIN",
-  "lvglState": "FOCUSED",
+  "lvglState": "DEFAULT",
   "lvglExpandedPropertiesGroup": [
-    "TEXT"
+    "TEXT",
+    "MISCELLANEOUS",
+    "POSITION AND SIZE",
+    "LAYOUT",
+    "PADDING",
+    "MARGIN",
+    "BACKGROUND",
+    "BORDER",
+    "OUTLINE",
+    "SHADOW",
+    "IMAGE",
+    "LINE",
+    "ARC"
   ],
   "showInactiveFlowsInDebugger": true
 }
