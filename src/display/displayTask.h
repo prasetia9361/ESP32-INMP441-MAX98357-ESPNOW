@@ -38,5 +38,6 @@ public:
     void binding();
     void deleteAddress();
     void sendMassage();
+    void sendVolume();
     void changeScreen();
 };

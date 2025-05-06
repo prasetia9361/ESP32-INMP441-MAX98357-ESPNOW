@@ -72,7 +72,7 @@ void displayTask::sendMassage(){
         mCommunication->sendButton(vol);
         String presentase = String(vol) + "%";
         // lv_label_set_text(objects.perentase, presentase.c_str());
-        Serial.println(vol);
+        Serial.println(presentase);
         gSending = false;
     }
 }

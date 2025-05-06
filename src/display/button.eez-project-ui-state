@@ -1,9 +1,12 @@
 {
   "navigation": {
     "selectedUserPageObject": "[button.eez-project]:/userPages/0",
-    "selectedActionObject": "[button.eez-project]:/actions/4",
+    "selectedActionObject": "[button.eez-project]:/actions/1",
+    "selectedGlobalVariableObject": "[button.eez-project]:/variables/globalVariables/2",
     "selectedFontObject": "[button.eez-project]:/fonts/1",
-    "subnavigationSelectedItems": {}
+    "subnavigationSelectedItems": {
+      "variables-tab/sub-navigation/selected-item": "Global"
+    }
   },
   "layoutModel": {
     "rootEditor": {
@@ -56,7 +59,7 @@
           {
             "type": "border",
             "selected": 0,
-            "size": 70.5,
+            "size": 0,
             "location": "bottom",
             "children": [
               {
@@ -898,18 +901,16 @@
     "[button.eez-project]:/userPages/0[flow-state]": {
       "selection": {
         "0": {
-          "0": {
-            "0": {},
-            "1": {}
-          },
+          "0": {},
           "1": {},
-          "2": {}
+          "2": {},
+          "3": {}
         }
       },
       "transform": {
         "translate": {
-          "x": -240,
-          "y": -136
+          "x": -291.47499999999997,
+          "y": -135
         },
         "scale": 1
       },
@@ -927,7 +928,11 @@
             "0": {},
             "1": {}
           },
-          "1": {}
+          "1": {},
+          "2": {},
+          "4": {
+            "$selected": true
+          }
         }
       },
       "transform": {
@@ -976,7 +981,7 @@
   "searchPattern": "",
   "searchMatchCase": false,
   "searchMatchWholeWord": false,
-  "replaceEnabled": false,
+  "replaceEnabled": true,
   "replaceText": "",
   "pageRuntimeFrontFace": true,
   "breakpoints": {},
@@ -984,8 +989,10 @@
   "showComponentDescriptions": true,
   "logsPanelFilter": "all",
   "selectedStylePropertyName": "",
-  "lvglPart": "INDICATOR",
-  "lvglState": "DISABLED",
-  "lvglExpandedPropertiesGroup": [],
+  "lvglPart": "MAIN",
+  "lvglState": "FOCUSED",
+  "lvglExpandedPropertiesGroup": [
+    "TEXT"
+  ],
   "showInactiveFlowsInDebugger": true
 }
