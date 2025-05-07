@@ -23,6 +23,13 @@ typedef struct _objects_t {
     lv_obj_t *obj0;
     lv_obj_t *obj1;
     lv_obj_t *obj10;
+    lv_obj_t *obj11;
+    lv_obj_t *obj12;
+    lv_obj_t *obj13;
+    lv_obj_t *obj14;
+    lv_obj_t *obj15;
+    lv_obj_t *obj16;
+    lv_obj_t *obj17;
     lv_obj_t *obj2;
     lv_obj_t *obj3;
     lv_obj_t *obj4;
@@ -33,9 +40,9 @@ typedef struct _objects_t {
     lv_obj_t *obj9;
     lv_obj_t *panel_load_1;
     lv_obj_t *perentase_1;
-    lv_obj_t *top_bar_1;
-    lv_obj_t *top_bar_2;
-    lv_obj_t *top_bar_3;
+    lv_obj_t *top_bar_home;
+    lv_obj_t *top_bar_load_setting;
+    lv_obj_t *top_bar_setting;
     lv_obj_t *volume_1;
 } objects_t;
 
