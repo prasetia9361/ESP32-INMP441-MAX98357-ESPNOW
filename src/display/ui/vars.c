@@ -9,6 +9,8 @@ char volume[5] = "15";
 const char gear[4] = "\xEF\x80\x93";
 const char home[4] = "\xEF\x80\x95";
 const char speaker[4] = "\xEF\x80\xA8";
+const char *address;
+bool msg_box;
 void set_var_volume (int32_t value) {
     vol = value;
     snprintf(volume, sizeof(volume), "%d", vol); 
@@ -40,4 +42,16 @@ const char *get_var_icon_gear(){
 
 const char *get_var_icon_peaker(){
     return speaker;
+}
+
+const char *get_var_address(){
+    return address;
+}
+
+bool get_var_msgbox(){
+    return !msg_box;
+}
+
+void set_var_msgbox(bool value){
+    msg_box = value;
 }

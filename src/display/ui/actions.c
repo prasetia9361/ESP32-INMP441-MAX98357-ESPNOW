@@ -1,5 +1,6 @@
 #include <stdbool.h>
 #include "actions.h"
+#include "vars.h"
 
 lv_event_t g_event_sending = {};
 lv_event_t g_event_binding = {};
@@ -10,6 +11,9 @@ bool gDelete = false;
 bool gMain = false;
 bool gSetting = false;
 bool loadSetting = false;
+bool modal = false;
+bool close_modal = false;
+bool box = false;
 
 void action_mode_binding(lv_event_t *e)
 {
@@ -38,4 +42,17 @@ extern void action_setting_page(lv_event_t * e){
 
 void action_load_setting(lv_event_t * e){
     loadSetting = true;
+}
+
+void action_piring(lv_event_t * e){
+    // modal = true;
+    box = true;
+    set_var_msgbox(box);
+}
+
+void action_close_modal(lv_event_t * e){
+    // close_modal = true;
+    box = false;
+    set_var_msgbox(box);
+    // msg_box = false;
 }

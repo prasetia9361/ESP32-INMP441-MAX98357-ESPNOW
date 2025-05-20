@@ -22,7 +22,9 @@ enum FlowGlobalVariables {
     FLOW_GLOBAL_VARIABLE_SCREEN = 4,
     FLOW_GLOBAL_VARIABLE_ICON_HOME = 5,
     FLOW_GLOBAL_VARIABLE_ICON_GEAR = 6,
-    FLOW_GLOBAL_VARIABLE_ICON_PEAKER = 7
+    FLOW_GLOBAL_VARIABLE_ICON_PEAKER = 7,
+    FLOW_GLOBAL_VARIABLE_ADDRESS = 8,
+    FLOW_GLOBAL_VARIABLE_MSGBOX = 9
 };
 
 // Native global variables
@@ -43,6 +45,10 @@ extern const char *get_var_icon_gear();
 extern void set_var_icon_gear(const char *value);
 extern const char *get_var_icon_peaker();
 extern void set_var_icon_peaker(const char *value);
+extern const char *get_var_address();
+extern void set_var_address(const char *value);
+extern bool get_var_msgbox();
+extern void set_var_msgbox(bool value);
 
 
 #ifdef __cplusplus

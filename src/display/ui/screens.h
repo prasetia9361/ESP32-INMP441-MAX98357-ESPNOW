@@ -12,7 +12,13 @@ typedef struct _objects_t {
     lv_obj_t *home;
     lv_obj_t *setting;
     lv_obj_t *load_setting;
-    lv_obj_t *data_from_receiver;
+    lv_obj_t *box_message;
+    lv_obj_t *box_message__approve;
+    lv_obj_t *box_message__close;
+    lv_obj_t *box_message__delete_address;
+    lv_obj_t *box_message__obj10;
+    lv_obj_t *button_about;
+    lv_obj_t *button_piring;
     lv_obj_t *data_from_receiver_1;
     lv_obj_t *mode_10;
     lv_obj_t *mode_11;
@@ -22,14 +28,12 @@ typedef struct _objects_t {
     lv_obj_t *mode_9;
     lv_obj_t *obj0;
     lv_obj_t *obj1;
-    lv_obj_t *obj10;
     lv_obj_t *obj11;
     lv_obj_t *obj12;
     lv_obj_t *obj13;
     lv_obj_t *obj14;
     lv_obj_t *obj15;
     lv_obj_t *obj16;
-    lv_obj_t *obj17;
     lv_obj_t *obj2;
     lv_obj_t *obj3;
     lv_obj_t *obj4;
@@ -53,6 +57,7 @@ enum ScreensEnum {
     SCREEN_ID_HOME = 2,
     SCREEN_ID_SETTING = 3,
     SCREEN_ID_LOAD_SETTING = 4,
+    SCREEN_ID_BOX_MESSAGE = 5,
 };
 
 void create_screen_main();
@@ -66,6 +71,9 @@ void tick_screen_setting();
 
 void create_screen_load_setting();
 void tick_screen_load_setting();
+
+void create_user_widget_box_message(lv_obj_t *parent_obj, int startWidgetIndex);
+void tick_user_widget_box_message(int startWidgetIndex);
 
 void create_screens();
 void tick_screen(int screen_index);

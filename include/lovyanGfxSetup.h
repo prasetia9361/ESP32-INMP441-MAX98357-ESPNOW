@@ -5,8 +5,8 @@
 #include <lgfx/v1/platforms/esp32s3/Bus_RGB.hpp>
 #include <driver/i2c.h>
 
-#define SCREEN_WIDTH  800
-#define SCREEN_HEIGHT 480
+#define SCREEN_WIDTH  480
+#define SCREEN_HEIGHT 272
 
 class LGFX : public lgfx::LGFX_Device
 {
@@ -22,10 +22,10 @@ public:
     {
       auto cfg = _panel_instance.config();
 
-      cfg.memory_width  = 800;
-      cfg.memory_height = 480;
-      cfg.panel_width  = 800;
-      cfg.panel_height = 480;
+      cfg.memory_width  = 480;
+      cfg.memory_height = 272;
+      cfg.panel_width  = 480;
+      cfg.panel_height = 272;
 
       cfg.offset_x = 0;
       cfg.offset_y = 0;
@@ -90,9 +90,9 @@ public:
     {
       auto cfg = _touch_instance.config();
       cfg.x_min      = 0;
-      cfg.x_max      = 800;
+      cfg.x_max      = 480;
       cfg.y_min      = 0;
-      cfg.y_max      = 480;
+      cfg.y_max      = 272;
       cfg.pin_int    = GPIO_NUM_NC;
       cfg.bus_shared = false;
       cfg.offset_rotation = 0;

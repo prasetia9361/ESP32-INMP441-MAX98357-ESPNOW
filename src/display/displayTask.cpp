@@ -5,12 +5,18 @@ extern bool gDelete;
 extern bool gMain;
 extern bool gSetting;
 extern bool loadSetting;
+extern bool modal;
+extern bool close_modal;
+extern bool msg_box;
 extern int32_t vol;
+extern const char *address;
 // extern void set_var_load(int32_t value);
 extern int32_t load_persentage;
 int persent = 10;
 // int32_t get_var_volume();
 uint8_t transportHeader[TRANSPORT_HEADER_SIZE] = {};
+
+lv_obj_t *obj; // untuk msg box
 
 displayTask::displayTask(){
     mScreen = new Screen();
@@ -79,13 +85,13 @@ void displayTask::showDataReceive(){
     // // Tampilkan pesan yang diterima
     // lv_label_set_text(objects.data_from_receiver, mCommunication->getReceivedMessage());
 
-    static String lastMessage = "";
-    String currentMessage = mCommunication->getReceivedMessage();
+    const char *lastMessage = "";
+    address = mCommunication->getReceivedMessage() ? mCommunication->getReceivedMessage() : "nill";
     
-    if(currentMessage != lastMessage) {
-        lv_label_set_text(objects.data_from_receiver, currentMessage.c_str());
-        lastMessage = currentMessage;
-    }
+    // if(address != lastMessage) {
+    //     lv_label_set_text(objects.data_from_receiver, address);
+    //     lastMessage = address;
+    // }
     
     mScreen->lvHandler();
     ui_tick();
@@ -127,6 +133,7 @@ void displayTask::deleteAddress(){
     // Proses penghapusan alamat jika diperlukan
     if (gDelete) {
         mMemory->deleteAddress(); 
+        address = "nill";
         gDelete = false;
     }
 }
@@ -167,4 +174,7 @@ void displayTask::changeScreen(){
         // lv_scr_load(objects.setting);
         gSetting = false;
     }
+    
+    
+    
 }
