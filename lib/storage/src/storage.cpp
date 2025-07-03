@@ -1,121 +1,312 @@
 #include "storage.h"
 
-storage::storage(){}
+#include "storage.h"
 
-void storage::init(){
+storage::storage() {
+    // Tidak perlu inisialisasi semaphore
+}
+
+storage::~storage() {
+    // Tidak perlu hapus semaphore
+}
+
+void storage::init() {
+    Serial.println("[DEBUG] Memulai inisialisasi storage");
+    
+    // Tidak perlu ambil semaphore
+
     if (!SPIFFS.begin(true)) {
-        Serial.println("Gagal menginisialisasi SPIFFS");
+        Serial.println("[ERROR] SPIFFS init failed");
         return;
     }
-    
-    if (SPIFFS.exists("/config.json"))
-    {
-        JsonDocument doc;
-        File file = SPIFFS.open("/config.json",FILE_READ);
+    Serial.println("[DEBUG] SPIFFS berhasil diinisialisasi");
 
-        if (!file) {
-            Serial.println("Gagal membuka file untuk dibaca");
-            memset(configData.macAddress, 0, 6);
-            memset(configData.macAddress1, 0, 6);
+    // Handle config.json
+    if (SPIFFS.exists("/config.json")) {
+        Serial.println("[DEBUG] File config.json ditemukan");
+        File file = SPIFFS.open("/config.json", FILE_READ);
+        if (file) {
+            size_t size = file.size();
+            Serial.printf("[DEBUG] Ukuran file config.json: %d bytes\n", size);
+            
+            if (size > 0 && size < 512) {
+                String content = file.readString();
+                file.close();
+                Serial.println("[DEBUG] Konten config.json berhasil dibaca");
+
+                JsonDocument doc;
+                if (deserializeJson(doc, content) == DeserializationError::Ok) {
+                    Serial.println("[DEBUG] JSON parsing berhasil");
+                    // Process MAC addresses
+                    for (int i = 0; i < 2; i++) {
+                        char key[10];
+                        sprintf(key, "address%d", i);
+                        Serial.printf("[DEBUG] Memproses key: %s\n", key);
+                        
+                        if (doc[key].is<JsonArray>()) {
+                            JsonArray arr = doc[key];
+                            Serial.printf("[DEBUG] Ukuran array untuk %s: %d\n", key, arr.size());
+                            
+                            if (arr.size() >= 2) {
+                                const char* macStr = arr[0];
+                                const char* devName = arr[1];
+                                Serial.printf("[DEBUG] MAC: %s, Device: %s\n", macStr, devName);
+                                
+                                if (strlen(macStr) == 17) {
+                                    uint8_t* targetMac = (i == 0) ? configData.macAddress : configData.macAddress1;
+                                    char* targetName = (i == 0) ? configData.nameDevice1 : configData.nameDevice2;
+                                    
+                                    for (int j = 0; j < 6; j++) {
+                                        targetMac[j] = strtoul(macStr + j*3, NULL, 16);
+                                    }
+                                    Serial.printf("[DEBUG] MAC address yang disimpan: %02X:%02X:%02X:%02X:%02X:%02X\n",
+                                        targetMac[0], targetMac[1], targetMac[2], targetMac[3], targetMac[4], targetMac[5]);
+                                    
+                                    strncpy(targetName, devName, 11);
+                                    Serial.printf("[DEBUG] Nama device yang disimpan: %s\n", targetName);
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    Serial.println("[ERROR] Gagal parsing JSON config.json");
+                }
+            }
+        }
+    } else {
+        Serial.println("[DEBUG] File config.json tidak ditemukan");
+    }
+
+    // Handle mode.json
+    if (SPIFFS.exists("/mode.json")) {
+        Serial.println("[DEBUG] File mode.json ditemukan");
+        File file = SPIFFS.open("/mode.json", FILE_READ);
+        if (file) {
+            JsonDocument doc;
+            if (deserializeJson(doc, file) == DeserializationError::Ok) {
+                Serial.println("[DEBUG] JSON parsing mode.json berhasil");
+                configData.dataInt = doc["volume"];
+                Serial.printf("[DEBUG] Volume yang dibaca: %d\n", configData.dataInt);
+                
+                JsonArray modes = doc["mode"];
+                Serial.printf("[DEBUG] Jumlah mode yang ditemukan: %d\n", modes.size());
+                
+                for (int i = 0; i < 8 && i < modes.size(); i++) {
+                    configData.modeArray[i] = modes[i];
+                    Serial.printf("[DEBUG] Mode[%d] = %d\n", i, configData.modeArray[i]);
+                }
+            } else {
+                Serial.println("[ERROR] Gagal parsing JSON mode.json");
+            }
+            file.close();
+        }
+    } else {
+        Serial.println("[DEBUG] File mode.json tidak ditemukan");
+    }
+
+    // Tidak perlu xSemaphoreGive
+    Serial.println("[DEBUG] Inisialisasi storage selesai");
+}
+
+void storage::writeMacAddress(const uint8_t *mac, const char *device, int count) {
+    // Tidak perlu ambil semaphore
+    
+    JsonDocument doc;
+    File fileRead = SPIFFS.open("/config.json", FILE_READ);
+    if (fileRead) {
+        deserializeJson(doc, fileRead);
+        fileRead.close();
+    }
+
+    char macStr[18];
+    snprintf(macStr, sizeof(macStr), "%02X:%02X:%02X:%02X:%02X:%02X", 
+             mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+
+    bool slotFound = false;
+    for (int i = 0; i < count; i++) {
+        char key[10];
+        sprintf(key, "address%d", i);
+        
+        if (/*!doc.containsKey(key) ||*/ !doc[key].is<JsonArray>() || doc[key].size() < 2) {
+            // JsonArray arr = doc.createNestedArray(key);
+            JsonArray arr = doc[key].to<JsonArray>();
+            arr.add(macStr);
+            arr.add(device);
+            
+            if (i == 0) {
+                memcpy(configData.macAddress, mac, 6);
+                strncpy(configData.nameDevice1, device, 11);
+            } else {
+                memcpy(configData.macAddress1, mac, 6);
+                strncpy(configData.nameDevice2, device, 11);
+            }
+            slotFound = true;
+            break;
+        }
+    }
+
+    if (slotFound) {
+        File fileWrite = SPIFFS.open("/config.json", FILE_WRITE);
+        if (fileWrite) {
+            serializeJson(doc, fileWrite);
+            fileWrite.close();
+        }
+    }
+
+    // Tidak perlu xSemaphoreGive
+}
+
+void storage::writeMode(const uint8_t *bufferMode, int count){
+    // Tidak perlu ambil semaphore
+    // Validasi parameter
+    if (bufferMode == nullptr || count <= 0) {
+        Serial.println("- bufferMode null atau count tidak valid");
+        return;
+    }
+    JsonDocument doc;
+    
+    File fileRead = SPIFFS.open("/mode.json", FILE_READ);
+    if (fileRead) {
+        deserializeJson(doc, fileRead);
+        fileRead.close();
+    }
+
+    bool slotFound = false;
+    // Pastikan bufferMode di-cast dengan benar ke tipe int
+    for (int i = 0; i < count; i++) {
+        // Karena bufferMode bertipe uint8_t*, kita ambil 1 byte per mode
+        doc["mode"][i] = bufferMode[i];
+        configData.modeArray[i] = bufferMode[i];
+        slotFound = true;
+    }
+
+    if (slotFound)
+    {
+        // Buka file untuk menulis mode
+        File fileWrite = SPIFFS.open("/mode.json", FILE_WRITE);
+        if (!fileWrite) {
+            Serial.println("- gagal membuka file untuk menulis mode");
             return;
         }
 
-        char macStr[128];
-        file.readBytes(macStr,file.size());
-        file.close();
-        
-        DeserializationError error = deserializeJson(doc, macStr);
-        if (error) {
-            Serial.print("deserializeJson() returned ");
+        if (serializeJson(doc, fileWrite) == 0) {
+            Serial.println("- gagal menulis JSON ke file mode.json");
+        } else {
+            Serial.println("Mode berhasil disimpan ke SPIFFS");
         }
-
-        const char* dataMac0 = doc["address0"];
-        const char* dataMac1 = doc["address1"];
-
-        for (int i = 0; i < 6; i++) {
-            char byteStr[3];
-            byteStr[0] = dataMac0[i * 3];
-            byteStr[1] = dataMac0[i * 3 + 1];
-            byteStr[2] = '\0';
-            configData.macAddress[i] = (uint8_t)strtol(byteStr, nullptr, 16);
-        }
-
-        for (int i = 0; i < 6; i++) {
-            char byteStr[3];
-            byteStr[0] = dataMac1[i * 3];
-            byteStr[1] = dataMac1[i * 3 + 1];
-            byteStr[2] = '\0';
-            configData.macAddress1[i] = (uint8_t)strtol(byteStr, nullptr, 16);
-        }
-
-        Serial.println("MAC address converted successfully");
+        fileWrite.close();
     }
+    // Tidak perlu xSemaphoreGive
 }
 
-void storage::writeMacAddress(const uint8_t *mac, int count){
-    JsonDocument doc;
-    char macStr[18];
-    char dataMac[128];
-    snprintf(macStr, sizeof(macStr), "%02X:%02X:%02X:%02X:%02X:%02X", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
-    File file = SPIFFS.open("/config.json",FILE_READ);
-    if (!file) {
-        Serial.println("Gagal membuka file untuk dibaca");
-        memset(configData.macAddress, 0, 6);
+void storage::writeMode(const int32_t* bufferMode, int count){
+    // Tidak perlu ambil semaphore
+    if (bufferMode == nullptr || count <= 0) {
+        Serial.println("- bufferMode null atau count tidak valid");
         return;
     }
-    file.readBytes(dataMac,file.size());
-    file.close();
-    DeserializationError error = deserializeJson(doc,dataMac);
-    if (error) {
-        Serial.print("deserializeJson() returned ");
+
+    JsonDocument doc;
+
+    File fileRead = SPIFFS.open("/mode.json", FILE_READ);
+    if (fileRead) {
+        deserializeJson(doc, fileRead);
+        fileRead.close();
     }
 
-    for (int i = 0; i < count; i++)
-    {
-        char docName[9];
-        sprintf(docName, "address%d", i);
-        const char *address = doc[docName];
-        if (strlen(address) != 17)
-        {
-            doc[docName] = macStr;
-            File file = SPIFFS.open("/config.json", FILE_WRITE);
-            if (!file) {
-                Serial.println("- failed to open file for writing");
-            }
+    bool slotFound = false;
+    // Pastikan bufferMode di-cast dengan benar ke tipe int
+    for (int i = 0; i < count; i++) {
+        // Karena bufferMode bertipe uint8_t*, kita ambil 1 byte per mode
+        doc["mode"][i] = bufferMode[i];
+        configData.modeArray[i] = bufferMode[i];
+        slotFound = true;
+    }
 
-            serializeJson(doc, file);
-            file.close();
-            switch (i){
-            case 0:
-                memcpy(configData.macAddress,mac,6);
-                for (int i = 0; i < 6; i++) {
-                    Serial.print(configData.macAddress[i], HEX);
-                    if (i < 5) {
-                        Serial.print(":");
-                    }
-                }
-                Serial.println();
-                break;
-            case 1:
-                memcpy(configData.macAddress1,mac,6);
-                for (int i = 0; i < 6; i++) {
-                    Serial.print(configData.macAddress1[i], HEX);
-                    if (i < 5) {
-                        Serial.print(":");
-                    }
-                }
-                Serial.println();
-                break;        
-            default:
-                break;
-            }
-            break;
-        }else
-        {
-            Serial.print(docName);
-            Serial.println(" is available");
+    if (slotFound)
+    {
+        // Buka file untuk menulis mode
+        File file = SPIFFS.open("/mode.json", FILE_WRITE);
+        if (!file) {
+            Serial.println("- gagal membuka file untuk menulis mode");
+            return;
+        }
+        if (serializeJson(doc, file) == 0) {
+            Serial.println("- gagal menulis JSON ke file mode.json");
+        } else {
+            Serial.println("Mode berhasil disimpan ke SPIFFS");
+        }
+        file.close();
+    }
+    // Tidak perlu xSemaphoreGive
+}
+
+// Fungsi untuk membaca mode dari SPIFFS dan mengkonversinya menjadi 8 variabel int
+int* storage::readMode() {
+    static int modeArray[8]; // static agar tetap valid setelah fungsi keluar
+
+    File file = SPIFFS.open("/mode.json", FILE_READ);
+    if (!file) {
+        Serial.println("- gagal membuka file untuk membaca mode");
+        // Jika gagal, set semua nilai ke 0
+        for (int i = 0; i < 8; i++) {
+            modeArray[i] = 0;
+        }
+        return modeArray;
+    }
+
+    JsonDocument doc;
+    DeserializationError error = deserializeJson(doc, file);
+    file.close();
+
+    // if (error) {
+    //     Serial.println("- gagal mendeserialize file mode.json");
+    //     for (int i = 0; i < 8; i++) {
+    //         modeArray[i] = 0;
+    //     }
+    //     return modeArray;
+    // }
+
+    // Membaca nilai mode dari dokumen JSON
+    for (int i = 0; i < 8; i++) {
+        if (doc["mode"][i].isNull()) {
+            modeArray[i] = 0;
+        } else {
+            modeArray[i] = doc["mode"][i].as<int>();
         }
     }
+    return modeArray;
+}
+
+void storage::saveVolume(int data){
+    // Tidak perlu ambil semaphore
+    // Buka file untuk menulis mode
+
+    JsonDocument doc;
+
+    File fileRead = SPIFFS.open("/mode.json", FILE_READ);
+    if (fileRead) {
+        deserializeJson(doc, fileRead);
+        fileRead.close();
+    }
+
+    File file = SPIFFS.open("/mode.json", FILE_WRITE);
+    if (!file) {
+        Serial.println("- gagal membuka file untuk menulis mode");
+        return;
+    }
+
+    // Karena bufferMode bertipe uint8_t*, kita ambil 1 byte per mode
+    doc["volume"] = data;
+    configData.dataInt = data;
+
+    if (serializeJson(doc, file) == 0) {
+        Serial.println("- gagal menulis JSON ke file mode.json");
+    } else {
+        Serial.println("Mode berhasil disimpan ke SPIFFS");
+    }
+    file.close();
+    // Tidak perlu xSemaphoreGive
 }
 
 void storage::deleteAddress() {
@@ -134,4 +325,42 @@ void storage::deleteAddress() {
     memset(configData.macAddress, 0, 6);
     memset(configData.macAddress1, 0, 6);
     Serial.println("Addresses cleared successfully");
+}
+
+bool storage::hapusAlamat(const char *docName) {
+    // Tidak perlu ambil semaphore
+
+    JsonDocument doc;
+    File fileRead = SPIFFS.open("/config.json", FILE_READ);
+    if (fileRead) {
+        deserializeJson(doc, fileRead);
+        fileRead.close();
+    }
+
+    // Hapus kunci dari JSON
+    doc.remove(docName);  // Benar-benar hapus kunci dari dokumen
+
+    File file = SPIFFS.open("/config.json", FILE_WRITE);
+    if (!file) {
+        Serial.println("- gagal membuka file untuk menulis");
+        return false;
+    }
+    
+    if (serializeJson(doc, file) == 0) {
+        Serial.println("- gagal menulis JSON ke file config.json");
+        file.close();
+        return false;
+    }
+    file.close();
+
+    // Reset MAC address di memori
+    if (strcmp(docName, "address0") == 0) {
+        memset(configData.macAddress, 0, sizeof(configData.macAddress));
+    } else if (strcmp(docName, "address1") == 0) {
+        memset(configData.macAddress1, 0, sizeof(configData.macAddress1));
+    }
+    
+    Serial.printf("%s berhasil dihapus\n", docName);  // Perbaikan format printf
+    // Tidak perlu xSemaphoreGive
+    return true;
 }

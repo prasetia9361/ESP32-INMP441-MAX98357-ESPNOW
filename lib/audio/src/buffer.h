@@ -20,5 +20,6 @@ public:
     ~Buffer();
     void addBuffer(const uint8_t *samples, int count);
     void removeBuffer(int16_t *samples, int count, int rank);
+    void flush();
     bool getBuffer(){return buffering;}
 };

@@ -51,8 +51,11 @@ void applicationTask(void *param){
 #ifdef TRANSMITTER
     while (true)
     {
-        transmitter->processBinding();
+        
         transmitter->trasnmitData();
+        transmitter->processBinding();
+        // vTaskDelay(10);
+        // vTaskDelay(5);
     }
     transmitter->clearSample();
 #endif
@@ -63,7 +66,8 @@ void applicationTask(void *param){
         lcd->loadPage();
         lcd->binding();
         lcd->deleteAddress();
-        lcd->sendMassage();
+        lcd->sendTones();
+        lcd->sendVolume();
         lcd->changeScreen();
         vTaskDelay(10);
     }

@@ -28,7 +28,7 @@ i2s_config_t i2s_config = {
         .communication_format = (i2s_comm_format_t)(I2S_COMM_FORMAT_I2S),
 #endif
         .intr_alloc_flags = ESP_INTR_FLAG_LEVEL1,
-        .dma_buf_count = 4,
+        .dma_buf_count = 8,
         .dma_buf_len = 128,
         .use_apll = true,
         .tx_desc_auto_clear = true,
@@ -57,13 +57,14 @@ void speaker::write(int16_t *samples, int count, int rank){
     while (sampleIndex < count)
     {
         int samplestoSend = 0;
-        for (int i = 0; i < rawSamplesSize && sampleIndex < count; i++)
-        {
-          int16_t sample = processSample(samples[sampleIndex]);
-          frames[i] = (abs(sample) < (2 ^ (rank + 1))) ? 0 : sample;
+        for (int i = 0; i < rawSamplesSize && sampleIndex < count; i++){
+                int sample = processSample(samples[sampleIndex]);
+                //   frames[i] = (abs(sample) < (2 ^ (rank + 1))) ? 0 : sample;
+                // frames[i] = sample * rank / 100;
+                  frames[i] = constrain(sample, -INT16_MAX, INT16_MAX);
 
-          samplestoSend++;
-          sampleIndex++;
+                samplestoSend++;
+                sampleIndex++;
         }
         size_t bytes_written = 0;
         i2s_write(i2sPort, frames, samplestoSend * sizeof(int16_t), &bytes_written, portMAX_DELAY);

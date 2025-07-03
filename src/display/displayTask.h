@@ -26,6 +26,11 @@ private:
     storage *mMemory;
     Screen *mScreen;
 
+    int tones[8];
+    char macStr[18];
+    uint8_t *macAddress = nullptr;
+    uint8_t* convertTouint8t(int32_t* dataInt, size_t size);
+
     lv_event_t gEventSending;
     lv_event_t gEventBinding;
     lv_event_t gEventDelete;
@@ -38,7 +43,7 @@ public:
     void loadPage();
     void binding();
     void deleteAddress();
-    void sendMassage();
     void sendVolume();
+    void sendTones();
     void changeScreen();
 };

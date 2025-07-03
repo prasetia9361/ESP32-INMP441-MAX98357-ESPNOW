@@ -33,17 +33,17 @@ void transmitterTask::begin(){
     }
     
     mButton->begin();
-    
     pinMode(GPIO_TRANSMIT_BUTTON, INPUT_PULLUP);
 
     Serial.println("Application started");
     mCommunication->addPeer();
+    mCommunication->sendButton(0);
 }
 
 void transmitterTask::processBinding(){
     if (digitalRead(GPIO_TRANSMIT_BUTTON)) {
         // Mode tombol
-        mButton->checkKey();
+        mButton->checkKey(mMemory->readModeTones());
         dataByte = mButton->getButton();
 
         // Proses tombol binding (10)
@@ -58,6 +58,7 @@ void transmitterTask::processBinding(){
         } 
         // Proses tombol normal
         else if (dataByte != 10 && dataByte != 11) {
+            // mCommunication->addPeer();
             mCommunication->sendButton(dataByte);
             mButton->setButton();
         }
@@ -65,26 +66,28 @@ void transmitterTask::processBinding(){
 }
 
 void transmitterTask::trasnmitData(){
+    mCommunication->addPeer();
     if (!digitalRead(GPIO_TRANSMIT_BUTTON)) {
-        // Mode transmisi audio
         Serial.println("Started transmitting");
         mInput->startMic(SAMPLE_RATE);
 
-        // Transmisi audio selama tombol ditekan atau timeout
         unsigned long start_time = millis();
         while (millis() - start_time < 100 || !digitalRead(GPIO_TRANSMIT_BUTTON)) {
             int samples_read = mInput->read(samples, 128);
 
             // Kirim sampel yang dibaca
             for (int i = 0; i < samples_read; i++) {
+                // Reduksi resolusi dari 16-bit ke 12-bit
+                // int16_t compressed = samples[i] >> 4;
+                // Serial.println(samples[i]);
+                // mCommunication->addSample(compressed);
                 mCommunication->addSample(samples[i]);
             }
             
-            // Beri kesempatan watchdog
+            // Tambahkan delay untuk beri waktu proses
             vTaskDelay(1);
         }
 
-        // Kirim sisa sampel dalam buffer
         mCommunication->flush();
         Serial.println("Finished transmitting");
         mInput->stopAudio();

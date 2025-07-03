@@ -42,6 +42,7 @@ void receiverTask::begin(){
     mOutput->startSpeaker(SAMPLE_RATE); 
 
     mButton->begin(); 
+    outBuffer->flush();
     Serial.println("Application started");
 }
 
@@ -72,7 +73,7 @@ void receiverTask::receiveData(){
     {
         // Mainkan nada berdasarkan nilai tombol
         mSirine->generateI2sTone(mode);
-        mSirine->generateSineWave();
+        mSirine->generateSineWave(mMemory->getVolume());
     }
     else
     {
@@ -84,10 +85,9 @@ void receiverTask::receiveData(){
             {
                 digitalWrite(I2S_SPEAKER_SD_PIN, HIGH);
             }
-
+            volSpeaker = map(mMemory->getVolume(), 0, 99, 5, 15);
             outBuffer->removeBuffer(samples, 128, volSpeaker);
-            mOutput->write(samples, 128, volSpeaker);
-
+            mOutput->write(samples, 128, 0);
             if (I2S_SPEAKER_SD_PIN != -1)
             {
                 digitalWrite(I2S_SPEAKER_SD_PIN, LOW);

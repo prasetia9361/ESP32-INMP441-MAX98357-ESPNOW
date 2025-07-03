@@ -42,11 +42,26 @@ void Buffer::removeBuffer(int16_t *samples, int count, int rank){
             samples[i] = 0;
         } else{
             buffering = false;
-            uint8_t sample = buffer[readHead];
-            samples[i] = ((int16_t)(sample - 127)) << rank;
+            // uint8_t sample = buffer[readHead];
+            int16_t sample = buffer[readHead];
+
+            // samples[i] = (sample - 128) << rank;
+
+            // samples[i] = ((int16_t)(sample - 128)) << 15;
+            samples[i] = (sample - 128) << rank;
+
+            // Serial.println(samples[i]);
             readHead = (readHead + 1) % bufferSize;
             availableSamples--;
         }
     }
     xSemaphoreGive(semaphore);
 }
+
+  void Buffer::flush(){
+    xSemaphoreTake(semaphore, portMAX_DELAY);
+    readHead = 0;
+    writeHead = 0;
+    availableSamples = 0;
+    xSemaphoreGive(semaphore);
+  }

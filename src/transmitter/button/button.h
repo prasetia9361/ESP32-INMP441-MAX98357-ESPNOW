@@ -21,7 +21,7 @@ private:
     const int rowPins[3];
     const int colPins[4];
 
-    char getKey(int row, int col);
+    char getKey(int row, int col, const int modeArr[7]);
 
 public:
     button()
@@ -30,7 +30,7 @@ public:
     }
 
     inline void begin();
-    inline void checkKey();
+    inline void checkKey(const int modeArr[7]);
     int getButton() { return massage; }
     void setButton() { massage = 0; }
 };
@@ -48,16 +48,18 @@ inline void button::begin(){
     }
 }
 
-inline char button::getKey(int row, int col){
+// Membuat fungsi getKey dengan parameter tambahan untuk mode 1 sampai 8
+// Fungsi getKey yang lebih efektif dengan input array int
+inline char button::getKey(int row, int col, const int modeArr[7]){
     int keys[3][4] = {
-        {1, 2, 3, 4},
-        {5, 6, 7, 8},
+        {modeArr[0], modeArr[1], modeArr[2], modeArr[3]},
+        {modeArr[4], modeArr[5], modeArr[6], modeArr[7]},
         {9, 10, 11, 12}
     };
     return keys[row][col];
 }
 
-inline void button::checkKey(){
+inline void button::checkKey(const int modeArr[7]){
     for (int col = 0; col < 4; col++)
     {
         digitalWrite(colPins[col], LOW);
@@ -65,7 +67,9 @@ inline void button::checkKey(){
         {
           if (digitalRead(rowPins[row]) == LOW)
             {
-                massage = getKey(row, col);
+                massage = getKey(row, col, modeArr);
+                // Serial.print("button:");
+                // Serial.println(massage);
                 // massage = 0;
             }
             

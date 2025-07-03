@@ -214,7 +214,6 @@ void sirine::generateI2sTone(uint8_t _mode){
 
     case 18:  // Warning chirp
       {
-
         unsigned long cycleTime = currentMillis % 800;
         float t = cycleTime / 800.0f;
         if (cycleTime <= 66) {
@@ -737,7 +736,7 @@ const uint8_t sirine::modeTableMap(int mode){
 
   }
 
-void sirine::generateSineWave() {
+void sirine::generateSineWave(int vol) {
     uint32_t index = (phaseAccumulator >> 24) & (WAVE_TABLE_SIZE - 1);
 
     // Pilih tabel berdasarkan mode lookup
@@ -760,6 +759,7 @@ void sirine::generateSineWave() {
     }
 
     // Apply volume
+    volume = vol;
     int16_t scaledSample = (int32_t(rawSample) * volume * envelopeVolume) / (100 * 100);
 
     phaseAccumulator += phaseStep;

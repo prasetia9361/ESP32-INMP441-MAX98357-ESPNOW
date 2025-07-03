@@ -32,5 +32,5 @@ public:
     //Sirine
     void generateWaveTable();
     void generateI2sTone(uint8_t mode);
-    void generateSineWave();
+    void generateSineWave(int vol);
 };

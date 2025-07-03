@@ -20,7 +20,7 @@
 // channel on ESP32 is channel 1
 #define ESP_NOW_WIFI_CHANNEL 1
 
-#define TRANSPORT_HEADER_SIZE 10
+#define TRANSPORT_HEADER_SIZE 0
 extern uint8_t transportHeader[TRANSPORT_HEADER_SIZE];
 
 class receiverTask{
