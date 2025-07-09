@@ -70,17 +70,13 @@ void transmitterTask::trasnmitData(){
     if (!digitalRead(GPIO_TRANSMIT_BUTTON)) {
         Serial.println("Started transmitting");
         mInput->startMic(SAMPLE_RATE);
-
         unsigned long start_time = millis();
         while (millis() - start_time < 100 || !digitalRead(GPIO_TRANSMIT_BUTTON)) {
             int samples_read = mInput->read(samples, 128);
 
             // Kirim sampel yang dibaca
             for (int i = 0; i < samples_read; i++) {
-                // Reduksi resolusi dari 16-bit ke 12-bit
-                // int16_t compressed = samples[i] >> 4;
-                // Serial.println(samples[i]);
-                // mCommunication->addSample(compressed);
+                // Serial.println(samples[i] >> 8);
                 mCommunication->addSample(samples[i]);
             }
             

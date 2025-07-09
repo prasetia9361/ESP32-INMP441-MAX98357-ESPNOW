@@ -32,5 +32,5 @@ public:
     void startSpeaker(uint16_t sampleRate);
     void stopAudio();
     int16_t processSample(int16_t sample){return sample;}
-    void write(int16_t *samples, int count, int rank);
+    void write(int16_t *samples, int count);
 };

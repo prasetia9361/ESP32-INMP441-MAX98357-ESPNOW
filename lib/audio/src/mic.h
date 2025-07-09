@@ -16,6 +16,9 @@ private:
     int16_t *rawSamples;
     int rawSamplesSize;
     int micReadHead;
+    const int16_t noiseThreshold = 8;// untuk mengurangi noise
+    
+    i2s_port_t i2sPort = I2S_NUM_0;
 
     i2s_pin_config_t i2s_mic_pins = {
         .bck_io_num = I2S_MIC_SERIAL_CLOCK,
@@ -24,7 +27,6 @@ private:
         .data_in_num = I2S_MIC_SERIAL_DATA
     };
 
-    i2s_port_t i2sPort = I2S_NUM_0;
 
     
 public:

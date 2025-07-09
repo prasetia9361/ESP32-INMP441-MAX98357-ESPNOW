@@ -28,9 +28,9 @@ i2s_config_t i2s_config = {
         .communication_format = (i2s_comm_format_t)(I2S_COMM_FORMAT_I2S),
 #endif
         .intr_alloc_flags = ESP_INTR_FLAG_LEVEL1,
-        .dma_buf_count = 8,
+        .dma_buf_count = 5,
         .dma_buf_len = 128,
-        .use_apll = true,
+        .use_apll = false,
         .tx_desc_auto_clear = true,
         .fixed_mclk = 0,
 #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 4, 1)
@@ -50,7 +50,7 @@ void speaker::stopAudio(){
     i2s_driver_uninstall(i2sPort);
 }
 
-void speaker::write(int16_t *samples, int count, int rank){
+void speaker::write(int16_t *samples, int count){
     int sampleIndex = 0;
     static int16_t prev_sample = 0;
     const float alpha = 0.1; 
@@ -59,9 +59,11 @@ void speaker::write(int16_t *samples, int count, int rank){
         int samplestoSend = 0;
         for (int i = 0; i < rawSamplesSize && sampleIndex < count; i++){
                 int sample = processSample(samples[sampleIndex]);
-                //   frames[i] = (abs(sample) < (2 ^ (rank + 1))) ? 0 : sample;
-                // frames[i] = sample * rank / 100;
-                  frames[i] = constrain(sample, -INT16_MAX, INT16_MAX);
+                frames[i] = sample;
+                // frames[i + 1] = sample;
+
+                // Serial.println(frames[i]);
+                // frames[i] = (sample > INT16_MAX) ? INT16_MAX : (sample < -INT16_MAX) ? -INT16_MAX : (int16_t)sample;
 
                 samplestoSend++;
                 sampleIndex++;

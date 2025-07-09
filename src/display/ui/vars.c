@@ -25,7 +25,13 @@ void set_var_volume (int32_t value) {
 }
 
 int32_t get_var_volume(){
+    snprintf(volume, sizeof(volume), "%d", vol); 
+    set_var_volume_persentage(volume);
     return vol;
+}
+
+void set_var_volume_persentage(const char *value){
+    strcpy(volume, value);
 }
 
 const char *get_var_volume_persentage(){

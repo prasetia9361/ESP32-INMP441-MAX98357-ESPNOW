@@ -47,7 +47,7 @@ void Buffer::removeBuffer(int16_t *samples, int count, int rank){
 
             // samples[i] = (sample - 128) << rank;
 
-            // samples[i] = ((int16_t)(sample - 128)) << 15;
+            // samples[i] = (sample - 128) << 7;
             samples[i] = (sample - 128) << rank;
 
             // Serial.println(samples[i]);
