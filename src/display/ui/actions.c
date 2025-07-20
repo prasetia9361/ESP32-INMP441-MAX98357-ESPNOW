@@ -24,8 +24,11 @@ bool button5 = false;
 bool button6 = false;
 bool button7 = false;
 bool button8 = false;
+bool test = false;
 const char *nameDevice;
 int32_t toneSelected[8];
+int32_t testTone;
+int32_t clickCount = 0;
 
 
 
@@ -205,6 +208,11 @@ void action_save_sirine(lv_event_t * e) {
     saveTone = true;
 }
 
+void action_test_sirine(lv_event_t * e){
+    clickCount++;
+    clickCount %= 2;
+    testTone = get_var_siren_tone();
+}
 
 void action_device1(lv_event_t * e){
     

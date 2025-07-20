@@ -34,10 +34,9 @@ void transmitterTask::begin(){
     
     mButton->begin();
     pinMode(GPIO_TRANSMIT_BUTTON, INPUT_PULLUP);
-
     Serial.println("Application started");
     mCommunication->addPeer();
-    mCommunication->sendButton(0);
+    // mCommunication->sendButton(0);
 }
 
 void transmitterTask::processBinding(){
@@ -47,17 +46,17 @@ void transmitterTask::processBinding(){
         dataByte = mButton->getButton();
 
         // Proses tombol binding (10)
-        if (dataByte == 10 && dataByte != lastByte) {
+        if (dataByte == -1 && dataByte != lastByte) {
             mCommunication->statusBinding();
             lastByte = dataByte;
         } 
         // Proses tombol hapus (11)
-        else if (dataByte == 11 && dataByte != lastByte) {
+        else if (dataByte == -2 && dataByte != lastByte) {
             mMemory->deleteAddress();
             lastByte = dataByte;
         } 
         // Proses tombol normal
-        else if (dataByte != 10 && dataByte != 11) {
+        else if (dataByte != -1 && dataByte != -2) {
             // mCommunication->addPeer();
             mCommunication->sendButton(dataByte);
             mButton->setButton();

@@ -29,6 +29,7 @@ extern void action_siren_mode_8(lv_event_t * e);
 extern void action_select_button_1(lv_event_t * e);
 extern void action_device1(lv_event_t * e);
 extern void action_device2(lv_event_t * e);
+extern void action_test_sirine(lv_event_t * e);
 
 
 #ifdef __cplusplus

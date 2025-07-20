@@ -45,5 +45,6 @@ public:
     void deleteAddress();
     void sendVolume();
     void sendTones();
+    void testing();
     void changeScreen();
 };

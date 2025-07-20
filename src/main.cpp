@@ -68,6 +68,7 @@ void applicationTask(void *param){
         lcd->deleteAddress();
         lcd->sendTones();
         lcd->sendVolume();
+        lcd->testing();
         lcd->changeScreen();
         vTaskDelay(10);
     }

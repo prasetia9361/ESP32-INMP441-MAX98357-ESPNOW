@@ -85,7 +85,7 @@ void receiverTask::receiveData(){
             {
                 digitalWrite(I2S_SPEAKER_SD_PIN, HIGH);
             }
-            volSpeaker = map(mMemory->getVolume(), 0, 99, 0, 11);
+            volSpeaker = map(mMemory->getVolume(), 0, 99, 0, 10);
             outBuffer->removeBuffer(samples, 128, volSpeaker);
             mOutput->write(samples, 128);
             if (I2S_SPEAKER_SD_PIN != -1)

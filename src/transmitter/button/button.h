@@ -54,7 +54,7 @@ inline char button::getKey(int row, int col, const int modeArr[7]){
     int keys[3][4] = {
         {modeArr[0], modeArr[1], modeArr[2], modeArr[3]},
         {modeArr[4], modeArr[5], modeArr[6], modeArr[7]},
-        {9, 10, 11, 12}
+        {-9, -1, -2, -4}
     };
     return keys[row][col];
 }

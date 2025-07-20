@@ -7,8 +7,11 @@ extern bool gSetting;
 extern bool gSirine;
 extern bool loadSetting;
 extern bool saveTone;
+// extern bool test;
+extern int32_t clickCount;
 extern int32_t toneSelected[8];
 extern int32_t vol;
+extern int32_t testTone;
 extern const char *address;
 extern const char *address2;
 extern const char *device1;
@@ -248,6 +251,19 @@ void displayTask::sendTones(){
         delete[] dataTones;
     }
     
+}
+
+void displayTask::testing(){
+    if (clickCount == 1)
+    {
+        mCommunication->addPeer();
+        mCommunication->sendButton(testTone);
+        Serial.println(testTone);
+    }else if (clickCount == 0){
+        mCommunication->addPeer();
+        mCommunication->sendButton(0);
+        // Serial.println(clickCount);
+    }
 }
 
 void displayTask::changeScreen(){

@@ -57,6 +57,7 @@ typedef struct _objects_t {
     lv_obj_t *obj22__approve_1;
     lv_obj_t *obj22__close_1;
     lv_obj_t *obj22__obj23;
+    lv_obj_t *obj22__testing;
     lv_obj_t *obj3;
     lv_obj_t *obj4;
     lv_obj_t *obj5;
