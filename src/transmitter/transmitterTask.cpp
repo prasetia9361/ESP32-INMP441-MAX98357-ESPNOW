@@ -39,10 +39,6 @@ void transmitterTask::begin(){
     // mCommunication->sendButton(0);
 }
 
-// Definisikan konstanta untuk "magic numbers" agar kode lebih mudah dibaca
-
-// Helper function untuk memeriksa apakah sebuah tombol adalah tone yang valid
-// (Ini opsional, tapi membuat kode utama lebih bersih)
 bool isToneValid(int key, const int* tones, size_t count) {
     for (size_t i = 0; i < count; ++i) {
         if (key == tones[i]) {
@@ -53,41 +49,36 @@ bool isToneValid(int key, const int* tones, size_t count) {
 }
 
 void transmitterTask::processBinding() {
-    // 1. Periksa kondisi utama (tombol transmit aktif)
     if (!digitalRead(GPIO_TRANSMIT_BUTTON)) {
-        return; // Keluar lebih awal jika tombol tidak aktif
+        return;
     }
 
-    // 2. Baca nilai tombol
     mButton->checkKey(mMemory->readModeTones());
     int dataByte = mButton->getButton();
 
-    // 3. Hanya proses jika nilai tombol BERUBAH
     if (dataByte == lastByte) {
-        return; // Tidak ada perubahan, tidak perlu melakukan apa-apa
+        return; 
     }
 
-    // 4. Proses nilai tombol yang baru menggunakan logika yang jelas
     bool shouldSend = false;
 
     switch (dataByte) {
         case KEY_STATUS_BINDING:
             mCommunication->statusBinding();
-            shouldSend = true; // Anggap ini sebagai aksi yang valid
+            shouldSend = true;
             break;
 
         case KEY_DELETE_ADDRESS:
             mMemory->deleteAddress();
-            shouldSend = true; // Aksi yang valid
+            shouldSend = true;
             break;
 
         case KEY_RELEASED:
-            mCommunication->sendButton(dataByte); // Kirim status tombol dilepas (0)
+            mCommunication->sendButton(dataByte);
             shouldSend = true;
             break;
 
         default:
-            // Untuk semua nilai lainnya, periksa apakah itu adalah tone yang valid
             const int* modeTones = mMemory->readModeTones();
             if (isToneValid(dataByte, modeTones, 8)) {
                 mCommunication->sendButton(dataByte);
@@ -96,7 +87,6 @@ void transmitterTask::processBinding() {
             break;
     }
 
-    // 5. Perbarui lastByte HANYA JIKA ada aksi yang valid dilakukan
     if (shouldSend) {
         lastByte = dataByte;
     }
@@ -111,13 +101,11 @@ void transmitterTask::trasnmitData(){
         while (millis() - start_time < 100 || !digitalRead(GPIO_TRANSMIT_BUTTON)) {
             int samples_read = mInput->read(samples, 128);
 
-            // Kirim sampel yang dibaca
             for (int i = 0; i < samples_read; i++) {
                 // Serial.println(samples[i] >> 8);
                 mCommunication->addSample(samples[i]);
             }
             
-            // Tambahkan delay untuk beri waktu proses
             vTaskDelay(1);
         }
 
