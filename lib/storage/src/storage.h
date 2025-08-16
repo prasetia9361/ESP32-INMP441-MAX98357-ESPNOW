@@ -2,7 +2,12 @@
 #define STORAGE_H
 
 #include <SPIFFS.h>
+#ifdef DISP
+#include "arduinojson_fix.h"
+#else
 #include <ArduinoJson.h>
+#endif
+
 #include <freertos/FreeRTOS.h>
 #include "FS.h"
 
@@ -39,6 +44,6 @@ public:
     void writeMacAddress(const uint8_t *mac, int count);
     void writeMacAddress(const uint8_t *mac, const char *device, int count);
     void deleteAddress();
-    bool hapusAlamat(const char *docName);
+    bool hapusAlamat(const char *deviceName);
 };
 #endif

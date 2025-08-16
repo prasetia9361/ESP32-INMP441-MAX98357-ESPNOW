@@ -2,9 +2,13 @@
 
 #include <Arduino.h>
 #include <WiFi.h>
+#ifdef DISP
+#include "arduinojson_fix.h"
+#else
+#include <ArduinoJson.h>
+#endif
 #include <esp_now.h>
 #include <esp_wifi.h>
-#include <ArduinoJson.h>
 #include "storage.h"
 #include "buffer.h"
 

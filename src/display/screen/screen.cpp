@@ -72,14 +72,22 @@ Screen::~Screen() {
 }
 
 bool Screen::begin() {
+    Serial.println("Initializing display...");
+    
     // Initialize display
-    tft.begin();
+    if (!tft.begin()) {
+        Serial.println("Failed to initialize display");
+        return false;
+    }
+    
     tft.setRotation(0);
     tft.setBrightness(255);
+    Serial.println("Display initialized successfully");
 
     // Initialize LVGL
     lv_init();
     lv_tick_set_cb((lv_tick_get_cb_t)millis);
+    Serial.println("LVGL initialized");
 
     // Allocate display buffer
     displayBuffer = (lv_color_t*)heap_caps_malloc(DRAW_BUF_SIZE, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
@@ -87,9 +95,15 @@ bool Screen::begin() {
         Serial.println("Failed to allocate display buffer");
         return false;
     }
+    Serial.printf("Display buffer allocated: %d bytes\n", DRAW_BUF_SIZE);
 
     // Setup display
     display = lv_display_create(TFT_HOR_RES, TFT_VER_RES);
+    if (!display) {
+        Serial.println("Failed to create LVGL display");
+        return false;
+    }
+    
     lv_display_set_user_data(display, this);
     lv_display_set_render_mode(display, LV_DISPLAY_RENDER_MODE_FULL);
     lv_display_set_flush_cb(display, disp_flush_cb);
@@ -97,10 +111,16 @@ bool Screen::begin() {
 
     // Setup touchpad
     touchpad = lv_indev_create();
+    if (!touchpad) {
+        Serial.println("Failed to create LVGL input device");
+        return false;
+    }
+    
     lv_indev_set_user_data(touchpad, this);
     lv_indev_set_type(touchpad, LV_INDEV_TYPE_POINTER);
     lv_indev_set_read_cb(touchpad, touchpad_read_cb);
 
+    Serial.println("Screen initialization completed successfully");
     return true;
 }
 

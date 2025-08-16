@@ -38,6 +38,12 @@ private:
 
     int16_t *samples = reinterpret_cast<int16_t *>(malloc(sizeof(int16_t) * 128));
 
+    typedef enum{
+        KEY_RELEASED = 0,
+        KEY_DELETE_ADDRESS = 254,
+        KEY_STATUS_BINDING = 255
+    }sendingButton;
+    
     int dataByte;
     int lastByte = 0;
     const TickType_t delayTicks = pdMS_TO_TICKS(5);

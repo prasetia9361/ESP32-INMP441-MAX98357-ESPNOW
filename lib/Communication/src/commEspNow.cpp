@@ -189,7 +189,7 @@ void commEspNow::addPeer() {
     
     if (strcmp(memoryStorage->device1(), "sound") == 0) {
         mac = memoryStorage->getMac();
-    } else {
+    } else if(strcmp(memoryStorage->device2(), "sound") == 0){
         mac = memoryStorage->getMac1();
     }
 

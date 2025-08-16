@@ -17,6 +17,11 @@ void applicationTask(void *param);
 
 void setup(){
     Serial.begin(115200);
+    
+    while (!Serial) {
+        delay(10);
+    }
+    
 #ifdef RECEIVER
     receiver = new receiverTask();
 
@@ -29,15 +34,29 @@ void setup(){
 #ifdef DISP
     lcd = new displayTask();
     lcd->begin();
+    
+    // Delay tambahan untuk display
+    delay(500);
 #endif
     TaskHandle_t taskHandler;
-    xTaskCreate(applicationTask, "applicationTask", 10192, NULL, 2, &taskHandler);
-
+    BaseType_t result = xTaskCreate(
+        applicationTask, 
+        "applicationTask", 
+        16384, 
+        NULL, 
+        2, 
+        &taskHandler
+    );
+    
+    if (result != pdPASS) {
+        Serial.println("Failed to create task!");
+    }
 }
 
 void loop(){
     vTaskDelay(pdMS_TO_TICKS(1000));
 }
+
 void applicationTask(void *param){
 #ifdef RECEIVER
     while (true)
@@ -59,19 +78,15 @@ void applicationTask(void *param){
     }
     transmitter->clearSample();
 #endif
+
 #ifdef DISP
-    while (true)
-    {
-        lcd->showDataReceive();
-        lcd->loadPage();
-        lcd->binding();
-        lcd->deleteAddress();
-        lcd->sendTones();
-        lcd->sendVolume();
-        lcd->testing();
-        lcd->changeScreen();
-        vTaskDelay(10);
+    while (true) {
+        if (lcd) {
+            lcd->tick();
+            lcd->updateData();
+            lcd->testSiren();
+        }
+        vTaskDelay(pdMS_TO_TICKS(50)); // Increased delay for stability
     }
-    
 #endif
 }

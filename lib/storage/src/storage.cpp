@@ -1,7 +1,5 @@
 #include "storage.h"
 
-#include "storage.h"
-
 storage::storage() {
     // Tidak perlu inisialisasi semaphore
 }
@@ -327,40 +325,67 @@ void storage::deleteAddress() {
     Serial.println("Addresses cleared successfully");
 }
 
-bool storage::hapusAlamat(const char *docName) {
-    // Tidak perlu ambil semaphore
+bool storage::hapusAlamat(const char *deviceName) {
+    File fileRead = SPIFFS.open("/config.json", FILE_READ);
+    if (!fileRead) {
+        Serial.println("Gagal membuka config.json untuk dibaca.");
+        return false;
+    }
 
     JsonDocument doc;
-    File fileRead = SPIFFS.open("/config.json", FILE_READ);
-    if (fileRead) {
-        deserializeJson(doc, fileRead);
-        fileRead.close();
-    }
+    DeserializationError error = deserializeJson(doc, fileRead);
+    fileRead.close();
 
-    // Hapus kunci dari JSON
-    doc.remove(docName);  // Benar-benar hapus kunci dari dokumen
-
-    File file = SPIFFS.open("/config.json", FILE_WRITE);
-    if (!file) {
-        Serial.println("- gagal membuka file untuk menulis");
+    if (error) {
+        Serial.print("deserializeJson() gagal: ");
+        Serial.println(error.c_str());
         return false;
     }
-    
-    if (serializeJson(doc, file) == 0) {
-        Serial.println("- gagal menulis JSON ke file config.json");
-        file.close();
-        return false;
-    }
-    file.close();
 
-    // Reset MAC address di memori
-    if (strcmp(docName, "address0") == 0) {
-        memset(configData.macAddress, 0, sizeof(configData.macAddress));
-    } else if (strcmp(docName, "address1") == 0) {
-        memset(configData.macAddress1, 0, sizeof(configData.macAddress1));
+    JsonObject root = doc.as<JsonObject>();
+    const char* keyToRemove = nullptr;
+
+    for (JsonPair kv : root) {
+        JsonArray arr = kv.value().as<JsonArray>();
+        
+        if (!arr.isNull() && arr.size() >= 2) {
+            const char* currentDeviceName = arr[1];
+
+            if (strcmp(currentDeviceName, deviceName) == 0) {
+                
+                keyToRemove = kv.key().c_str();
+                Serial.printf("Perangkat '%s' ditemukan pada kunci '%s'. Akan dihapus.\n", deviceName, keyToRemove);
+                break;
+            }
+        }
     }
-    
-    Serial.printf("%s berhasil dihapus\n", docName);  // Perbaikan format printf
-    // Tidak perlu xSemaphoreGive
+
+    if (keyToRemove != nullptr) {
+
+        if (strcmp(keyToRemove, "address0") == 0) {
+            memset(configData.macAddress, 0, sizeof(configData.macAddress));
+            memset(configData.nameDevice1,0,sizeof(configData.nameDevice1));
+        } else if (strcmp(keyToRemove, "address1") == 0) {
+            memset(configData.macAddress1, 0, sizeof(configData.macAddress1));
+            memset(configData.nameDevice2,0,sizeof(configData.nameDevice2));
+        }
+        
+        root.remove(keyToRemove);
+
+        File fileWrite = SPIFFS.open("/config.json", FILE_WRITE);
+        if (!fileWrite) {
+            Serial.println("Gagal membuka config.json untuk ditulis.");
+            return false;
+        }
+
+        if (serializeJson(doc, fileWrite) == 0) {
+            Serial.println("Gagal menulis ke file.");
+        } else {
+            Serial.println("File config.json berhasil diperbarui.");
+        }
+        fileWrite.close();
+    } else {
+        Serial.printf("Perangkat dengan nama '%s' tidak ditemukan.\n", deviceName);
+    }
     return true;
 }

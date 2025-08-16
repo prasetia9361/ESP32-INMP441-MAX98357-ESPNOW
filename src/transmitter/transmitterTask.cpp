@@ -39,28 +39,66 @@ void transmitterTask::begin(){
     // mCommunication->sendButton(0);
 }
 
-void transmitterTask::processBinding(){
-    if (digitalRead(GPIO_TRANSMIT_BUTTON)) {
-        // Mode tombol
-        mButton->checkKey(mMemory->readModeTones());
-        dataByte = mButton->getButton();
+// Definisikan konstanta untuk "magic numbers" agar kode lebih mudah dibaca
 
-        // Proses tombol binding (10)
-        if (dataByte == -1 && dataByte != lastByte) {
-            mCommunication->statusBinding();
-            lastByte = dataByte;
-        } 
-        // Proses tombol hapus (11)
-        else if (dataByte == -2 && dataByte != lastByte) {
-            mMemory->deleteAddress();
-            lastByte = dataByte;
-        } 
-        // Proses tombol normal
-        else if (dataByte != -1 && dataByte != -2) {
-            // mCommunication->addPeer();
-            mCommunication->sendButton(dataByte);
-            mButton->setButton();
+// Helper function untuk memeriksa apakah sebuah tombol adalah tone yang valid
+// (Ini opsional, tapi membuat kode utama lebih bersih)
+bool isToneValid(int key, const int* tones, size_t count) {
+    for (size_t i = 0; i < count; ++i) {
+        if (key == tones[i]) {
+            return true;
         }
+    }
+    return false;
+}
+
+void transmitterTask::processBinding() {
+    // 1. Periksa kondisi utama (tombol transmit aktif)
+    if (!digitalRead(GPIO_TRANSMIT_BUTTON)) {
+        return; // Keluar lebih awal jika tombol tidak aktif
+    }
+
+    // 2. Baca nilai tombol
+    mButton->checkKey(mMemory->readModeTones());
+    int dataByte = mButton->getButton();
+
+    // 3. Hanya proses jika nilai tombol BERUBAH
+    if (dataByte == lastByte) {
+        return; // Tidak ada perubahan, tidak perlu melakukan apa-apa
+    }
+
+    // 4. Proses nilai tombol yang baru menggunakan logika yang jelas
+    bool shouldSend = false;
+
+    switch (dataByte) {
+        case KEY_STATUS_BINDING:
+            mCommunication->statusBinding();
+            shouldSend = true; // Anggap ini sebagai aksi yang valid
+            break;
+
+        case KEY_DELETE_ADDRESS:
+            mMemory->deleteAddress();
+            shouldSend = true; // Aksi yang valid
+            break;
+
+        case KEY_RELEASED:
+            mCommunication->sendButton(dataByte); // Kirim status tombol dilepas (0)
+            shouldSend = true;
+            break;
+
+        default:
+            // Untuk semua nilai lainnya, periksa apakah itu adalah tone yang valid
+            const int* modeTones = mMemory->readModeTones();
+            if (isToneValid(dataByte, modeTones, 8)) {
+                mCommunication->sendButton(dataByte);
+                shouldSend = true;
+            }
+            break;
+    }
+
+    // 5. Perbarui lastByte HANYA JIKA ada aksi yang valid dilakukan
+    if (shouldSend) {
+        lastByte = dataByte;
     }
 }
 

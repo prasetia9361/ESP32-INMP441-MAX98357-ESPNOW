@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Size: 20 px
  * Bpp: 4
- * Opts: --user-data-dir=C:\Users\ACER\AppData\Roaming\eezstudio --app-path=C:\Users\ACER\AppData\Local\Programs\eezstudio\resources\app.asar --no-sandbox --no-zygote --node-integration-in-worker --lang=en-US --device-scale-factor=1 --num-raster-threads=4 --enable-main-frame-before-activation --renderer-client-id=5 --time-ticks-at-unix-epoch=-1744987694188694 --launch-time-ticks=142916415708 --mojo-platform-channel-handle=2584 --field-trial-handle=1696,i,18126846293053216474,12720215641353285960,262144 --enable-features=kWebSQLAccess --disable-features=SpareRendererForSitePerProcess,WinDelaySpellcheckServiceInit,WinRetrieveSuggestionsOnlyOnDemand --variations-seed-version /prefetch:1
+ * Opts: --user-data-dir=C:\Users\ACER\AppData\Roaming\eezstudio --app-path=C:\Users\ACER\AppData\Local\Programs\eezstudio\resources\app.asar --no-sandbox --no-zygote --node-integration-in-worker --lang=en-US --device-scale-factor=1.5 --num-raster-threads=4 --enable-main-frame-before-activation --renderer-client-id=5 --time-ticks-at-unix-epoch=-1752585452703512 --launch-time-ticks=259519894848 --mojo-platform-channel-handle=2592 --field-trial-handle=1668,i,9806301549760338575,13850132661832984463,262144 --enable-features=kWebSQLAccess --disable-features=SpareRendererForSitePerProcess,WinDelaySpellcheckServiceInit,WinRetrieveSuggestionsOnlyOnDemand --variations-seed-version /prefetch:1
  ******************************************************************************/
 
 #ifdef LV_LVGL_H_INCLUDE_SIMPLE
