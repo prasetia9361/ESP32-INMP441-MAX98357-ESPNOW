@@ -12,6 +12,12 @@ receiverTask::receiverTask()
     mCommunication = new commEspNow(outBuffer, mMemory, ESP_NOW_WIFI_CHANNEL);
     mCommunication->setHeader(TRANSPORT_HEADER_SIZE, transportHeader);
     mButton = new button(BINDING_BUTTON); 
+    
+    // Alokasi memory yang aman untuk samples
+    samples = (int16_t *)malloc(sizeof(int16_t) * 128);
+    if (!samples) {
+        Serial.println("Error: Failed to allocate memory for samples");
+    }
 }
 
 receiverTask::~receiverTask()
@@ -31,15 +37,23 @@ void receiverTask::begin(){
     Serial.print("My IDF Version is: ");
     Serial.println(esp_get_idf_version());
     
+    // Delay untuk memastikan sistem stabil
+    delay(200);
+    
     // Inisialisasi komunikasi dan komponen lain
     mMemory->init(); 
+    delay(100);
 
     if (!mCommunication->begin()) {
         Serial.println("Komunikasi gagal dimulai!");
+        return;
     }
+    delay(200); // Delay setelah komunikasi
 
     mSirine->generateWaveTable();
+    delay(50);
     mOutput->startSpeaker(SAMPLE_RATE); 
+    delay(100); // Delay untuk memastikan I2S stabil
 
     mButton->begin(); 
     outBuffer->flush();
@@ -78,6 +92,11 @@ void receiverTask::receiveData(){
     else
     {
         // Proses audio normal
+        if (!samples) {
+            Serial.println("Error: samples buffer is null");
+            return;
+        }
+        
         unsigned long start_time = millis();
         while (millis() - start_time < 100 || !outBuffer->getBuffer())
         {
@@ -92,6 +111,7 @@ void receiverTask::receiveData(){
             {
                 digitalWrite(I2S_SPEAKER_SD_PIN, LOW);
             }
+            yield(); // Berikan kesempatan task lain berjalan
         }
     }
 

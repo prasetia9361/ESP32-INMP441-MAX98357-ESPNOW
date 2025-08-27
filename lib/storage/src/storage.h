@@ -16,7 +16,7 @@ private:
     typedef struct config {
         uint8_t macAddress[6] = {0,0,0,0,0,0};
         uint8_t macAddress1[6] = {0,0,0,0,0,0};
-        int32_t modeArray[8] = {0,0,0,0,0,0,0,0};
+        int32_t modeArray[9] = {0,0,0,0,0,0,0,0,0};
         char nameDevice1[12] = "";
         char nameDevice2[12] = "";
         int dataInt;

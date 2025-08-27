@@ -53,7 +53,7 @@ void transmitterTask::processBinding() {
         return;
     }
 
-    mButton->checkKey(mMemory->readModeTones());
+    mButton->checkKey();
     int dataByte = mButton->getButton();
 
     if (dataByte == lastByte) {
@@ -74,14 +74,14 @@ void transmitterTask::processBinding() {
             break;
 
         case KEY_RELEASED:
-            mCommunication->sendButton(dataByte);
+            mCommunication->sendDataInt(dataByte, "remot");
             shouldSend = true;
             break;
 
         default:
-            const int* modeTones = mMemory->readModeTones();
-            if (isToneValid(dataByte, modeTones, 8)) {
-                mCommunication->sendButton(dataByte);
+            const int modeTones[9] = {0,1,2,3,4,5,6,7,8};
+            if (isToneValid(dataByte, modeTones, 9)) {
+                mCommunication->sendDataInt(dataByte, "remot");
                 shouldSend = true;
             }
             break;

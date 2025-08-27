@@ -27,6 +27,7 @@
         "exception": "cpp",
         "fstream": "cpp",
         "ostream": "cpp",
-        "sstream": "cpp"
+        "sstream": "cpp",
+        "istream": "cpp"
     }
 }

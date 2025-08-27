@@ -17,11 +17,6 @@ void applicationTask(void *param);
 
 void setup(){
     Serial.begin(115200);
-    
-    while (!Serial) {
-        delay(10);
-    }
-    
 #ifdef RECEIVER
     receiver = new receiverTask();
 
@@ -42,7 +37,7 @@ void setup(){
     BaseType_t result = xTaskCreate(
         applicationTask, 
         "applicationTask", 
-        16384, 
+        32768, 
         NULL, 
         2, 
         &taskHandler
@@ -63,6 +58,8 @@ void applicationTask(void *param){
     {
         receiver->processBinding();
         receiver->receiveData();
+        // vTaskDelay(pdMS_TO_TICKS(5)); // Tambahkan delay untuk menghindari watchdog
+        // vTaskDelay(5);
     }
     receiver->clearSample();
 #endif

@@ -3,7 +3,7 @@
     "selectedUserPageObject": "[exodus-one.eez-project]:/userPages/2",
     "selectedUserWidgetObject": "[exodus-one.eez-project]:/userWidgets/0",
     "selectedActionObject": "[exodus-one.eez-project]:/actions/0",
-    "selectedGlobalVariableObject": "[exodus-one.eez-project]:/variables/globalVariables/13",
+    "selectedGlobalVariableObject": "[exodus-one.eez-project]:/variables/globalVariables/0",
     "selectedStructureObject": "[exodus-one.eez-project]:/variables/structures/1",
     "selectedEnumObject": "[exodus-one.eez-project]:/variables/enums/1",
     "subnavigationSelectedItems": {
@@ -67,7 +67,7 @@
           },
           {
             "type": "border",
-            "selected": 0,
+            "selected": 3,
             "size": 331.5,
             "location": "bottom",
             "children": [
@@ -121,7 +121,6 @@
                   "type": "tabset",
                   "id": "#2402e58f-0bbf-4b2b-8393-d25907a592a5",
                   "weight": 1,
-                  "selected": 2,
                   "enableClose": false,
                   "children": [
                     {
@@ -1376,16 +1375,18 @@
     "[exodus-one.eez-project]:/userWidgets/0[flow-state]": {
       "selection": {
         "0": {
+          "3": {},
           "4": {}
         },
-        "26": {
+        "26": {},
+        "34": {
           "$selected": true
         }
       },
       "transform": {
         "translate": {
-          "x": -1165.4083349227906,
-          "y": -233.92750000000024
+          "x": -1160.95333492279,
+          "y": -220.9799853134158
         },
         "scale": 0.67
       },
@@ -1506,7 +1507,7 @@
   "searchMatchWholeWord": false,
   "replaceEnabled": false,
   "replaceText": "",
-  "pageRuntimeFrontFace": false,
+  "pageRuntimeFrontFace": true,
   "breakpoints": {},
   "watchExpressions": [],
   "showComponentDescriptions": true,

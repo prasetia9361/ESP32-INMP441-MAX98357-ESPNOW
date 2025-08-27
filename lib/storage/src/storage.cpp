@@ -89,7 +89,7 @@ void storage::init() {
                 JsonArray modes = doc["mode"];
                 Serial.printf("[DEBUG] Jumlah mode yang ditemukan: %d\n", modes.size());
                 
-                for (int i = 0; i < 8 && i < modes.size(); i++) {
+                for (int i = 0; i < 9 && i < modes.size(); i++) {
                     configData.modeArray[i] = modes[i];
                     Serial.printf("[DEBUG] Mode[%d] = %d\n", i, configData.modeArray[i]);
                 }

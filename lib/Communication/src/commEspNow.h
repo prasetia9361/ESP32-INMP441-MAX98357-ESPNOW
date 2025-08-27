@@ -47,9 +47,13 @@ public:
     void addSample(int16_t sample);
     void flush();
     
+    void sendDataInt(int data, const char *header);
+    int32_t recvDataInt(const char *header);
+
     // fungsi untuk display
     void sendVolume(int vol);
     void sendSirineSetting(const uint8_t *modelBuffer);
+    void sendMode(const int32_t *modelBuffer, int count);
 
     // Fungsi untuk button
     void sendButton(int data);

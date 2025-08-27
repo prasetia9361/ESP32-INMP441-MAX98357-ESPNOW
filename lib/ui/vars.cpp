@@ -36,19 +36,19 @@ int32_t getSirenTone(){
 }
 
 int32_t *getModes(){
-    static int32_t modesBuffer[8];
+    static int32_t modesBuffer[9];
     auto value = flow::getGlobalVariable(FLOW_GLOBAL_VARIABLE_MODES);
     auto array = value.getArray();
     if (!array) {
-        for (int i = 0; i < 8; ++i) modesBuffer[i] = 0;
+        for (int i = 0; i < 9; ++i) modesBuffer[i] = 0;
         return modesBuffer;
     }
     uint32_t count = array->arraySize;
-    if (count > 8) count = 8;
+    if (count > 9) count = 9;
     for (uint32_t i = 0; i < count; ++i) {
         modesBuffer[i] = array->values[i].getInt32();
     }
-    for (uint32_t i = count; i < 8; ++i) {
+    for (uint32_t i = count; i < 9; ++i) {
         modesBuffer[i] = 0;
     }
     return modesBuffer;
@@ -96,9 +96,9 @@ void setVol(int32_t vol){
 }
 
 void setModes(int32_t *arr, size_t len){
-    if (arr == nullptr || len < 8) return;
-    eez::ArrayOfInteger flowArray(8);
-    for (int i = 0; i < 8; ++i) {
+    if (arr == nullptr || len < 9) return;
+    eez::ArrayOfInteger flowArray(9);
+    for (int i = 0; i < 9; ++i) {
         flowArray.at(i, arr[i]);
     }
     flow::setGlobalVariable(FLOW_GLOBAL_VARIABLE_MODES, flowArray.value);

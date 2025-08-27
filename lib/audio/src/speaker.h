@@ -5,11 +5,11 @@
 
 // speaker settings
 #define USE_I2S_SPEAKER_OUTPUT
-#define I2S_SPEAKER_SERIAL_CLOCK 26
-#define I2S_SPEAKER_LEFT_RIGHT_CLOCK 25
-#define I2S_SPEAKER_SERIAL_DATA 22
+#define I2S_SPEAKER_SERIAL_CLOCK 7
+#define I2S_SPEAKER_LEFT_RIGHT_CLOCK 6
+#define I2S_SPEAKER_SERIAL_DATA 8
 // Shutdown line if you have this wired up or -1 if you don't
-#define I2S_SPEAKER_SD_PIN 5
+#define I2S_SPEAKER_SD_PIN -1
 
 class speaker
 {

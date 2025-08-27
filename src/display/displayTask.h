@@ -29,6 +29,7 @@ public:
     void tick();
     void updateData();
     void testSiren();
+    int latesButton;
 
 private:
     uint8_t* convertTouint8t(int32_t* dataInt, size_t size);

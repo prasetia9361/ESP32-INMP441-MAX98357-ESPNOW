@@ -14,42 +14,84 @@ static commEspNow* instance = NULL;
 
 // Callback untuk receiver
 void receiverCallback(const uint8_t* macAddr, const uint8_t* data, int dataLen) { 
+    // Pengecekan null pointer untuk mencegah crash
+    if (!instance || !macAddr || !data) {
+        Serial.println("[ERROR] Null pointer in receiverCallback");
+        return;
+    }
+    
+    if (dataLen <= 0) {
+        Serial.println("[ERROR] Invalid data length in receiverCallback");
+        return;
+    }
+    
     if (strcmp((char*)data, "remot") == 0 || strcmp((char*)data, "displ") == 0) {
         Serial.println("[DEBUG] Menerima esp32remote/displ, menyimpan MAC address...");
-        instance->memoryStorage->writeMacAddress(macAddr,(char*)data, 2);
+        if (instance->memoryStorage) {
+            instance->memoryStorage->writeMacAddress(macAddr,(char*)data, 2);
+        }
     } else {
         // Serial.println("[DEBUG] Memproses data normal");
+        if (!instance->memoryStorage) {
+            Serial.println("[ERROR] memoryStorage is null");
+            return;
+        }
+        
         int headerSize = instance->headerSize;
-        memcpy(&instance->messageData, data, sizeof(instance->messageData));
+        if (dataLen >= sizeof(instance->messageData)) {
+            memcpy(&instance->messageData, data, sizeof(instance->messageData));
+        } else {
+            Serial.println("[ERROR] Data length too small for messageData");
+            return;
+        }
 
         if (memcmp(macAddr, instance->memoryStorage->getMac(), 6) == 0 || 
             memcmp(macAddr, instance->memoryStorage->getMac1(), 6) == 0) {
-            if (instance->messageData.dataLen > headerSize && 
-                (instance->messageData.dataLen <= maxEspNowPacketSize) && 
-                strlen(instance->messageData.data) == 0) {
-            // if (strlen(instance->messageData.data) == 0){
-            
+            if (sizeof(instance->messageData.buffer) > headerSize && (sizeof(instance->messageData.buffer) <= maxEspNowPacketSize) && strlen(instance->messageData.data) == 0) {
+                if (instance->messageData.dataLen == 0)
+                {
+                    if (instance->audioBuffer) {
+                        instance->audioBuffer->addBuffer(instance->messageData.buffer + headerSize, sizeof(instance->messageData.buffer) - headerSize);
+                    }
+                }else
+                {// masih sampe disini
+                    for (int i = 0; i < 9; i++) {
+                        Serial.print(instance->messageData.buffer[i]);
+                        if (i < 8) Serial.print(", ");
+                    }
+                    Serial.println();
+                    instance->memoryStorage->writeMode(instance->messageData.buffer, 9);
+                }
                 // Audio data
-                instance->audioBuffer->addBuffer(instance->messageData.buffer + headerSize, 
-                                           instance->messageData.dataLen - headerSize);
             } else {
-                Serial.println("[DEBUG] Memproses button data");
+                char jsonBuffer[256];
+                memcpy(jsonBuffer, instance->messageData.data, sizeof(jsonBuffer) - 1);
+                jsonBuffer[sizeof(jsonBuffer) - 1] = '\0';
                 JsonDocument jsonDoc;
-                DeserializationError error = deserializeJson(jsonDoc, instance->messageData.data);
+                DeserializationError error = deserializeJson(jsonDoc, jsonBuffer);
                 if (!error) {
                     const char *header = jsonDoc["h"];
-                    if (strcmp(header, "displ") == 0) {
+                    if (strcmp(header, "vol") == 0) {
                         Serial.print("[DEBUG] Volume speaker: ");
-                        int vol = jsonDoc["v"];
+                        int vol = jsonDoc["d"];
                         instance->memoryStorage->saveVolume(vol);
                         Serial.println(vol);
-                    } else if (strcmp(header, "remot") == 0) {
+                    } else if (strcmp(header, "test") == 0) {
                         Serial.print("[DEBUG] Button value: ");
                         instance->buttonValue = jsonDoc["d"];
+                        Serial.println(instance->buttonValue);
+                    }else if (strcmp(header, "remot") == 0)
+                    {
+                        Serial.print("[DEBUG] Button value: ");
+                        int value = jsonDoc["d"];
+                        int32_t* modeTones = instance->memoryStorage->readModeTones();
+                        instance->buttonValue = modeTones[value];
                         Serial.println(instance->buttonValue);
                     }
                 } else {
                     Serial.println("[DEBUG] Error parsing JSON");
+                    Serial.print("[DEBUG] Error parsing JSON: ");
+                    Serial.println(error.c_str());
                 }
             }
         } else {
@@ -60,67 +102,44 @@ void receiverCallback(const uint8_t* macAddr, const uint8_t* data, int dataLen) 
 
 // Callback untuk transmitter
 void transmitterCallback(const uint8_t* macAddr, const uint8_t* data, int dataLen) {
-    Serial.println("[DEBUG] Transmitter callback dipanggil");
-    Serial.print("[DEBUG] Data diterima dari MAC: ");
-    for (int i = 0; i < 6; i++) {
-        Serial.printf("%02X", macAddr[i]);
-        if (i < 5) Serial.print(":");
+    // Pengecekan null pointer untuk mencegah crash
+    if (!instance || !macAddr || !data) {
+        Serial.println("[ERROR] Null pointer in transmitterCallback");
+        return;
     }
-    Serial.println();
+    
+    if (dataLen <= 0) {
+        Serial.println("[ERROR] Invalid data length in transmitterCallback");
+        return;
+    }
+    
+    // Serial.println("[DEBUG] Transmitter callback dipanggil");
+    // Serial.print("[DEBUG] Data diterima dari MAC: ");
+    // for (int i = 0; i < 6; i++) {
+    //     Serial.printf("%02X", macAddr[i]);
+    //     if (i < 5) Serial.print(":");
+    // }
+    // Serial.println();
 
-    if (strcmp((char*)data, "sound") == 0 || strcmp((char*)data, "displ") == 0) {
-        Serial.println("[DEBUG] Menerima sound/displ, menyimpan MAC address...");
-        instance->memoryStorage->writeMacAddress(macAddr,(char*)data, 2);
-    } else {
-        Serial.println("[DEBUG] Memproses data normal");
-        int headerSize = instance->headerSize;
-        memcpy(&instance->messageData, data, sizeof(instance->messageData));
-        
-        if (memcmp(macAddr, instance->memoryStorage->getMac(), 6) == 0 || 
-            memcmp(macAddr, instance->memoryStorage->getMac1(), 6) == 0) {
-            Serial.println("[DEBUG] MAC address cocok");
-            
-            if (strlen(instance->messageData.data) == 0) {
-                Serial.println("[DEBUG] Memproses tone selected data");
-                Serial.print("[DEBUG] Nilai toneSelected: ");
-                for (int i = 0; i < 8; i++) {
-                    Serial.print(instance->messageData.buffer[i]);
-                    if (i < 7) Serial.print(", ");
-                }
-                Serial.println();
-                instance->memoryStorage->writeMode(instance->messageData.buffer, 8);
-            } else {
-                Serial.println("[DEBUG] Memproses JSON data");
-                JsonDocument jsonDoc;
-                DeserializationError error = deserializeJson(jsonDoc, instance->messageData.data);
-                if (!error) {
-                    const char *header = jsonDoc["h"];
-                    if (strcmp(header, "displ") == 0) {
-                        Serial.print("[DEBUG] Volume speaker: ");
-                        int volume = jsonDoc["v"];
-                        Serial.println(volume);
-                    }
-                } else {
-                    Serial.println("[DEBUG] Error parsing JSON");
-                }
-            }
-        } else {
-            Serial.println("[DEBUG] MAC address tidak cocok dengan yang tersimpan di storage");
+    if (strcmp((char*)data, "sound") == 0) {
+        Serial.println("[DEBUG] Menerima sound, menyimpan MAC address...");
+        if (instance->memoryStorage) {
+            instance->memoryStorage->writeMacAddress(macAddr,(char*)data, 2);
         }
     }
 }
 
 void displayCallback(const uint8_t* macAddr, const uint8_t* data, int dataLen) {
-    Serial.println("[DEBUG] Display callback dipanggil");
-    Serial.print("[DEBUG] Data diterima dari MAC: ");
-    for (int i = 0; i < 6; i++) {
-        Serial.printf("%02X", macAddr[i]);
-        if (i < 5) Serial.print(":");
-    }
-    Serial.println();
+    // Serial.println("[DEBUG] Display callback dipanggil");
+    // Serial.print("[DEBUG] Data diterima dari MAC: ");
+    // for (int i = 0; i < 6; i++) {
+    //     Serial.printf("%02X", macAddr[i]);
+    //     if (i < 5) Serial.print(":");
+    // }
+    // Serial.println();
 
-    if (strcmp((char*)data, "sound") == 0 || strcmp((char*)data, "remot") == 0) {
-        Serial.println("[DEBUG] Menerima esp32-sound/esp32remote, menyimpan MAC address...");
+    if (strcmp((char*)data, "sound") == 0) {
+        Serial.println("[DEBUG] Menerima sound/, menyimpan MAC address...");
         instance->memoryStorage->writeMacAddress(macAddr,(char*)data, 2);
     }
 }
@@ -149,19 +168,30 @@ bool commEspNow::begin() {
         return false;
     }
 
+    // Delay untuk memastikan sistem stabil
+    delay(100);
+    
     WiFi.mode(WIFI_STA);
+    delay(50);
     WiFi.disconnect();
+    delay(100);
+    
     Serial.print("[DEBUG] MAC Address: ");
     Serial.println(WiFi.macAddress());
 
     Serial.println("[DEBUG] Setup WiFi channel");
     esp_wifi_set_promiscuous(true);
+    delay(10);
     esp_wifi_set_channel(wifiChannel, WIFI_SECOND_CHAN_NONE);
+    delay(10);
     esp_wifi_set_promiscuous(false);
+    delay(50);
 
     Serial.println("[DEBUG] Inisialisasi ESP-NOW");
     esp_err_t result = esp_now_init();
     if (result == ESP_OK) {
+        delay(50); // Delay setelah ESP-NOW init
+        
         #ifdef RECEIVER
             Serial.println("[DEBUG] ESPNow Init in Receiver Success");
             esp_now_register_recv_cb(receiverCallback);
@@ -176,6 +206,8 @@ bool commEspNow::begin() {
             Serial.println("[DEBUG] ESPNow Init in Display Success");
             esp_now_register_recv_cb(displayCallback);
         #endif
+        
+        delay(50); // Delay setelah register callback
     } else {
         Serial.printf("[ERROR] ESPNow Init failed: %s\n", esp_err_to_name(result));
         return false;
@@ -275,13 +307,14 @@ void commEspNow::addSample(int16_t sample) {
     index++;
 
     if ((index + headerSize) == bufferSize) {
-        messageData.dataLen = index + headerSize;
+        // messageData.dataLen = index + headerSize;
+        messageData.dataLen = 0;
         // memset(messageData.data, 0, sizeof(messageData.data));
         sendData();
         index = 0;
     }
 }
-
+// bakal ganti ke sendDataInt
 void commEspNow::sendButton(int data) {
     if (data != lastData) {
         JsonDocument doc;
@@ -296,14 +329,40 @@ void commEspNow::sendButton(int data) {
         lastData = data;
     }
 }
-
+// bakal ganti ke sendDataInt
 void commEspNow::sendVolume(int vol) {
     JsonDocument doc;
-    doc["h"] = "displ";
-    doc["v"] = vol;
+    doc["h"] = "vol";
+    doc["d"] = vol;
     serializeJson(doc, messageData.data);
     sendData();
     memset(messageData.data, 0, sizeof(messageData.data));
+}
+
+void commEspNow::sendDataInt(int data, const char *header) {
+    bool isVolHeader = (strcmp(header, "vol") == 0);
+    if (!isVolHeader && data == lastData) {
+        return;
+    }
+
+    Serial.print("[DEBUG] Mengirim data integer. Header: ");
+    Serial.print(header);
+    Serial.print(", Data: ");
+    Serial.println(data);
+
+    JsonDocument doc;
+    doc["h"] = header;
+    doc["d"] = data;
+
+    serializeJson(doc, messageData.data);
+
+    sendData();
+    memset(messageData.data, 0, sizeof(messageData.data));
+    if (!isVolHeader) {
+        lastData = data;
+        Serial.print("[DEBUG] lastData diupdate menjadi: ");
+        Serial.println(lastData);
+    }
 }
 
 void commEspNow::sendSirineSetting(const uint8_t *modelBuffer){
@@ -311,6 +370,31 @@ void commEspNow::sendSirineSetting(const uint8_t *modelBuffer){
     memset(messageData.data, 0, sizeof(messageData.data));
     messageData.dataLen = sizeof(modelBuffer);
     sendData();
+}
+
+void commEspNow::sendMode(const int32_t *modelBuffer, int count){
+    Serial.println("[DEBUG] Memulai fungsi sendMode");
+    JsonDocument doc;
+    doc["h"] = "mode";
+    Serial.print("[DEBUG] Jumlah mode yang akan dikirim: ");
+    Serial.println(count);
+    for (int i = 0; i < count; i++) {
+        doc["siren"][i] = modelBuffer[i];
+        Serial.print("[DEBUG] Mode[");
+        Serial.print(i);
+        Serial.print("] = ");
+        Serial.println(modelBuffer[i]);
+    }
+    serializeJson(doc, messageData.data);
+    Serial.print("[DEBUG] Payload JSON mode: ");
+    Serial.println(messageData.data);
+
+    memset(messageData.buffer, 0, sizeof(messageData.buffer));
+    index = 0;
+    messageData.dataLen = 0;
+    sendData();
+    memset(messageData.data, 0, sizeof(messageData.data));
+    Serial.println("[DEBUG] Selesai mengirim mode dan membersihkan buffer data");
 }
 
 void commEspNow::flush() {
@@ -351,10 +435,20 @@ bool commEspNow::binding() {
         peerInfo.peer_addr[i] = 0xFF;
     }
 
+    // uint8_t custom_addr[6] = {0x34, 0x85, 0x18, 0x8F, 0xBD, 0x04};
+    // memcpy(peerInfo.peer_addr, custom_addr, 6);
+
     if (esp_now_add_peer(&peerInfo) == ESP_OK) {
         Serial.println(messaging);
-        esp_now_send(peerInfo.peer_addr, (uint8_t*)messaging, 12);
+        esp_err_t result = esp_now_send(peerInfo.peer_addr, (uint8_t*)messaging, 12);
+        if (result != ESP_OK) {
+            Serial.printf("Send Error: %s\n", esp_err_to_name(result));
+        }else
+        {
+            Serial.printf("Send Success");
+        }
         esp_now_del_peer(peerInfo.peer_addr);
+        
         return true;
     }
     return false;

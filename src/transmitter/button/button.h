@@ -21,7 +21,7 @@ private:
     const int rowPins[3];
     const int colPins[4];
 
-    char getKey(int row, int col, const int modeArr[7]);
+    char getKey(int row, int col);
     int lastPressedKey = 0; 
 
 public:
@@ -31,7 +31,7 @@ public:
     }
 
     inline void begin();
-    inline void checkKey(const int modeArr[7]);
+    inline void checkKey();
     int getButton() { return massage; }
     void setButton() { massage = 0; }
 };
@@ -51,16 +51,16 @@ inline void button::begin(){
 
 // Membuat fungsi getKey dengan parameter tambahan untuk mode 1 sampai 8
 // Fungsi getKey yang lebih efektif dengan input array int
-inline char button::getKey(int row, int col, const int modeArr[7]){
+inline char button::getKey(int row, int col){
     int keys[3][4] = {
-        {modeArr[0], modeArr[1], modeArr[2], modeArr[3]},
-        {modeArr[4], modeArr[5], modeArr[6], modeArr[7]},
+        {1, 2, 3, 4},
+        {5, 6, 7, 8},
         {-9, 254, 255, -4}
     };
     return keys[row][col];
 }
 
-inline void button::checkKey(const int modeArr[7]) {
+inline void button::checkKey() {
     int currentPressedKey = 0; // Variabel lokal untuk menyimpan tombol yang ditekan pada pemindaian ini
     bool keyFoundThisScan = false;
 
@@ -69,7 +69,7 @@ inline void button::checkKey(const int modeArr[7]) {
         digitalWrite(colPins[col], LOW);
         for (int row = 0; row < 3; row++) {
             if (digitalRead(rowPins[row]) == LOW) {
-                currentPressedKey = getKey(row, col, modeArr);
+                currentPressedKey = getKey(row, col);
                 keyFoundThisScan = true;
                 break;
             }

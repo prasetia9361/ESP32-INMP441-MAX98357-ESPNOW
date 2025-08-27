@@ -32,7 +32,7 @@ private:
     Buffer *outBuffer;
     button *mButton; 
 
-    int16_t *samples = reinterpret_cast<int16_t *>(malloc(sizeof(int16_t) * 128));
+    int16_t *samples = nullptr;
     
     int mode = 0;
     int volSpeaker = 11;

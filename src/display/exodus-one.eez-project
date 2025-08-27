@@ -185,7 +185,7 @@
         "objID": "dd08b8dc-49e2-400f-b1ae-97be6b9b1cc3",
         "name": "device1",
         "type": "string",
-        "defaultValue": "\"speaker\"",
+        "defaultValue": "\"\"",
         "persistent": false,
         "native": false
       },
@@ -193,7 +193,7 @@
         "objID": "1c63f594-8ae8-4896-f655-7f4069b1e9a7",
         "name": "device2",
         "type": "string",
-        "defaultValue": "\"remote\"",
+        "defaultValue": "\"\"",
         "persistent": false,
         "native": false
       },
@@ -201,7 +201,7 @@
         "objID": "7b405719-11ac-444b-a6ad-98cc4bee34ff",
         "name": "address",
         "type": "string",
-        "defaultValue": "\"F4:EE:AA:E3:FF\"",
+        "defaultValue": "\"\"",
         "persistent": false,
         "native": false
       },
@@ -209,7 +209,7 @@
         "objID": "73100c29-8687-41ea-cdea-0f0c8b1c4f02",
         "name": "address2",
         "type": "string",
-        "defaultValue": "\"FF:E7:A4:E3:00\"",
+        "defaultValue": "\"\"",
         "persistent": false,
         "native": false
       },
@@ -314,7 +314,7 @@
         "objID": "e4003625-6f14-4359-8305-db8d13f3e200",
         "name": "modes",
         "type": "array:integer",
-        "defaultValue": "[0,0,0,0,0,0,0,0]",
+        "defaultValue": "[0,0,0,0,0,0,0,0,0]",
         "persistent": false,
         "native": false
       },
@@ -352,6 +352,38 @@
         "type": "boolean",
         "defaultValue": "false",
         "persistent": false
+      },
+      {
+        "objID": "e45b4329-e0b6-4a2f-ee60-eddf979e9874",
+        "name": "title1",
+        "type": "string",
+        "defaultValue": "\"\"",
+        "persistent": false,
+        "native": false
+      },
+      {
+        "objID": "b9d8efaf-027a-48ff-d7a2-b20641b2b43b",
+        "name": "title2",
+        "type": "string",
+        "defaultValue": "\"\"",
+        "persistent": false,
+        "native": false
+      },
+      {
+        "objID": "6864c546-e10d-4d67-b7d6-209800e2af23",
+        "name": "body1",
+        "type": "string",
+        "defaultValue": "\"\"",
+        "persistent": false,
+        "native": false
+      },
+      {
+        "objID": "e5f8ed89-3944-4e17-a8d6-bff2a5cf7c7f",
+        "name": "body2",
+        "type": "string",
+        "defaultValue": "\"\"",
+        "persistent": false,
+        "native": false
       }
     ],
     "structures": [
@@ -646,7 +678,7 @@
           "entries": [
             {
               "objID": "70c2d56d-ae7d-4215-807c-0223b462dc7f",
-              "variable": "modes[0]",
+              "variable": "modes[1]",
               "value": "siren_tone"
             },
             {
@@ -668,7 +700,7 @@
           "entries": [
             {
               "objID": "2240aabc-ed33-48f5-aac2-de1aca225cbb",
-              "variable": "modes[1]",
+              "variable": "modes[2]",
               "value": "siren_tone"
             },
             {
@@ -690,7 +722,7 @@
           "entries": [
             {
               "objID": "e520597f-4285-4e0d-d52c-c21ab5e2a753",
-              "variable": "modes[2]",
+              "variable": "modes[3]",
               "value": "siren_tone"
             },
             {
@@ -712,7 +744,7 @@
           "entries": [
             {
               "objID": "ea410f57-ae0d-4545-b51d-62ae3626749d",
-              "variable": "modes[3]",
+              "variable": "modes[4]",
               "value": "siren_tone"
             },
             {
@@ -734,7 +766,7 @@
           "entries": [
             {
               "objID": "03ea8185-73e4-4a1a-86bd-54b33936b942",
-              "variable": "modes[4]",
+              "variable": "modes[5]",
               "value": "siren_tone"
             },
             {
@@ -756,7 +788,7 @@
           "entries": [
             {
               "objID": "f680b7c5-e376-4279-f1a4-8ead0c78954b",
-              "variable": "modes[5]",
+              "variable": "modes[6]",
               "value": "siren_tone"
             },
             {
@@ -778,7 +810,7 @@
           "entries": [
             {
               "objID": "092b05cd-2024-4c2e-e84f-95a9b77a62ed",
-              "variable": "modes[6]",
+              "variable": "modes[7]",
               "value": "siren_tone"
             },
             {
@@ -800,7 +832,7 @@
           "entries": [
             {
               "objID": "8c04a5e9-6999-4230-f45b-c64a3eb8f41d",
-              "variable": "modes[7]",
+              "variable": "modes[8]",
               "value": "siren_tone"
             },
             {
@@ -4406,17 +4438,22 @@
         {
           "objID": "007858ec-639c-4771-9804-8bdf8f1010ff",
           "type": "SetVariableActionComponent",
-          "left": 0,
-          "top": -94,
+          "left": -266,
+          "top": -101,
           "width": 214,
-          "height": 79,
+          "height": 101,
           "customInputs": [],
           "customOutputs": [],
           "entries": [
             {
+              "objID": "d5d5ee8a-dff4-40fb-d6c3-c16e0aa60a1c",
+              "variable": "siren_modal",
+              "value": "1"
+            },
+            {
               "objID": "56457d40-82b2-4a35-c502-2057c018415c",
               "variable": "siren_tone",
-              "value": "modes[0]"
+              "value": "modes[1]"
             },
             {
               "objID": "619fa7ef-0495-4a55-d90c-81fe5833c3d5",
@@ -4426,36 +4463,24 @@
           ]
         },
         {
-          "objID": "9e6845bb-b2b6-4152-f572-d54ee4953d39",
+          "objID": "aa8360ce-5181-43bd-b2e7-ee736d338677",
           "type": "SetVariableActionComponent",
-          "left": 0,
-          "top": -166,
-          "width": 140,
-          "height": 57,
+          "left": 134,
+          "top": -101,
+          "width": 214,
+          "height": 101,
           "customInputs": [],
           "customOutputs": [],
           "entries": [
             {
-              "objID": "fdf39137-453e-48bc-d459-ee5d29ef9c5f",
+              "objID": "ee9d086d-b9f6-4e9b-8762-1b62e0082b17",
               "variable": "siren_modal",
-              "value": "1"
-            }
-          ]
-        },
-        {
-          "objID": "aa8360ce-5181-43bd-b2e7-ee736d338677",
-          "type": "SetVariableActionComponent",
-          "left": 304,
-          "top": -101,
-          "width": 214,
-          "height": 79,
-          "customInputs": [],
-          "customOutputs": [],
-          "entries": [
+              "value": "2"
+            },
             {
               "objID": "a2ed50e1-aa75-4aaa-d887-d37e3d077cdd",
               "variable": "siren_tone",
-              "value": "modes[1]"
+              "value": "modes[2]"
             },
             {
               "objID": "64e0112a-820c-4b53-f838-c6741356571c",
@@ -4465,36 +4490,24 @@
           ]
         },
         {
-          "objID": "a69a7c09-3d27-45b4-9219-33d3f9cffe2c",
+          "objID": "78072a18-33ec-4213-aa13-ed63de46d835",
           "type": "SetVariableActionComponent",
-          "left": 304,
-          "top": -173,
-          "width": 140,
-          "height": 57,
+          "left": 561,
+          "top": -101,
+          "width": 214,
+          "height": 101,
           "customInputs": [],
           "customOutputs": [],
           "entries": [
             {
-              "objID": "0562142b-efbb-4752-a599-e42e8a142a76",
+              "objID": "ca58e99a-14f4-4380-914c-c6d0423002f4",
               "variable": "siren_modal",
-              "value": "2"
-            }
-          ]
-        },
-        {
-          "objID": "78072a18-33ec-4213-aa13-ed63de46d835",
-          "type": "SetVariableActionComponent",
-          "left": 664,
-          "top": -101,
-          "width": 214,
-          "height": 79,
-          "customInputs": [],
-          "customOutputs": [],
-          "entries": [
+              "value": "3"
+            },
             {
               "objID": "6dae615f-7281-426f-a94d-21633e36f906",
               "variable": "siren_tone",
-              "value": "modes[2]"
+              "value": "modes[3]"
             },
             {
               "objID": "994cc563-3927-4f13-9ef5-8aaa949cae01",
@@ -4504,36 +4517,24 @@
           ]
         },
         {
-          "objID": "e103a40d-bffd-4549-d206-01d5b96f13f1",
+          "objID": "30bccad9-0bf1-4e41-8695-ae3b49d76e60",
           "type": "SetVariableActionComponent",
-          "left": 664,
-          "top": -173,
-          "width": 140,
-          "height": 57,
+          "left": 380,
+          "top": 289,
+          "width": 214,
+          "height": 101,
           "customInputs": [],
           "customOutputs": [],
           "entries": [
             {
-              "objID": "ebbcecb3-f6f8-4cd9-cb11-dd640e0f9ae5",
+              "objID": "d01704ad-9fd1-44d2-9de2-7fb8bbc2e4d1",
               "variable": "siren_modal",
-              "value": "3"
-            }
-          ]
-        },
-        {
-          "objID": "30bccad9-0bf1-4e41-8695-ae3b49d76e60",
-          "type": "SetVariableActionComponent",
-          "left": 672,
-          "top": 439,
-          "width": 214,
-          "height": 79,
-          "customInputs": [],
-          "customOutputs": [],
-          "entries": [
+              "value": "5"
+            },
             {
               "objID": "142028d9-542f-4890-a145-768198212156",
               "variable": "siren_tone",
-              "value": "modes[4]"
+              "value": "modes[5]"
             },
             {
               "objID": "d77c8be8-c4f0-42d8-ee42-5feff546cc68",
@@ -4543,36 +4544,24 @@
           ]
         },
         {
-          "objID": "7d95c266-afc6-4894-e7fa-3e704d1f97b7",
+          "objID": "a068d5d5-4097-4bcb-c6b8-6c904d2548a1",
           "type": "SetVariableActionComponent",
-          "left": 670,
-          "top": 365,
-          "width": 140,
-          "height": 57,
+          "left": -266,
+          "top": 91,
+          "width": 214,
+          "height": 101,
           "customInputs": [],
           "customOutputs": [],
           "entries": [
             {
-              "objID": "2e0dbf59-bbe0-4c1d-ccd5-d6d62bd17d43",
+              "objID": "c9168531-1206-4cfd-a8cf-1eb9cdb61aee",
               "variable": "siren_modal",
-              "value": "5"
-            }
-          ]
-        },
-        {
-          "objID": "a068d5d5-4097-4bcb-c6b8-6c904d2548a1",
-          "type": "SetVariableActionComponent",
-          "left": -400,
-          "top": 93,
-          "width": 214,
-          "height": 79,
-          "customInputs": [],
-          "customOutputs": [],
-          "entries": [
+              "value": "4"
+            },
             {
               "objID": "23a624f9-62cd-479f-dccf-79608be4278c",
               "variable": "siren_tone",
-              "value": "modes[3]"
+              "value": "modes[4]"
             },
             {
               "objID": "927abb97-0950-477d-bfb8-bb978dfa9d19",
@@ -4582,36 +4571,24 @@
           ]
         },
         {
-          "objID": "d2da7c4c-24f0-400d-bbea-08345fbf0c80",
+          "objID": "1ec91e11-9c98-4814-aeaa-fab61925265e",
           "type": "SetVariableActionComponent",
-          "left": -400,
-          "top": 21,
-          "width": 140,
-          "height": 57,
+          "left": 561,
+          "top": 91,
+          "width": 214,
+          "height": 101,
           "customInputs": [],
           "customOutputs": [],
           "entries": [
             {
-              "objID": "df21010b-00de-41a3-8172-23a1ee228883",
+              "objID": "9e53ad6f-253d-4c97-fb0a-265e5deca07d",
               "variable": "siren_modal",
-              "value": "4"
-            }
-          ]
-        },
-        {
-          "objID": "1ec91e11-9c98-4814-aeaa-fab61925265e",
-          "type": "SetVariableActionComponent",
-          "left": 668,
-          "top": 74,
-          "width": 214,
-          "height": 79,
-          "customInputs": [],
-          "customOutputs": [],
-          "entries": [
+              "value": "6"
+            },
             {
               "objID": "4649dabe-f28c-4343-d17b-9e28475aa498",
               "variable": "siren_tone",
-              "value": "modes[5]"
+              "value": "modes[6]"
             },
             {
               "objID": "eec35cff-f26e-416c-816a-542112db75e7",
@@ -4621,36 +4598,24 @@
           ]
         },
         {
-          "objID": "dbecaaf9-fe2c-4abb-91be-b4c0e9ba709d",
+          "objID": "fced2965-8fcb-48f5-c6b2-ff5d1554d435",
           "type": "SetVariableActionComponent",
-          "left": 666,
-          "top": 0,
-          "width": 140,
-          "height": 57,
+          "left": -266,
+          "top": 289,
+          "width": 214,
+          "height": 101,
           "customInputs": [],
           "customOutputs": [],
           "entries": [
             {
-              "objID": "cf50baa5-f530-4d61-e6b2-605d48d009b8",
+              "objID": "144539e7-91e1-402a-c05e-fbd1725510fe",
               "variable": "siren_modal",
-              "value": "6"
-            }
-          ]
-        },
-        {
-          "objID": "fced2965-8fcb-48f5-c6b2-ff5d1554d435",
-          "type": "SetVariableActionComponent",
-          "left": -363,
-          "top": 422,
-          "width": 214,
-          "height": 79,
-          "customInputs": [],
-          "customOutputs": [],
-          "entries": [
+              "value": "7"
+            },
             {
               "objID": "01ffc08a-17c3-4c3d-b8ba-6f7a484af35f",
               "variable": "siren_tone",
-              "value": "modes[6]"
+              "value": "modes[7]"
             },
             {
               "objID": "9a158317-6eb9-4e6b-8fff-6d084b97c33e",
@@ -4660,36 +4625,24 @@
           ]
         },
         {
-          "objID": "b8dbb840-12bb-4440-d699-b5d5c18bd02a",
+          "objID": "282c0c4b-e362-4957-9256-cc248a150e2b",
           "type": "SetVariableActionComponent",
-          "left": -365,
-          "top": 348,
-          "width": 140,
-          "height": 57,
+          "left": 649,
+          "top": 272,
+          "width": 214,
+          "height": 101,
           "customInputs": [],
           "customOutputs": [],
           "entries": [
             {
-              "objID": "a7f845ec-9c44-4cf1-a31e-1c46db70b1fc",
+              "objID": "c0d6b287-8c10-48c1-ad37-e3c73ff05b28",
               "variable": "siren_modal",
-              "value": "7"
-            }
-          ]
-        },
-        {
-          "objID": "282c0c4b-e362-4957-9256-cc248a150e2b",
-          "type": "SetVariableActionComponent",
-          "left": 670,
-          "top": 262,
-          "width": 214,
-          "height": 79,
-          "customInputs": [],
-          "customOutputs": [],
-          "entries": [
+              "value": "8"
+            },
             {
               "objID": "a5b5c834-93ab-4bd7-9ebd-27cb6c2e2705",
               "variable": "siren_tone",
-              "value": "modes[7]"
+              "value": "modes[8]"
             },
             {
               "objID": "00eaac9b-1d0c-4113-fdba-7784735baeb8",
@@ -4699,27 +4652,10 @@
           ]
         },
         {
-          "objID": "e1b3e18a-a3d5-44c9-9b46-f729438fc2e4",
-          "type": "SetVariableActionComponent",
-          "left": 668,
-          "top": 188,
-          "width": 140,
-          "height": 57,
-          "customInputs": [],
-          "customOutputs": [],
-          "entries": [
-            {
-              "objID": "a00444b6-6b53-4732-b9f2-b718156a01fb",
-              "variable": "siren_modal",
-              "value": "8"
-            }
-          ]
-        },
-        {
           "objID": "0331dbb0-bccb-4dee-ff64-c811e1107ffb",
           "type": "LVGLActionComponent",
-          "left": 249,
-          "top": 404,
+          "left": 334,
+          "top": 470,
           "width": 293,
           "height": 54,
           "customInputs": [],
@@ -4746,31 +4682,10 @@
           "input": "@seqin"
         },
         {
-          "objID": "944cd4e1-4b0b-4f7a-e891-30587671a504",
-          "source": "cd6db517-5979-474e-f51f-194857afd138",
-          "output": "CLICKED",
-          "target": "9e6845bb-b2b6-4152-f572-d54ee4953d39",
-          "input": "@seqin"
-        },
-        {
           "objID": "1c96513f-450a-41f4-e710-ec8d2d0e7969",
           "source": "e9a3b617-4a08-4013-88be-4f25fc754cc0",
           "output": "CLICKED",
           "target": "aa8360ce-5181-43bd-b2e7-ee736d338677",
-          "input": "@seqin"
-        },
-        {
-          "objID": "0c10c129-e977-47bb-b28f-8a53071bacf7",
-          "source": "e9a3b617-4a08-4013-88be-4f25fc754cc0",
-          "output": "CLICKED",
-          "target": "a69a7c09-3d27-45b4-9219-33d3f9cffe2c",
-          "input": "@seqin"
-        },
-        {
-          "objID": "bdf6cca6-7a8b-4394-bd08-de31038051c5",
-          "source": "37cd8d1d-8164-4cf2-c0ab-8378f115902c",
-          "output": "CLICKED",
-          "target": "e103a40d-bffd-4549-d206-01d5b96f13f1",
           "input": "@seqin"
         },
         {
@@ -4781,24 +4696,10 @@
           "input": "@seqin"
         },
         {
-          "objID": "626ba47f-feb9-4d7b-f60e-82548dd55b53",
-          "source": "8618c2e9-c1a5-4751-be66-e945d689b507",
-          "output": "CLICKED",
-          "target": "d2da7c4c-24f0-400d-bbea-08345fbf0c80",
-          "input": "@seqin"
-        },
-        {
           "objID": "ffb717ca-d11d-4336-b541-766e92364327",
           "source": "8618c2e9-c1a5-4751-be66-e945d689b507",
           "output": "CLICKED",
           "target": "a068d5d5-4097-4bcb-c6b8-6c904d2548a1",
-          "input": "@seqin"
-        },
-        {
-          "objID": "4e15f90c-af08-49a0-8099-d1e80012c4a9",
-          "source": "cb425a53-c0f7-4160-ff7d-0b9ff5bf9a45",
-          "output": "CLICKED",
-          "target": "b8dbb840-12bb-4440-d699-b5d5c18bd02a",
           "input": "@seqin"
         },
         {
@@ -4809,13 +4710,6 @@
           "input": "@seqin"
         },
         {
-          "objID": "f37b1e01-307e-4daa-b0df-7d4d645eb6e0",
-          "source": "db97c91e-a7fc-4841-b28f-fd0a74edcaac",
-          "output": "CLICKED",
-          "target": "dbecaaf9-fe2c-4abb-91be-b4c0e9ba709d",
-          "input": "@seqin"
-        },
-        {
           "objID": "7e782336-e912-4f93-dad6-1bf6c97f775f",
           "source": "db97c91e-a7fc-4841-b28f-fd0a74edcaac",
           "output": "CLICKED",
@@ -4823,24 +4717,10 @@
           "input": "@seqin"
         },
         {
-          "objID": "75c19f00-988b-4b9b-f444-c9b188a5fbac",
-          "source": "b913f2cb-55fb-464a-d2d9-a720b3429c31",
-          "output": "CLICKED",
-          "target": "e1b3e18a-a3d5-44c9-9b46-f729438fc2e4",
-          "input": "@seqin"
-        },
-        {
           "objID": "c5863da7-f730-4cf5-89a6-c08d6e1bdce6",
           "source": "b913f2cb-55fb-464a-d2d9-a720b3429c31",
           "output": "CLICKED",
           "target": "282c0c4b-e362-4957-9256-cc248a150e2b",
-          "input": "@seqin"
-        },
-        {
-          "objID": "0bfb79d1-71ca-49dc-a0c6-e1b2c862063a",
-          "source": "b8d46f89-9e07-4741-bc94-621592ea87c9",
-          "output": "CLICKED",
-          "target": "7d95c266-afc6-4894-e7fa-3e704d1f97b7",
           "input": "@seqin"
         },
         {
@@ -5345,9 +5225,15 @@
                   "type": "LVGLLabelWidget",
                   "left": 1,
                   "top": 20,
-                  "width": 288,
+                  "width": 56,
                   "height": 17,
-                  "customInputs": [],
+                  "customInputs": [
+                    {
+                      "objID": "8b7f3768-2391-4b2c-a02d-75ead22b417d",
+                      "name": "in",
+                      "type": "any"
+                    }
+                  ],
                   "customOutputs": [],
                   "style": {
                     "objID": "8c325c15-1910-41ab-9712-a4aa717cbe9f",
@@ -5382,7 +5268,7 @@
                       }
                     }
                   },
-                  "text": "address == \"\" ? address2 : address",
+                  "text": "body1",
                   "textType": "expression",
                   "longMode": "WRAP",
                   "recolor": false
@@ -5392,9 +5278,15 @@
                   "type": "LVGLLabelWidget",
                   "left": 1,
                   "top": -2,
-                  "width": 272,
+                  "width": 52,
                   "height": 22,
-                  "customInputs": [],
+                  "customInputs": [
+                    {
+                      "objID": "72ba6b64-bc38-4ac5-d0df-51e537c8c405",
+                      "name": "in",
+                      "type": "any"
+                    }
+                  ],
                   "customOutputs": [],
                   "style": {
                     "objID": "f3773e29-81c0-4eb9-af71-c7e75034f5b3",
@@ -5430,7 +5322,7 @@
                       }
                     }
                   },
-                  "text": "device1 == \"\" ? device2 : device1",
+                  "text": "title1",
                   "textType": "expression",
                   "longMode": "WRAP",
                   "recolor": false,
@@ -5506,9 +5398,15 @@
                   "type": "LVGLLabelWidget",
                   "left": 1,
                   "top": 20,
-                  "width": 80,
+                  "width": 56,
                   "height": 17,
-                  "customInputs": [],
+                  "customInputs": [
+                    {
+                      "objID": "410c3719-23ad-4552-fc83-2fcbdc430bf7",
+                      "name": "in",
+                      "type": "any"
+                    }
+                  ],
                   "customOutputs": [],
                   "style": {
                     "objID": "776a7f65-ae29-4959-ea14-7229d769c2cb",
@@ -5544,7 +5442,7 @@
                       }
                     }
                   },
-                  "text": "address2",
+                  "text": "body2",
                   "textType": "expression",
                   "longMode": "WRAP",
                   "recolor": false
@@ -5554,9 +5452,15 @@
                   "type": "LVGLLabelWidget",
                   "left": 1,
                   "top": -1,
-                  "width": 77,
+                  "width": 56,
                   "height": 22,
-                  "customInputs": [],
+                  "customInputs": [
+                    {
+                      "objID": "7f88e64e-d770-4f01-c2a7-7a5a78bb9c2c",
+                      "name": "in",
+                      "type": "any"
+                    }
+                  ],
                   "customOutputs": [],
                   "style": {
                     "objID": "701d0f57-968c-4038-8d57-ed938e0e047c",
@@ -5592,7 +5496,7 @@
                       }
                     }
                   },
-                  "text": "device2",
+                  "text": "title2",
                   "textType": "expression",
                   "longMode": "WRAP",
                   "recolor": false
@@ -5679,8 +5583,8 @@
         {
           "objID": "3661b011-7fd1-46e5-e5ff-d4908a67f196",
           "type": "SetVariableActionComponent",
-          "left": 1375,
-          "top": 150,
+          "left": 1356,
+          "top": 109,
           "width": 294,
           "height": 189,
           "customInputs": [],
@@ -5688,12 +5592,12 @@
           "entries": [
             {
               "objID": "c81f1985-42ba-48ee-d03e-ef7448ba805a",
-              "variable": "device1 != \"\" ? device1 : device2",
+              "variable": "title1",
               "value": "\"\""
             },
             {
               "objID": "729c2d84-ec12-415a-d4a7-468a8d677dd5",
-              "variable": "address != \"\" ? address : address2",
+              "variable": "body1",
               "value": "\"\""
             },
             {
@@ -5726,20 +5630,30 @@
         {
           "objID": "01aa09a8-8e7c-4edd-f4bf-64f2de5f27ed",
           "type": "SetVariableActionComponent",
-          "left": 1375,
-          "top": 384,
+          "left": 1356,
+          "top": 367,
           "width": 294,
-          "height": 189,
+          "height": 233,
           "customInputs": [],
           "customOutputs": [],
           "entries": [
             {
               "objID": "c5fa5c4a-e88c-49d3-9778-92a076d47397",
+              "variable": "title2",
+              "value": "\"\""
+            },
+            {
+              "objID": "9b697d1a-4be2-4d42-a7ef-c734289b3f27",
               "variable": "device2",
               "value": "\"\""
             },
             {
               "objID": "889bfc1e-6769-45b9-b367-4e8ff35d1a99",
+              "variable": "body2",
+              "value": "\"\""
+            },
+            {
+              "objID": "88ccd0e6-2428-463a-8fcc-356cec092e24",
               "variable": "address2",
               "value": "\"\""
             },
@@ -5854,8 +5768,8 @@
         {
           "objID": "6612c57a-d341-4aeb-b556-059442e9549d",
           "type": "SwitchActionComponent",
-          "left": 505,
-          "top": 211,
+          "left": 500,
+          "top": 222,
           "width": 223,
           "height": 73,
           "customInputs": [],
@@ -6090,40 +6004,6 @@
           "milliseconds": "500"
         },
         {
-          "objID": "c7f383c4-26a7-4a0c-cd79-d48dc52eb887",
-          "type": "SetVariableActionComponent",
-          "left": 943,
-          "top": 106,
-          "width": 331,
-          "height": 57,
-          "customInputs": [],
-          "customOutputs": [],
-          "entries": [
-            {
-              "objID": "7437e679-2cbd-497c-aec4-b8357e6f400a",
-              "variable": "nameDevice",
-              "value": "device1 == \"\" ? device2 : device1"
-            }
-          ]
-        },
-        {
-          "objID": "1eccf3fe-e9e7-4e37-df8d-c4f49b665233",
-          "type": "SetVariableActionComponent",
-          "left": 943,
-          "top": 350,
-          "width": 171,
-          "height": 57,
-          "customInputs": [],
-          "customOutputs": [],
-          "entries": [
-            {
-              "objID": "911b3cf2-e4e6-4222-ea48-6cb7e89f969d",
-              "variable": "nameDevice",
-              "value": "device2"
-            }
-          ]
-        },
-        {
           "objID": "f3f4ac08-f3bf-4acc-81ec-52af451a89fe",
           "type": "CallActionActionComponent",
           "left": 1767,
@@ -6236,7 +6116,7 @@
         {
           "objID": "123f3a4b-4f47-42b4-eccd-3d810179cbe5",
           "type": "IsTrueActionComponent",
-          "left": 1988,
+          "left": 1970,
           "top": 367,
           "width": 170,
           "height": 70,
@@ -6310,6 +6190,461 @@
           ],
           "customOutputs": [],
           "value": "value == null"
+        },
+        {
+          "objID": "170a3ad9-346f-4a4a-bfda-9ff8ef9871e8",
+          "type": "SetVariableActionComponent",
+          "left": -293,
+          "top": -16,
+          "width": 146,
+          "height": 57,
+          "customInputs": [],
+          "customOutputs": [],
+          "entries": [
+            {
+              "objID": "dbb8062d-7851-402a-9811-f985b4f17e2e",
+              "variable": "title1",
+              "value": "device1"
+            }
+          ]
+        },
+        {
+          "objID": "007d547b-2f88-427b-f27b-980a984794cc",
+          "type": "SetVariableActionComponent",
+          "left": -306,
+          "top": 77,
+          "width": 140,
+          "height": 57,
+          "customInputs": [],
+          "customOutputs": [],
+          "entries": [
+            {
+              "objID": "20a75807-5c76-4e15-994e-011977579e0f",
+              "variable": "body1",
+              "value": "address"
+            }
+          ]
+        },
+        {
+          "objID": "099222d1-6bf0-4ee5-f1c5-7eed707dd5a9",
+          "type": "IsTrueActionComponent",
+          "left": 1744,
+          "top": 16,
+          "width": 163,
+          "height": 70,
+          "customInputs": [
+            {
+              "objID": "5b7d3dcf-8635-41d1-a9dd-c6ec9e8bd421",
+              "name": "value",
+              "type": "any"
+            }
+          ],
+          "customOutputs": [],
+          "value": "title1 == \"\""
+        },
+        {
+          "objID": "d5d52d32-8d70-47f0-fd79-8f04545e03fc",
+          "type": "SetVariableActionComponent",
+          "left": 1957,
+          "top": -41,
+          "width": 146,
+          "height": 167,
+          "customInputs": [],
+          "customOutputs": [],
+          "entries": [
+            {
+              "objID": "d9df997c-98c1-4ac1-9609-eaa7f6341619",
+              "variable": "device1",
+              "value": "\"\""
+            },
+            {
+              "objID": "d25c2a5b-1f66-4798-a79e-9e6f8fefa5e8",
+              "variable": "address",
+              "value": "\"\""
+            },
+            {
+              "objID": "02731252-d096-4142-8f67-ad888cc986b8",
+              "variable": "title1",
+              "value": "device2"
+            },
+            {
+              "objID": "69da77d0-3061-4790-a010-609420cf2e37",
+              "variable": "body1",
+              "value": "address2"
+            },
+            {
+              "objID": "a43689bf-1c79-4b20-b0be-83ea197a12e5",
+              "variable": "title2",
+              "value": "device1"
+            },
+            {
+              "objID": "abbb7917-7922-4f79-9335-73b8f85f9067",
+              "variable": "body2",
+              "value": "address"
+            }
+          ]
+        },
+        {
+          "objID": "f3cf60ac-359b-450c-c8dc-3f377f4411be",
+          "type": "SetVariableActionComponent",
+          "left": -293,
+          "top": 134,
+          "width": 146,
+          "height": 57,
+          "customInputs": [],
+          "customOutputs": [],
+          "entries": [
+            {
+              "objID": "ca848fdd-5a33-4360-f56d-c123296901b5",
+              "variable": "title2",
+              "value": "device2"
+            }
+          ]
+        },
+        {
+          "objID": "702447e7-44a3-4674-def9-1b56f7e9e688",
+          "type": "SetVariableActionComponent",
+          "left": -306,
+          "top": 227,
+          "width": 146,
+          "height": 57,
+          "customInputs": [],
+          "customOutputs": [],
+          "entries": [
+            {
+              "objID": "73c75216-ff74-487a-9ef6-41596ef5dc7b",
+              "variable": "body2",
+              "value": "address2"
+            }
+          ]
+        },
+        {
+          "objID": "e3b1b9da-3402-46e9-bda8-0637142767d1",
+          "type": "IsTrueActionComponent",
+          "left": 2224,
+          "top": 13,
+          "width": 170,
+          "height": 70,
+          "customInputs": [
+            {
+              "objID": "5680f11a-c596-4ee1-b647-43f4a8812ab7",
+              "name": "value",
+              "type": "any"
+            }
+          ],
+          "customOutputs": [],
+          "value": "device2 == \"\""
+        },
+        {
+          "objID": "1c28ba0d-e412-4e11-b94c-1383037ed659",
+          "type": "SetVariableActionComponent",
+          "left": 2509,
+          "top": -87,
+          "width": 195,
+          "height": 145,
+          "customInputs": [],
+          "customOutputs": [],
+          "entries": [
+            {
+              "objID": "2b541523-2c9f-4108-fec0-1f204cfc8f22",
+              "variable": "title1",
+              "value": "device1"
+            },
+            {
+              "objID": "a8b26bf5-2a35-4396-9091-9e96de16f70e",
+              "variable": "body1",
+              "value": "address"
+            },
+            {
+              "objID": "ad963c04-0a0f-4835-df45-8e193b925253",
+              "variable": "title2",
+              "value": "device2"
+            },
+            {
+              "objID": "1c4de2fe-e650-4649-c479-390b2ce9fbc3",
+              "variable": "body2",
+              "value": "address2"
+            },
+            {
+              "objID": "e692f3b6-f0e1-442b-ac2d-a2e64db0a322",
+              "variable": "top_button_hidden",
+              "value": "true"
+            }
+          ]
+        },
+        {
+          "objID": "a2f8dbda-b4a0-4aeb-d288-13325992eedb",
+          "type": "SetVariableActionComponent",
+          "left": 1375,
+          "top": -292,
+          "width": 294,
+          "height": 233,
+          "customInputs": [],
+          "customOutputs": [],
+          "entries": [
+            {
+              "objID": "6403c3ec-9151-4b4b-8505-131ce45b7ec8",
+              "variable": "device2",
+              "value": "\"\""
+            },
+            {
+              "objID": "b46abac7-8a17-47ee-f6b0-5ed51e6de421",
+              "variable": "address2",
+              "value": "\"\""
+            },
+            {
+              "objID": "f6acb46f-c23e-4747-f232-5b0ca731f903",
+              "variable": "title1",
+              "value": "\"\""
+            },
+            {
+              "objID": "77405312-03f9-4b71-a1de-00238b2cc589",
+              "variable": "body1",
+              "value": "\"\""
+            },
+            {
+              "objID": "94d1d976-22f1-43d3-9aaa-975f182bada1",
+              "variable": "button_device_1",
+              "value": "false"
+            },
+            {
+              "objID": "500c5bd5-9640-44f5-ba1f-3f1731ecd06d",
+              "variable": "label_massage",
+              "value": "\"deleted  \" + nameDevice"
+            },
+            {
+              "objID": "96e4b4bf-4c95-4c5e-fd26-15eca2361631",
+              "variable": "hidden_massage",
+              "value": "true"
+            },
+            {
+              "objID": "d88a08f2-24bf-4069-ef19-3d4624cf3139",
+              "variable": "notif",
+              "value": "notif == nameDevice ? \"\" : notif"
+            },
+            {
+              "objID": "70c37ad7-772a-4ea5-b686-fe0079a1be39",
+              "variable": "icon_notif",
+              "value": "notif == \"\" ? false : true"
+            }
+          ]
+        },
+        {
+          "objID": "0447e7d7-bdb1-4c0a-fee8-5f9d543e05fe",
+          "type": "DelayActionComponent",
+          "left": 2199,
+          "top": -242,
+          "width": 87,
+          "height": 54,
+          "customInputs": [],
+          "customOutputs": [],
+          "milliseconds": "500"
+        },
+        {
+          "objID": "a4258925-7372-451d-9671-12ff8670e362",
+          "type": "CallActionActionComponent",
+          "left": 1786,
+          "top": -243,
+          "width": 151,
+          "height": 52,
+          "customInputs": [],
+          "customOutputs": [],
+          "action": "delete_mac_address"
+        },
+        {
+          "objID": "31d20bc0-b437-409a-b13a-2dbc4d0745ef",
+          "type": "SetVariableActionComponent",
+          "left": 2341,
+          "top": -242,
+          "width": 183,
+          "height": 79,
+          "customInputs": [],
+          "customOutputs": [],
+          "entries": [
+            {
+              "objID": "05d26c2f-6cde-4e72-dccb-2a97ec1a5eaf",
+              "variable": "label_massage",
+              "value": "\"\""
+            },
+            {
+              "objID": "983da345-84cc-450e-d104-5d9353acb56c",
+              "variable": "disable_button",
+              "value": "false"
+            }
+          ]
+        },
+        {
+          "objID": "80c4eeb2-a31c-453f-9642-62b325730a21",
+          "type": "IsTrueActionComponent",
+          "left": 2007,
+          "top": -243,
+          "width": 170,
+          "height": 70,
+          "customInputs": [
+            {
+              "objID": "5e356e7e-bc4a-450e-9534-5d6968e45a8c",
+              "name": "value",
+              "type": "any"
+            }
+          ],
+          "customOutputs": [],
+          "value": "value == null"
+        },
+        {
+          "objID": "f9a199e7-d05b-467d-8df8-a0dadb07ef46",
+          "type": "IsTrueActionComponent",
+          "left": 835,
+          "top": 91,
+          "width": 170,
+          "height": 70,
+          "customInputs": [
+            {
+              "objID": "b2ace6bc-af53-4f1e-ffa4-aa0de0770d2a",
+              "name": "value",
+              "type": "any"
+            }
+          ],
+          "customOutputs": [],
+          "value": "device1 == \"\""
+        },
+        {
+          "objID": "04e94692-5c24-4fb0-dfd4-ade4e58b3819",
+          "type": "SetVariableActionComponent",
+          "left": 1074,
+          "top": 147,
+          "width": 171,
+          "height": 57,
+          "customInputs": [],
+          "customOutputs": [],
+          "entries": [
+            {
+              "objID": "799d0c60-5c77-4370-a8a2-e65f1b431abf",
+              "variable": "nameDevice",
+              "value": "device1"
+            }
+          ]
+        },
+        {
+          "objID": "b17fd65b-3d36-47a4-f117-f8fe1d71e17a",
+          "type": "SetVariableActionComponent",
+          "left": 835,
+          "top": 272,
+          "width": 171,
+          "height": 57,
+          "customInputs": [],
+          "customOutputs": [],
+          "entries": [
+            {
+              "objID": "9bf37eb3-e266-4dec-b10b-cacb9e872e91",
+              "variable": "nameDevice",
+              "value": "device2"
+            }
+          ]
+        },
+        {
+          "objID": "cec313a1-13e4-49b3-f711-76cfa38e4730",
+          "type": "SetVariableActionComponent",
+          "left": 1091,
+          "top": -127,
+          "width": 171,
+          "height": 57,
+          "customInputs": [],
+          "customOutputs": [],
+          "entries": [
+            {
+              "objID": "e9b4e4dd-9e2b-4f29-e8d0-b5abb904d313",
+              "variable": "nameDevice",
+              "value": "device2"
+            }
+          ]
+        },
+        {
+          "objID": "938cd475-4b45-49a8-a4a0-1460a24cb577",
+          "type": "SetVariableActionComponent",
+          "left": 2509,
+          "top": 70,
+          "width": 202,
+          "height": 57,
+          "customInputs": [],
+          "customOutputs": [],
+          "entries": [
+            {
+              "objID": "476aef2b-d6da-4032-af55-83a593bf8022",
+              "variable": "top_button_hidden",
+              "value": "false"
+            }
+          ]
+        },
+        {
+          "objID": "28ac5b7e-df4f-4d4a-af4b-db77aaef69b4",
+          "type": "IsTrueActionComponent",
+          "left": 1780,
+          "top": -386,
+          "width": 170,
+          "height": 70,
+          "customInputs": [
+            {
+              "objID": "3de4d52f-8d9b-4df7-9d40-3be89065d5f1",
+              "name": "value",
+              "type": "any"
+            }
+          ],
+          "customOutputs": [],
+          "value": "device2 == \"\""
+        },
+        {
+          "objID": "ca2681e5-5426-42a1-be77-1d598c7c1c8f",
+          "type": "SetVariableActionComponent",
+          "left": 2065,
+          "top": -329,
+          "width": 202,
+          "height": 57,
+          "customInputs": [],
+          "customOutputs": [],
+          "entries": [
+            {
+              "objID": "a996741f-d18a-46a5-91d5-f13a2ced057e",
+              "variable": "top_button_hidden",
+              "value": "false"
+            }
+          ]
+        },
+        {
+          "objID": "24755feb-1fca-4ecb-f8f2-d720188b4901",
+          "type": "SetVariableActionComponent",
+          "left": 2060,
+          "top": -514,
+          "width": 195,
+          "height": 145,
+          "customInputs": [],
+          "customOutputs": [],
+          "entries": [
+            {
+              "objID": "5a069b89-c22e-468f-e8a6-28331d7ab3a3",
+              "variable": "title1",
+              "value": "device1"
+            },
+            {
+              "objID": "9d6ece2b-2057-4b79-fb79-5097f205308b",
+              "variable": "body1",
+              "value": "address"
+            },
+            {
+              "objID": "96e8cbdf-e113-45ae-8449-81c3a848afd0",
+              "variable": "title2",
+              "value": "device2"
+            },
+            {
+              "objID": "fe83b49b-0ce4-4a56-8ef5-abaa8edb31a8",
+              "variable": "body2",
+              "value": "address2"
+            },
+            {
+              "objID": "994a06f1-3a7b-4be8-ba10-d4ccaa40ee9b",
+              "variable": "top_button_hidden",
+              "value": "true"
+            }
+          ]
         }
       ],
       "connectionLines": [
@@ -6339,13 +6674,6 @@
           "source": "3137f3ea-2af5-4fb6-ecea-4f75c0e06fbf",
           "output": "RELEASED",
           "target": "ce6c606f-1681-4779-b2ae-f13362867441",
-          "input": "@seqin"
-        },
-        {
-          "objID": "4423f52d-e3f1-45e1-a464-8fc288ac3023",
-          "source": "6cbb5691-d75a-4480-c0c9-959391727cff",
-          "output": "RELEASED",
-          "target": "6612c57a-d341-4aeb-b556-059442e9549d",
           "input": "@seqin"
         },
         {
@@ -6395,34 +6723,6 @@
           "source": "b3e1748b-1da3-4ae9-d68d-5900986369db",
           "output": "@seqout",
           "target": "309f0746-de5d-4708-dad6-99813ef2cd89",
-          "input": "@seqin"
-        },
-        {
-          "objID": "c5177aa1-a50f-42b5-c1bd-afe0d6230451",
-          "source": "6612c57a-d341-4aeb-b556-059442e9549d",
-          "output": "value",
-          "target": "c7f383c4-26a7-4a0c-cd79-d48dc52eb887",
-          "input": "@seqin"
-        },
-        {
-          "objID": "d65e2f07-7662-4c7b-8ed2-e5f9ce78bdf1",
-          "source": "c7f383c4-26a7-4a0c-cd79-d48dc52eb887",
-          "output": "@seqout",
-          "target": "3661b011-7fd1-46e5-e5ff-d4908a67f196",
-          "input": "@seqin"
-        },
-        {
-          "objID": "6fce8ec8-c344-456d-b5c8-b8b84c9c44bc",
-          "source": "6612c57a-d341-4aeb-b556-059442e9549d",
-          "output": "value2",
-          "target": "1eccf3fe-e9e7-4e37-df8d-c4f49b665233",
-          "input": "@seqin"
-        },
-        {
-          "objID": "9e48c7f8-3063-4e56-cdf4-01d758fae052",
-          "source": "1eccf3fe-e9e7-4e37-df8d-c4f49b665233",
-          "output": "@seqout",
-          "target": "01aa09a8-8e7c-4edd-f4bf-64f2de5f27ed",
           "input": "@seqin"
         },
         {
@@ -6510,11 +6810,179 @@
           "input": "@seqin"
         },
         {
-          "objID": "5ad48d5a-8652-45f1-da2e-7b077084d917",
+          "objID": "181c3806-ce3a-4e03-83c5-d763bc889dab",
+          "source": "170a3ad9-346f-4a4a-bfda-9ff8ef9871e8",
+          "output": "@seqout",
+          "target": "fdca3637-f38a-4c62-cd63-faabe865a3e4",
+          "input": "in"
+        },
+        {
+          "objID": "6fc193d3-07e1-43ee-c087-3bc2f6b7f4f7",
+          "source": "007d547b-2f88-427b-f27b-980a984794cc",
+          "output": "@seqout",
+          "target": "7909eb81-db1c-4d11-f624-620f3b18adf9",
+          "input": "in"
+        },
+        {
+          "objID": "68dffefe-9a4e-4677-c39c-1c72795433f5",
+          "source": "099222d1-6bf0-4ee5-f1c5-7eed707dd5a9",
+          "output": "True",
+          "target": "d5d52d32-8d70-47f0-fd79-8f04545e03fc",
+          "input": "@seqin"
+        },
+        {
+          "objID": "8f5c96dc-291b-4071-c2db-4a2843b82433",
           "source": "3661b011-7fd1-46e5-e5ff-d4908a67f196",
           "output": "@seqout",
           "target": "b2903a68-c07b-43a6-c170-1179ace04f69",
           "input": "@seqin"
+        },
+        {
+          "objID": "e7dc8fc8-abc7-4b8b-cab0-23e384ff1e5c",
+          "source": "e3b1b9da-3402-46e9-bda8-0637142767d1",
+          "output": "True",
+          "target": "1c28ba0d-e412-4e11-b94c-1383037ed659",
+          "input": "@seqin"
+        },
+        {
+          "objID": "edfbed8b-993c-4c01-fb73-99fbd2988a83",
+          "source": "d5d52d32-8d70-47f0-fd79-8f04545e03fc",
+          "output": "@seqout",
+          "target": "e3b1b9da-3402-46e9-bda8-0637142767d1",
+          "input": "value"
+        },
+        {
+          "objID": "3977af3a-4546-4e77-b928-a0e596f38319",
+          "source": "0447e7d7-bdb1-4c0a-fee8-5f9d543e05fe",
+          "output": "@seqout",
+          "target": "31d20bc0-b437-409a-b13a-2dbc4d0745ef",
+          "input": "@seqin"
+        },
+        {
+          "objID": "299ea18b-592b-4a54-9b85-ac8ce3d5b224",
+          "source": "a4258925-7372-451d-9671-12ff8670e362",
+          "output": "54044f30-66e8-4f45-d91d-059163686927",
+          "target": "80c4eeb2-a31c-453f-9642-62b325730a21",
+          "input": "value"
+        },
+        {
+          "objID": "71869560-73a2-4513-fc8f-c8e479202196",
+          "source": "80c4eeb2-a31c-453f-9642-62b325730a21",
+          "output": "True",
+          "target": "0447e7d7-bdb1-4c0a-fee8-5f9d543e05fe",
+          "input": "@seqin"
+        },
+        {
+          "objID": "7263b70b-0746-4ce8-91b1-d13da3c2a909",
+          "source": "a2f8dbda-b4a0-4aeb-d288-13325992eedb",
+          "output": "@seqout",
+          "target": "a4258925-7372-451d-9671-12ff8670e362",
+          "input": "@seqin"
+        },
+        {
+          "objID": "846fa184-47bf-442a-fc2c-b937feb80e8e",
+          "source": "6cbb5691-d75a-4480-c0c9-959391727cff",
+          "output": "RELEASED",
+          "target": "6612c57a-d341-4aeb-b556-059442e9549d",
+          "input": "@seqin"
+        },
+        {
+          "objID": "a07b91e8-c68d-415b-8f56-c1fb916cc625",
+          "source": "6612c57a-d341-4aeb-b556-059442e9549d",
+          "output": "value2",
+          "target": "b17fd65b-3d36-47a4-f117-f8fe1d71e17a",
+          "input": "@seqin"
+        },
+        {
+          "objID": "59718443-dc82-4bec-a010-35aa509e9d2f",
+          "source": "b17fd65b-3d36-47a4-f117-f8fe1d71e17a",
+          "output": "@seqout",
+          "target": "01aa09a8-8e7c-4edd-f4bf-64f2de5f27ed",
+          "input": "@seqin"
+        },
+        {
+          "objID": "4aa77889-3255-45aa-b630-133dce1b0a7e",
+          "source": "6612c57a-d341-4aeb-b556-059442e9549d",
+          "output": "value",
+          "target": "f9a199e7-d05b-467d-8df8-a0dadb07ef46",
+          "input": "value"
+        },
+        {
+          "objID": "d932c7c4-2f26-41f2-b820-a35981f895a7",
+          "source": "f9a199e7-d05b-467d-8df8-a0dadb07ef46",
+          "output": "False",
+          "target": "04e94692-5c24-4fb0-dfd4-ade4e58b3819",
+          "input": "@seqin"
+        },
+        {
+          "objID": "0913dc03-28d3-4397-8320-141d448bfab2",
+          "source": "04e94692-5c24-4fb0-dfd4-ade4e58b3819",
+          "output": "@seqout",
+          "target": "3661b011-7fd1-46e5-e5ff-d4908a67f196",
+          "input": "@seqin"
+        },
+        {
+          "objID": "a636ac7a-4ba5-4094-b473-f2ecc272a4fe",
+          "source": "f9a199e7-d05b-467d-8df8-a0dadb07ef46",
+          "output": "True",
+          "target": "cec313a1-13e4-49b3-f711-76cfa38e4730",
+          "input": "@seqin"
+        },
+        {
+          "objID": "7b80ee89-cbc2-4d2c-a18e-8cc2b750475e",
+          "source": "cec313a1-13e4-49b3-f711-76cfa38e4730",
+          "output": "@seqout",
+          "target": "a2f8dbda-b4a0-4aeb-d288-13325992eedb",
+          "input": "@seqin"
+        },
+        {
+          "objID": "fcfd1c75-c501-4b32-9ef9-b70e2811a870",
+          "source": "e3b1b9da-3402-46e9-bda8-0637142767d1",
+          "output": "False",
+          "target": "938cd475-4b45-49a8-a4a0-1460a24cb577",
+          "input": "@seqin"
+        },
+        {
+          "objID": "6fd718dc-56a1-4db0-a7b7-8c35e5d68ffb",
+          "source": "28ac5b7e-df4f-4d4a-af4b-db77aaef69b4",
+          "output": "False",
+          "target": "ca2681e5-5426-42a1-be77-1d598c7c1c8f",
+          "input": "@seqin"
+        },
+        {
+          "objID": "a4330df4-2f9a-4b67-8196-2b8dba0d19cb",
+          "source": "a4258925-7372-451d-9671-12ff8670e362",
+          "output": "54044f30-66e8-4f45-d91d-059163686927",
+          "target": "28ac5b7e-df4f-4d4a-af4b-db77aaef69b4",
+          "input": "value"
+        },
+        {
+          "objID": "0ebff132-8b79-460c-eceb-4496a1696bf9",
+          "source": "b2903a68-c07b-43a6-c170-1179ace04f69",
+          "output": "54044f30-66e8-4f45-d91d-059163686927",
+          "target": "099222d1-6bf0-4ee5-f1c5-7eed707dd5a9",
+          "input": "value"
+        },
+        {
+          "objID": "aa7254bb-d697-4491-a0f6-dc447ca32dcc",
+          "source": "28ac5b7e-df4f-4d4a-af4b-db77aaef69b4",
+          "output": "True",
+          "target": "24755feb-1fca-4ecb-f8f2-d720188b4901",
+          "input": "@seqin"
+        },
+        {
+          "objID": "72ae8a25-0823-493c-ca2f-427acd214b93",
+          "source": "f3cf60ac-359b-450c-c8dc-3f377f4411be",
+          "output": "@seqout",
+          "target": "34fda379-7d65-40c5-fbfb-af3e98002761",
+          "input": "in"
+        },
+        {
+          "objID": "5330d588-e4d5-4807-c5d3-30db1c076749",
+          "source": "702447e7-44a3-4674-def9-1b56f7e9e688",
+          "output": "@seqout",
+          "target": "13dc826a-873c-4667-ee1a-3ff77c94c30f",
+          "input": "in"
         }
       ],
       "localVariables": [
@@ -6537,38 +7005,6 @@
         {
           "objID": "8bdc0545-c2de-4386-b09c-209daba73ce3",
           "name": "label_massage",
-          "type": "string",
-          "defaultValue": "\"\"",
-          "persistent": false,
-          "native": false
-        },
-        {
-          "objID": "de4af113-9687-47e8-c181-16041161eeed",
-          "name": "title1",
-          "type": "string",
-          "defaultValue": "\"\"",
-          "persistent": false,
-          "native": false
-        },
-        {
-          "objID": "a7c7b109-b7fc-48d4-8ac1-efee9271bc3a",
-          "name": "title2",
-          "type": "string",
-          "defaultValue": "\"\"",
-          "persistent": false,
-          "native": false
-        },
-        {
-          "objID": "01ead886-e402-47c7-a5f4-85ad0f9f7b66",
-          "name": "body1",
-          "type": "string",
-          "defaultValue": "\"\"",
-          "persistent": false,
-          "native": false
-        },
-        {
-          "objID": "57033f4a-abf4-434f-c17f-d9bccf9a1397",
-          "name": "body2",
           "type": "string",
           "defaultValue": "\"\"",
           "persistent": false,
@@ -6691,7 +7127,7 @@
                   "type": "LVGLLabelWidget",
                   "left": -8,
                   "top": -7,
-                  "width": 0,
+                  "width": 18,
                   "height": 22,
                   "customInputs": [],
                   "customOutputs": [],
@@ -6797,7 +7233,7 @@
                   "type": "LVGLLabelWidget",
                   "left": -12,
                   "top": -7,
-                  "width": 0,
+                  "width": 18,
                   "height": 22,
                   "customInputs": [],
                   "customOutputs": [],
@@ -6969,7 +7405,7 @@
                       "type": "LVGLLabelWidget",
                       "left": -8,
                       "top": -7,
-                      "width": 0,
+                      "width": 14,
                       "height": 22,
                       "customInputs": [],
                       "customOutputs": [],

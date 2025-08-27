@@ -43,8 +43,10 @@ extern void setModes(int32_t* arr, size_t len);
 extern void setPlayButton(int button);
 
 #ifndef TRANSPORT_HEADER_SIZE
-#define TRANSPORT_HEADER_SIZE 8
+#define TRANSPORT_HEADER_SIZE 0
 #endif
+
+#define ESP_NOW_WIFI_CHANNEL 1
 
 uint8_t transportHeader[TRANSPORT_HEADER_SIZE] = {};
 int32_t clickCount = 0;
@@ -53,7 +55,7 @@ displayTask::displayTask(){
     mScreen = new Screen();
     mMemory = new storage();
     mOutputBuffer = new Buffer(300 * 16);
-    mCommunication = new commEspNow(mOutputBuffer, mMemory, /*channel*/ 0);
+    mCommunication = new commEspNow(mOutputBuffer, mMemory, ESP_NOW_WIFI_CHANNEL);
     mCommunication->setHeader(TRANSPORT_HEADER_SIZE, transportHeader);
 
     macAddress = nullptr;
@@ -112,10 +114,10 @@ void displayTask::begin(){
     latsVol = getVol();
 
     if (toneSelected != nullptr) {
-        setModes(toneSelected, 8);
+        setModes(toneSelected, 9);
     } else {
-        int32_t defaultModes[8] = {0,0,0,0,0,0,0,0};
-        setModes(defaultModes, 8);
+        int32_t defaultModes[9] = {0,0,0,0,0,0,0,0,0};
+        setModes(defaultModes, 9);
     }
 
     if (mMemory->getMac() == nullptr || mMemory->getMac()[0] == 0) {
@@ -200,7 +202,7 @@ void displayTask::updateData(){
     case actionState_save_sirine: {
         if (macAddress != nullptr) {
             mCommunication->addPeer(macAddress);
-            uint8_t* dataTones = convertTouint8t(getModes(), 8);
+            uint8_t* dataTones = convertTouint8t(getModes(), 9);
             if (dataTones) {
                 mCommunication->sendSirineSetting(dataTones);
                 delete[] dataTones;
@@ -213,8 +215,8 @@ void displayTask::updateData(){
 
     case actionState_send_volume: {
         if (macAddress != nullptr) {
-            mCommunication->addPeer(macAddress);
-            mCommunication->sendVolume(getVol());
+            mCommunication->addPeer();
+            mCommunication->sendDataInt(getVol(),"vol");
         }
         mMemory->saveVolume(getVol());
         String presentase = String(getVol()) + "%";
@@ -224,31 +226,56 @@ void displayTask::updateData(){
     }
     
     default:{
-        if (mMemory->getMac() == nullptr || mMemory->getMac()[0] == 0) {
-            setAddress("");
-            setDevice1("");
-            setHidden(FLOW_GLOBAL_VARIABLE_TOP_BUTTON_HIDDEN, true);
-        } else {
-            uint8_t* mac = mMemory->getMac();
-            snprintf(macStr, sizeof(macStr), "%02X:%02X:%02X:%02X:%02X:%02X",
-                    mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
-            setAddress(macStr);
-            setDevice1(mMemory->device1());
-            setHidden(FLOW_GLOBAL_VARIABLE_TOP_BUTTON_HIDDEN, false);
-        }
+        // if (mMemory->device1() != NULL) {
+        //     uint8_t* mac = mMemory->getMac();
+        //     snprintf(macStr, sizeof(macStr), "%02X:%02X:%02X:%02X:%02X:%02X",
+        //             mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+        //     Serial.print("Nilai macStr (device1): ");
+        //     Serial.println(macStr);
+        //     setAddress(macStr);
+        //     setDevice1(mMemory->device1());
+        //     setHidden(FLOW_GLOBAL_VARIABLE_TOP_BUTTON_HIDDEN, false);
+        //     Serial.println(mMemory->device1());
+        // }
 
-        if (mMemory->getMac1() == nullptr || mMemory->getMac1()[0] == 0) {
-            setAddress2("");
-            setDevice2("");
-            setHidden(FLOW_GLOBAL_VARIABLE_HIDDEN_MASSAGE, true);
-        } else {
-            uint8_t* mac = mMemory->getMac1();
-            snprintf(macStr, sizeof(macStr), "%02X:%02X:%02X:%02X:%02X:%02X",
-                    mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
-            setAddress2(macStr);
-            setDevice2(mMemory->device2());
-            setHidden(FLOW_GLOBAL_VARIABLE_HIDDEN_MASSAGE, false);
-        }
+        // if (mMemory->device2() != NULL) {
+        //     uint8_t* mac = mMemory->getMac1();
+        //     snprintf(macStr, sizeof(macStr), "%02X:%02X:%02X:%02X:%02X:%02X",
+        //             mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+        //     Serial.print("Nilai macStr (device2): ");
+        //     Serial.println(macStr);
+        //     setAddress2(macStr);
+        //     setDevice2(mMemory->device2());
+        //     setHidden(FLOW_GLOBAL_VARIABLE_HIDDEN_MASSAGE, false);
+        // }
+            
+        // uint8_t* mac = mMemory->getMac();
+        // snprintf(macStr, sizeof(macStr), "%02X:%02X:%02X:%02X:%02X:%02X",
+        //         mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+        // setAddress(macStr);
+        // setDevice1(mMemory->device1());
+        // uint8_t* mac1 = mMemory->getMac1();
+        // snprintf(macStr, sizeof(macStr), "%02X:%02X:%02X:%02X:%02X:%02X",
+        //         mac1[0], mac1[1], mac1[2], mac1[3], mac1[4], mac1[5]);
+        // setAddress2(macStr);
+        // setDevice2(mMemory->device2());
+        // // Jika getDevice1 kosong (pointer ke string kosong), setHidden true
+        // if (getDevice1() == nullptr || getDevice1()[0] == '\0') {
+        //     setHidden(FLOW_GLOBAL_VARIABLE_TOP_BUTTON_HIDDEN, true);
+        // } else {
+        //     setHidden(FLOW_GLOBAL_VARIABLE_TOP_BUTTON_HIDDEN, false);
+        // }
+
+        // Jika getDevice2 kosong (pointer ke string kosong), setHidden true
+        // if (getDevice2() == nullptr || getDevice2()[0] == '\0') {
+        //     setHidden(FLOW_GLOBAL_VARIABLE_HIDDEN_MASSAGE, true);
+        // } else {
+        //     setHidden(FLOW_GLOBAL_VARIABLE_HIDDEN_MASSAGE, false);
+        // }
+        
+        
+        
+        
         break;
     }
     }
@@ -258,42 +285,42 @@ void displayTask::testSiren(){
 
     if (whenLoop)
     {
-        mCommunication->addPeer();
         if (getButton() == 1) {
+            mCommunication->addPeer();
             clickCount = (clickCount + 1) % 2;
             if (clickCount == 1) {
-                mCommunication->sendButton(getSirenTone());
+                mCommunication->sendDataInt(getSirenTone(),"test");
                 Serial.println("button click on");
                 Serial.print("play siren :");
                 Serial.println(getSirenTone());
                 setPlayButton(0);
             } else {
                 Serial.println("button click off");
-                mCommunication->sendButton(0);
+                mCommunication->sendDataInt(0,"test");
                 setPlayButton(0);
             }
         }else if (getButton() == 3)
         {
             clickCount = 0;
-            mCommunication->sendButton(0);
+            mCommunication->sendDataInt(0,"test");
         }
         
         
     }else
     {
-        mCommunication->addPeer();
         if (getButton() == 2)
         {
+            mCommunication->addPeer();
             clickCount = 0;
             Serial.println("button press on");
-            mCommunication->sendButton(getSirenTone());
+            mCommunication->sendDataInt(getSirenTone(),"test");
             Serial.print("play siren :");
             Serial.println(getSirenTone());
             // currentState = actionState_none;
         }else
         {
             // clickCount = 0;
-            mCommunication->sendButton(0);
+            mCommunication->sendDataInt(0,"test");
             setPlayButton(0);
         }
     }
