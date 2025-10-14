@@ -1,34 +1,74 @@
 #pragma once
-
-#include "OneButton.h"
-// #include "config.h"
+#include "Arduino.h"
 
 class button
 {
 private:
-    bool mode;
-    bool removeData;
     int _pin;
-    OneButton bindingButton;
-    static button* instance;
-    static void doubleClick();
-    static void longPress();
-public:
-    button(int pin):_pin(pin),bindingButton(_pin, true){
-        mode = false;
-        removeData = false;
-        instance = this;
-    }
-    void begin();
+    bool mode;
+    bool lastMode = false;
+    bool removeData;
+    bool lastRemoveData = false;
+
+    int buttonState;
+    int lastButtonState;
+
+    unsigned long lastDebounceTime;
+    unsigned long debounceDelay;
+
+    unsigned long longPressTime;
+    unsigned long longPressDelay;
+    bool isLongPress;
+
+    unsigned long lastClickTime;
+    unsigned long doubleClickTimeout;
+    byte clickCount;
+
     void onDoubleClick();
     void onLongPress();
-    bool getMode(){return mode;}
-    bool setMode(bool value){
+
+public:
+    button(int pin) : _pin(pin) {
+        mode = false;
+        removeData = false;
+
+        lastButtonState = HIGH;
+        buttonState = HIGH;
+        lastDebounceTime = 0;
+        longPressTime = 0;
+        lastClickTime = 0;
+        clickCount = 0;
+        isLongPress = false;
+
+        debounceDelay = 50;
+        longPressDelay = 1000;
+        doubleClickTimeout = 300;
+    }
+
+    void begin();
+    bool getMode() {
+        if (mode != lastMode) {
+            lastMode = mode;
+            return mode;
+        }else
+        {
+            return false;
+        }
+    }
+    bool setMode(bool value) {
         mode = value;
         return mode;
     }
-    bool getRemove(){return removeData;}
-    bool setRemove(bool value){
+    bool getRemove() { 
+        if (removeData != lastRemoveData) {
+            lastRemoveData = removeData;
+            return removeData;
+        }else
+        {
+            return false;
+        }
+    }
+    bool setRemove(bool value) {
         removeData = value;
         return removeData;
     }

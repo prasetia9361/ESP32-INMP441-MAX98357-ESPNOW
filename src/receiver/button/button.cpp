@@ -1,36 +1,54 @@
 #include "button.h"
 
-
-button* button::instance = nullptr;
-
-void button::begin(){
-    bindingButton.attachDoubleClick(doubleClick);
-    bindingButton.attachLongPressStop(longPress);
-    pinMode(_pin,INPUT_PULLUP);
+void button::begin() {
+    pinMode(_pin, INPUT_PULLUP);
 }
 
-void button::doubleClick(){
-    if (instance)
-    {
-        instance->onDoubleClick();
-    }
-}
-void button::onDoubleClick(){
+void button::onDoubleClick() {
     mode = true;
 }
 
-void button::longPress(){
-    if (instance)
-    {
-        instance->onLongPress();
-    }
-}
-
-void button::onLongPress(){
+void button::onLongPress() {
     removeData = true;
 }
 
-void button::tick(){
-    bindingButton.tick();
-}
+void button::tick() {
+    int reading = digitalRead(_pin);
 
+    if (reading != lastButtonState) {
+        lastDebounceTime = millis();
+    }
+
+    if ((millis() - lastDebounceTime) > debounceDelay) {
+        if (reading != buttonState) {
+            buttonState = reading;
+
+            if (buttonState == LOW) {
+                isLongPress = false;
+                longPressTime = millis();
+            }
+            else {
+                if (!isLongPress) {
+                    clickCount++;
+                    lastClickTime = millis();
+                }
+            }
+        }
+    }
+
+    lastButtonState = reading;
+
+    if (buttonState == LOW && !isLongPress) {
+        if ((millis() - longPressTime) > longPressDelay) {
+            onLongPress();
+            isLongPress = true;
+        }
+    }
+
+    if (clickCount > 0 && (millis() - lastClickTime) > doubleClickTimeout) {
+        if (clickCount == 2) {
+            onDoubleClick();
+        }
+        clickCount = 0;
+    }
+}

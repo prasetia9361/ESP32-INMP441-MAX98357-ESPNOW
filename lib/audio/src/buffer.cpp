@@ -42,15 +42,8 @@ void Buffer::removeBuffer(int16_t *samples, int count, int rank){
             samples[i] = 0;
         } else{
             buffering = false;
-            // uint8_t sample = buffer[readHead];
             int16_t sample = buffer[readHead];
-
-            // samples[i] = (sample - 128) << rank;
-
-            // samples[i] = (sample - 128) << 7;
             samples[i] = (sample - 128) << rank;
-
-            // Serial.println(samples[i]);
             readHead = (readHead + 1) % bufferSize;
             availableSamples--;
         }
@@ -65,3 +58,4 @@ void Buffer::removeBuffer(int16_t *samples, int count, int rank){
     availableSamples = 0;
     xSemaphoreGive(semaphore);
   }
+

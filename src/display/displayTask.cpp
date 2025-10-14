@@ -120,7 +120,7 @@ void displayTask::begin(){
         setModes(defaultModes, 9);
     }
 
-    if (mMemory->getMac() == nullptr || mMemory->getMac()[0] == 0) {
+    if (mMemory->getMac() == nullptr) {
         setAddress("");
         setDevice1("");
         setHidden(FLOW_GLOBAL_VARIABLE_TOP_BUTTON_HIDDEN, true);
@@ -133,7 +133,7 @@ void displayTask::begin(){
         setHidden(FLOW_GLOBAL_VARIABLE_TOP_BUTTON_HIDDEN, false);
     }
 
-    if (mMemory->getMac1() == nullptr || mMemory->getMac1()[0] == 0) {
+    if (mMemory->getMac1() == nullptr) {
         setAddress2("");
         setDevice2("");
         setHidden(FLOW_GLOBAL_VARIABLE_HIDDEN_MASSAGE, true);
@@ -204,23 +204,23 @@ void displayTask::updateData(){
             mCommunication->addPeer(macAddress);
             uint8_t* dataTones = convertTouint8t(getModes(), 9);
             if (dataTones) {
-                mCommunication->sendSirineSetting(dataTones);
+                mCommunication->sendModeSiren(dataTones);
                 delete[] dataTones;
             }
         }
-        mMemory->writeMode(getModes(), 8);
+        mMemory->writeMode(getModes(), 9);
         setCurrentState(actionState_none);
         break;
     }
 
     case actionState_send_volume: {
         if (macAddress != nullptr) {
-            mCommunication->addPeer();
+            mCommunication->addPeer(macAddress);
             mCommunication->sendDataInt(getVol(),"vol");
         }
         mMemory->saveVolume(getVol());
-        String presentase = String(getVol()) + "%";
-        Serial.println(presentase);
+        // String presentase = String(getVol()) + "%";
+        // Serial.println(presentase);
         setCurrentState(actionState_none);
         break;
     }
@@ -282,46 +282,73 @@ void displayTask::updateData(){
 }
 
 void displayTask::testSiren(){
-
-    if (whenLoop)
+    if (mCommunication->addPeer(macAddress))
     {
-        if (getButton() == 1) {
-            mCommunication->addPeer();
-            clickCount = (clickCount + 1) % 2;
-            if (clickCount == 1) {
+        mCommunication->sendDataBool(switchLoop());
+        if (switchLoop())
+        {
+            if (getButton() == 1) {
+                mCommunication->sendDataInt(0,"test");
+                // mCommunication->addPeer();
+                // clickCount = (clickCount + 1) % 2;
+                // if (clickCount == 1) {
+                //     // mCommunication->sendDataInt(getSirenTone(),"test");
+                //     // Serial.println("button click on");
+                //     // Serial.print("play siren :");
+                //     // Serial.println(getSirenTone());
+                //     // setPlayButton(0);
+                // } else {
+                //     Serial.println("button click off");
+                //     mCommunication->sendDataInt(0,"test");
+                //     setPlayButton(0);
+                // }
+            } else if (getButton() == 2)
+            {
+                // mCommunication->addPeer();
+                // clickCount = 0;
                 mCommunication->sendDataInt(getSirenTone(),"test");
-                Serial.println("button click on");
+                // setPlayButton(1);
+                // currentState = actionState_none;
+            }else if (getButton() == 3)
+            {
+                // clickCount = 0;
+                mCommunication->sendDataInt(63,"test");
+                // setPlayButton(1);
+            }
+            
+        }else
+        {
+            if (getButton() == 2)
+            {
+                // mCommunication->addPeer();
+                clickCount = 0;
+                Serial.println("button press on");
+                mCommunication->sendDataInt(getSirenTone(),"test");
                 Serial.print("play siren :");
                 Serial.println(getSirenTone());
-                setPlayButton(0);
-            } else {
-                Serial.println("button click off");
+                // currentState = actionState_none;
+            }else
+            {
+                // clickCount = 0;
                 mCommunication->sendDataInt(0,"test");
                 setPlayButton(0);
             }
-        }else if (getButton() == 3)
-        {
-            clickCount = 0;
-            mCommunication->sendDataInt(0,"test");
         }
-        
-        
-    }else
-    {
-        if (getButton() == 2)
-        {
-            mCommunication->addPeer();
-            clickCount = 0;
-            Serial.println("button press on");
-            mCommunication->sendDataInt(getSirenTone(),"test");
-            Serial.print("play siren :");
-            Serial.println(getSirenTone());
-            // currentState = actionState_none;
-        }else
-        {
-            // clickCount = 0;
-            mCommunication->sendDataInt(0,"test");
-            setPlayButton(0);
-        }
+
+        // if (getButton() == 2)
+        // {
+        //     // mCommunication->addPeer();
+        //     // clickCount = 0;
+        //     Serial.println("button press on");
+        //     mCommunication->sendDataInt(getSirenTone(),"test");
+        //     Serial.print("play siren :");
+        //     Serial.println(getSirenTone());
+        //     // currentState = actionState_none;
+        // }else
+        // {
+        //     // clickCount = 0;
+        //     mCommunication->sendDataInt(0,"test");
+        //     setPlayButton(0);
+        // }
     }
 }

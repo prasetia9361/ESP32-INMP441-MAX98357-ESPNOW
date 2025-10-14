@@ -10,16 +10,9 @@
 #include "storage.h"
 #include "button/button.h"
 
-// Konstanta dan konfigurasi yang dipindahkan dari config.h
-#define SAMPLE_RATE 44100 // Microfone
+#define SAMPLE_RATE 48000 // Microfone
+#define BYTE_RATE 1024
 
-// Analog Microphone Settings - ADC1_CHANNEL_7 is GPIO35
-// #define ADC_MIC_CHANNEL ADC1_CHANNEL_7
-
-// transmit button
-#define GPIO_TRANSMIT_BUTTON GPIO_NUM_5
-
-// On which wifi channel (1-11) should ESP-Now transmit?
 #define ESP_NOW_WIFI_CHANNEL 1
 
 #define TRANSPORT_HEADER_SIZE 0
@@ -36,7 +29,8 @@ private:
     Buffer *outBuffer;
     button *mButton;
 
-    int16_t *samples = reinterpret_cast<int16_t *>(malloc(sizeof(int16_t) * 128));
+    // int16_t *samples = reinterpret_cast<int16_t *>(malloc(sizeof(int16_t) * 128));
+    int16_t *samples = nullptr;
 
     typedef enum{
         KEY_RELEASED = 0,
@@ -47,12 +41,13 @@ private:
     int dataByte;
     int lastByte = 0;
     const TickType_t delayTicks = pdMS_TO_TICKS(5);
+    void playButton();
 public:
     transmitterTask();
     ~transmitterTask();
     void begin();
-    void processBinding();
     void trasnmitData();
+    void communication();
     void clearSample();
 };
 

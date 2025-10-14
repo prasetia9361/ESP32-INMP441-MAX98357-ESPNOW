@@ -2,11 +2,7 @@
 
 #include <Arduino.h>
 #include <WiFi.h>
-#ifdef DISP
-#include "arduinojson_fix.h"
-#else
 #include <ArduinoJson.h>
-#endif
 #include <esp_now.h>
 #include <esp_wifi.h>
 #include "storage.h"
@@ -30,43 +26,37 @@ private:
     int index;
     int headerSize;
     int lastData;
+    bool isLoop = false;
+    bool lastBool;
     int buttonValue = 0;
     const uint8_t* mac = nullptr;
-    bool stateBinding = false;
-    char dataFromReceiver[12] = "";
+
+    SemaphoreHandle_t _commMutex;   
 
 public:
     commEspNow(Buffer* audioBuffer, storage* memoryStorage, uint8_t wifiChannel);
     ~commEspNow();
     bool begin();
-    void addPeer();
-    void addPeer(const uint8_t* _mac);
+    bool addPeer();
+    bool addPeer(const uint8_t* _mac);
     void sendData();
     
     // Fungsi audio
     void addSample(int16_t sample);
     void flush();
-    
-    void sendDataInt(int data, const char *header);
-    int32_t recvDataInt(const char *header);
 
-    // fungsi untuk display
-    void sendVolume(int vol);
-    void sendSirineSetting(const uint8_t *modelBuffer);
-    void sendMode(const int32_t *modelBuffer, int count);
-
-    // Fungsi untuk button
-    void sendButton(int data);
-    int getButtonValue() { return buttonValue; }
+    // sending data 
+    int sendDataInt(int data, const char *header);
+    bool sendDataBool(bool data);
+    void sendModeSiren(const uint8_t *modelBuffer);
+    // recieve data
+    int getButtonValue();
+    int getMode();
+    bool getBool();
     
     // Fungsi binding
     void statusBinding();
     bool binding();
-    bool setBinding(bool bindingState);
-    bool getBinding() { return stateBinding; }
-    
-    // Getter
-    const char* getReceivedMessage() { return dataFromReceiver; }
     
     // Header settings
     int setHeader(const int headerSize, const uint8_t* header);
@@ -75,9 +65,6 @@ public:
     friend void receiverCallback(const uint8_t* macAddr, const uint8_t* data, int dataLen);
     friend void transmitterCallback(const uint8_t* macAddr, const uint8_t* data, int dataLen);
     friend void displayCallback(const uint8_t* macAddr, const uint8_t* data, int dataLen);
-    
-    // Static task function for sending
-    static void sendTask(void* parameter);
 };
 
 // Callback function declarations

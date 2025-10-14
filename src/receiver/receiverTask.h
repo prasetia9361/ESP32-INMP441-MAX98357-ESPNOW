@@ -8,16 +8,9 @@
 #include "storage.h"
 #include "button/button.h"
 
+#define SAMPLE_RATE 48000 
+#define BYTE_RATE 128
 
-
-// sample rate for the system
-// #define SAMPLE_RATE 22050
-#define SAMPLE_RATE 44100 
-
-#define BINDING_BUTTON GPIO_NUM_0
-
-// On which wifi channel (1-11) should ESP-Now transmit? The default ESP-Now
-// channel on ESP32 is channel 1
 #define ESP_NOW_WIFI_CHANNEL 1
 
 #define TRANSPORT_HEADER_SIZE 0
@@ -33,17 +26,25 @@ private:
     button *mButton; 
 
     int16_t *samples = nullptr;
+    int16_t *sine_buffer = nullptr;
     
-    int mode = 0;
+    int siren = 0;
+    int mode =0;
+    bool isLoop = false;
     int volSpeaker = 11;
+    int clickTimeout =300;
+    int clickTime = 0;
+    int clickCount;
+    int SirenModeClick;
+
+    SemaphoreHandle_t _taskMutex; 
 
     unsigned long currentTime;
-    volatile bool stateBinding = false;
+    void clearSample();
 public:
     receiverTask();
     ~receiverTask();
     void begin();
-    void processBinding();
-    void receiveData();
-    void clearSample();
+    void communication();
+    void processData();
 };

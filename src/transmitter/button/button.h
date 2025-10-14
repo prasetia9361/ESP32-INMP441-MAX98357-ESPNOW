@@ -1,21 +1,23 @@
 #pragma once
 
-#include "OneButton.h"
-#include <driver/gpio.h>
+// #include "OneButton.h"
+// #include <driver/gpio.h>
+#include <Arduino.h>
+#include "config.h"
 
 
 class button
 {
 private:
     //banjar (kabel kuning)
-    const int pin1 = GPIO_NUM_33;
-    const int pin2 = GPIO_NUM_25;
-    const int pin3 = GPIO_NUM_26;
+    const int pin1 = ROW_1;
+    const int pin2 = ROW_2;
+    const int pin3 = ROW_3;
     ////baris (kabel biru)
-    const int pin4 = GPIO_NUM_15;
-    const int pin5 = GPIO_NUM_4;
-    const int pin6 = GPIO_NUM_22;
-    const int pin7 = GPIO_NUM_23;
+    const int pin4 = COL_1;
+    const int pin5 = COL_2;
+    const int pin6 = COL_3;
+    const int pin7 = COL_4;
     int massage;
 
     const int rowPins[3];

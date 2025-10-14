@@ -2,13 +2,9 @@
 #define STORAGE_H
 
 #include <SPIFFS.h>
-#ifdef DISP
-#include "arduinojson_fix.h"
-#else
 #include <ArduinoJson.h>
-#endif
-
 #include <freertos/FreeRTOS.h>
+#include <freertos/semphr.h>
 #include "FS.h"
 
 class storage {
@@ -23,25 +19,26 @@ private:
     } config;
     config configData;
 
-    SemaphoreHandle_t semaphore;
+    SemaphoreHandle_t _semaphore;
     
 public:
     storage();
     ~storage();
 
-    uint8_t *getMac(){return configData.macAddress;}
-    uint8_t *getMac1(){return configData.macAddress1;}
-    int32_t *readModeTones(){return configData.modeArray;}
-    char *device1(){return configData.nameDevice1;}
-    char *device2(){return configData.nameDevice2;}
-    int getVolume(){return configData.dataInt;}
+    uint8_t *getMac(int i);
+    uint8_t *getMac();
+    uint8_t *getMac1();
+    int32_t *readModeTones();
+    const char *getDevice(int i);
+    char *device1();
+    char *device2();
+    int getVolume();
 
     void init();
     void writeMode(const uint8_t *bufferMode, int count);
     void writeMode(const int32_t* bufferMode, int count);
     int* readMode();
-    void saveVolume(int data);
-    void writeMacAddress(const uint8_t *mac, int count);
+    bool saveVolume(int data);
     void writeMacAddress(const uint8_t *mac, const char *device, int count);
     void deleteAddress();
     bool hapusAlamat(const char *deviceName);

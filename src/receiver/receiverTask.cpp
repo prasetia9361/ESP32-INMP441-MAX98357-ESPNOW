@@ -1,20 +1,78 @@
 #include "receiverTask.h"
+#include "config.h"
+
+i2s_pin_config_t i2sPins = {
+    .bck_io_num = I2S_SPEAKER_SERIAL_CLOCK,
+    .ws_io_num = I2S_SPEAKER_LEFT_RIGHT_CLOCK,
+    .data_out_num = I2S_SPEAKER_SERIAL_DATA,
+    .data_in_num = I2S_SPEAKER_SD_PIN
+};
+i2s_port_t i2sPort = I2S_NUM_0;
+
+i2s_config_t i2s_sirine_config = {
+    .mode = (i2s_mode_t)(I2S_MODE_MASTER | I2S_MODE_TX),
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 4, 1)
+    .sample_rate = SAMPLE_RATE,
+#else
+    .sample_rate = (int)sample_rate,
+#endif
+    .bits_per_sample = I2S_BITS_PER_SAMPLE_16BIT,
+    .channel_format = I2S_CHANNEL_FMT_ONLY_RIGHT,
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0)
+    .communication_format = (i2s_comm_format_t)(I2S_COMM_FORMAT_STAND_I2S),
+#else
+    .communication_format = (i2s_comm_format_t)(I2S_COMM_FORMAT_I2S),
+#endif
+    .intr_alloc_flags = ESP_INTR_FLAG_LEVEL1,
+    .dma_buf_count = 2,
+    .dma_buf_len = 128,
+    .use_apll = false,
+    .tx_desc_auto_clear = false,
+    .fixed_mclk = 0,
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 4, 1)
+    .bits_per_chan = I2S_BITS_PER_CHAN_DEFAULT
+#endif
+  };
+
+i2s_config_t i2s_speaker_config = {
+        .mode = (i2s_mode_t)(I2S_MODE_MASTER | I2S_MODE_TX),
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 4, 1)
+        .sample_rate = SAMPLE_RATE,
+#else
+        .sample_rate = (int)sample_rate,
+#endif
+        .bits_per_sample = I2S_BITS_PER_SAMPLE_16BIT,
+        .channel_format = I2S_CHANNEL_FMT_RIGHT_LEFT,
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 2, 0)
+        .communication_format = (i2s_comm_format_t)(I2S_COMM_FORMAT_STAND_I2S),
+#else
+        .communication_format = (i2s_comm_format_t)(I2S_COMM_FORMAT_I2S),
+#endif
+        .intr_alloc_flags = ESP_INTR_FLAG_LEVEL1,
+        .dma_buf_count = 2,
+        .dma_buf_len = 1024,
+        .use_apll = false,
+        .tx_desc_auto_clear = false,
+        .fixed_mclk = 0,
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 4, 1)
+        .bits_per_chan = I2S_BITS_PER_CHAN_DEFAULT
+#endif
+    };
 
 uint8_t transportHeader[TRANSPORT_HEADER_SIZE] = {};
 
-
 receiverTask::receiverTask()
 {
-    mOutput = new speaker(128);// 256
-    mSirine = new sirine();
+    _taskMutex = xSemaphoreCreateMutex(); 
+    mOutput = new speaker(i2sPort,i2sPins,i2s_speaker_config,256);
+    mSirine = new sirine(i2sPort,i2sPins,i2s_sirine_config);
     outBuffer = new Buffer(300 * 16);
     mMemory = new storage();
     mCommunication = new commEspNow(outBuffer, mMemory, ESP_NOW_WIFI_CHANNEL);
     mCommunication->setHeader(TRANSPORT_HEADER_SIZE, transportHeader);
     mButton = new button(BINDING_BUTTON); 
     
-    // Alokasi memory yang aman untuk samples
-    samples = (int16_t *)malloc(sizeof(int16_t) * 128);
+    samples = (int16_t *)malloc(sizeof(int16_t) * BYTE_RATE);
     if (!samples) {
         Serial.println("Error: Failed to allocate memory for samples");
     }
@@ -37,90 +95,155 @@ void receiverTask::begin(){
     Serial.print("My IDF Version is: ");
     Serial.println(esp_get_idf_version());
     
-    // Delay untuk memastikan sistem stabil
     delay(200);
     
-    // Inisialisasi komunikasi dan komponen lain
     mMemory->init(); 
     delay(100);
 
-    if (!mCommunication->begin()) {
-        Serial.println("Komunikasi gagal dimulai!");
-        return;
-    }
-    delay(200); // Delay setelah komunikasi
-
     mSirine->generateWaveTable();
     delay(50);
-    mOutput->startSpeaker(SAMPLE_RATE); 
-    delay(100); // Delay untuk memastikan I2S stabil
+    
+    delay(100);
 
     mButton->begin(); 
     outBuffer->flush();
     Serial.println("Application started");
 }
 
-void receiverTask::processBinding(){
-
-    // Proses binding jika tombol double-click ditekan
-    if (mButton->getMode()) 
-    {
-        Serial.println("Proses binding dimulai");
-        mCommunication->statusBinding();
-        mCommunication->setBinding(true);
-        mButton->setMode(false); 
+void receiverTask::communication(){
+    if (!mCommunication->begin()) {
+        Serial.println("Komunikasi gagal dimulai!");
+        return;
     }
-    stateBinding = mCommunication->getBinding();
 
-    //Proses penghapusan alamat jika tombol long-press ditekan
-    if (mButton->getRemove()) 
+    for (;;)
     {
-        mMemory->deleteAddress(); 
-        mButton->setRemove(false); 
-    }
-}
+        mButton->tick();
+        if (mButton->getMode() == true){
+            Serial.println("Proses binding dimulai");
+            mCommunication->binding();
+        }
 
-// Dapatkan nilai tombol yang ditekan
-void receiverTask::receiveData(){
-    mode = mCommunication->getButtonValue();
-    if (mode > 0)
-    {
-        // Mainkan nada berdasarkan nilai tombol
-        mSirine->generateI2sTone(mode);
-        mSirine->generateSineWave(mMemory->getVolume());
-    }
-    else
-    {
-        // Proses audio normal
-        if (!samples) {
-            Serial.println("Error: samples buffer is null");
-            return;
+        if (mButton->getRemove() == true) 
+        {
+            mMemory->deleteAddress(); 
         }
         
-        unsigned long start_time = millis();
-        while (millis() - start_time < 100 || !outBuffer->getBuffer())
-        {
-            if (I2S_SPEAKER_SD_PIN != -1)
-            {
-                digitalWrite(I2S_SPEAKER_SD_PIN, HIGH);
-            }
-            volSpeaker = map(mMemory->getVolume(), 0, 99, 0, 10);
-            outBuffer->removeBuffer(samples, 128, volSpeaker);
-            mOutput->write(samples, 128);
-            if (I2S_SPEAKER_SD_PIN != -1)
-            {
-                digitalWrite(I2S_SPEAKER_SD_PIN, LOW);
-            }
-            yield(); // Berikan kesempatan task lain berjalan
+        if (xSemaphoreTake(_taskMutex, portMAX_DELAY) == pdTRUE) {
+            siren = mCommunication->getButtonValue();
+            mode = mCommunication->getMode();
+            isLoop = mCommunication->getBool();
+            xSemaphoreGive(_taskMutex);
         }
+        vTaskDelay(5);
     }
-
-    mButton->tick();
 }
 
-// memberishkan data yang tersisia pada sample setelah nilai sample tidak digunakan
 void receiverTask::clearSample(){
     if (samples) {
         free(samples);
     }
+}
+
+void receiverTask::processData(){
+    const size_t SINE_BUFFER_SAMPLES = 256;
+    sine_buffer = (int16_t *)malloc(sizeof(int16_t) * SINE_BUFFER_SAMPLES);
+    if (!sine_buffer) {
+        Serial.println("Error: Failed to allocate memory for sine_buffer");
+    }
+    int lastSiren = 0;
+    int onPress = 0;
+    while (true)
+    {
+        int currentSiren = 0;
+        int currentMode = 0;
+        bool currentLoop = false;
+
+        if (xSemaphoreTake(_taskMutex, portMAX_DELAY) == pdTRUE) {
+            SirenModeClick = siren;
+            currentMode = mode;
+            currentLoop = isLoop;
+            xSemaphoreGive(_taskMutex);
+        }
+
+        if (currentLoop)
+        {
+            if (SirenModeClick != lastSiren && SirenModeClick < 63)
+            {
+                lastSiren = SirenModeClick;
+
+                if (lastSiren >= 1)
+                {
+                    onPress = lastSiren;
+                }else
+                {
+                    clickCount = (clickCount + 1) % 2;
+                    if (clickCount == 0)
+                    {
+                        currentSiren = onPress;
+                    }else
+                    {
+                        currentSiren = 0;
+                    }
+                } 
+            }else if (SirenModeClick == 63){
+                clickCount = 1;
+                currentSiren = 0;
+            }
+        }else
+        {
+            currentSiren = SirenModeClick;
+        }
+
+        unsigned long start_time = 0;
+        
+        switch (currentMode) {
+            case 1: {
+                mSirine->startSirine();
+                while (currentSiren >= 1 && currentSiren < 63) {
+                    xSemaphoreTake(_taskMutex, portMAX_DELAY);
+                    currentSiren = siren;
+                    xSemaphoreGive(_taskMutex);
+                    
+                    mSirine->generateI2sTone(currentSiren);
+                    mSirine->generateSineWave(mMemory->getVolume());
+                    if (currentSiren == 0) {
+                        Serial.println("[DEBUG] Menghentikan siren");
+                        mSirine->generateI2sTone(currentSiren);
+                        mSirine->cleanBuffer();
+                        break;
+                    }
+                }
+                mSirine->stopSirine();
+                break;
+            }
+            default: {
+                if (!samples) {
+                    Serial.println("Error: samples buffer is null");
+                    return;
+                }
+                mOutput->startSpeaker(); 
+                start_time = millis();
+                while (millis() - start_time < 1000 || !outBuffer->getBuffer())
+                {
+                    if (I2S_SPEAKER_SD_PIN != -1)
+                    {
+                        digitalWrite(I2S_SPEAKER_SD_PIN, HIGH);
+                    }
+                    volSpeaker = map(mMemory->getVolume(), 0, 100, 0, 8);
+                    outBuffer->removeBuffer(samples, BYTE_RATE, volSpeaker);
+                    mOutput->write(samples, BYTE_RATE);
+                    if (I2S_SPEAKER_SD_PIN != -1)
+                    {
+                        digitalWrite(I2S_SPEAKER_SD_PIN, LOW);
+                    }
+                    yield();
+                }
+                mOutput->stopAudio();
+                break;
+            }
+        }
+        vTaskDelay(5);
+    }
+    clearSample();
 }
