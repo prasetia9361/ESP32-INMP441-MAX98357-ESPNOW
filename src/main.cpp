@@ -1,5 +1,4 @@
 #include <Arduino.h>
-// #include "config.h"
 #ifdef RECEIVER
 #include "receiver/receiverTask.h"
 receiverTask *receiver;
@@ -98,16 +97,6 @@ void setup(){
         0
     );
 
-    // TaskHandle_t apphandler;
-    // xTaskCreatePinnedToCore(
-    //     applicationTask,
-    //     "applicationTask",
-    //     10000,
-    //     NULL,
-    //     2,
-    //     &apphandler,
-    //     0
-    // );
 
     TaskHandle_t handleCore1;
     xTaskCreatePinnedToCore(
@@ -141,14 +130,6 @@ void appCore1(void *param){
 
 
 #ifdef RECEIVER
-    // while (true)
-    // {
-    //     receiver->deleteAddress();
-    //     receiver->receiveData();
-    //     // vTaskDelay(pdMS_TO_TICKS(5)); // Tambahkan delay untuk menghindari watchdog
-    //     // vTaskDelay(5);
-    // }
-    // receiver->clearSample();
 #endif
 
 #ifdef TRANSMITTER
@@ -171,13 +152,6 @@ void appCore0(void *param){
     }
 }
 
-// void applicationTask(void *param){
-//     for (;;)
-//     {
-//         lcd->updateMAc();
-//         vTaskDelay(10);
-//     }
-// }
 void appCore1(void *param){
     for (;;)
     {

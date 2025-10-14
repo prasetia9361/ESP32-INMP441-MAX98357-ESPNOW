@@ -72,7 +72,7 @@ bool isToneValid(int key, const int* tones, size_t count) {
 }
 
 void transmitterTask::trasnmitData(){
-    mInput->configMic(SAMPLE_RATE);
+    mInput->configMic();
     // int16_t *samples = reinterpret_cast<int16_t *>(malloc(sizeof(int16_t) * 128));
     for (;;)
     {

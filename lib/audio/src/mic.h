@@ -21,7 +21,7 @@ private:
 public:
     mic(i2s_port_t _i2sPort, i2s_pin_config_t &_i2sPin, i2s_config_t &_i2sConfig, int size);
     ~mic();
-    void configMic(uint16_t sampleRate);
+    void configMic();
     void startMic();
     int read(int16_t *samples, int count);
     void stopAudio();
