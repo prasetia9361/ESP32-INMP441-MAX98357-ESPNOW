@@ -1,4 +1,6 @@
 #include "commEspNow.h"
+#include <esp_log.h>
+static const char *TAG = "commEspNow";
 
 #ifdef RECEIVER
 const char messaging[6] = "sound";
@@ -13,15 +15,6 @@ const char messaging[6] = "displ";
 static commEspNow* instance = NULL;
 
 void receiverCallback(const uint8_t* macAddr, const uint8_t* data, int dataLen) {
-    if (!instance || !macAddr || !data) {
-        Serial.println("[ERROR] Null pointer in receiverCallback");
-        return;
-    }
-    
-    if (dataLen <= 0) {
-        Serial.println("[ERROR] Invalid data length in receiverCallback");
-        return;
-    }
 
     if (strcmp((char*)data, "remot") == 0 || strcmp((char*)data, "displ") == 0) {
         Serial.println("[DEBUG] Menerima esp32remote/displ, menyimpan MAC address...");
@@ -29,83 +22,32 @@ void receiverCallback(const uint8_t* macAddr, const uint8_t* data, int dataLen) 
             instance->memoryStorage->writeMacAddress(macAddr,(char*)data, 2);
         }
     } else {
-        if (!instance->memoryStorage) {
-            Serial.println("[ERROR] memoryStorage is null");
-            return;
-        }
-        
-        if (dataLen > sizeof(instance->messageData)) {
-            Serial.printf("[ERROR] Data length (%d) too large for messageData (%d). Truncating.\n", dataLen, sizeof(instance->messageData));
-            memcpy(&instance->messageData, data, sizeof(instance->messageData));
-        } else {
-            memcpy(&instance->messageData, data, dataLen);
-        }
 
-        instance->messageData.data[sizeof(instance->messageData.data) - 1] = '\0'; 
+        if (memcmp(macAddr, instance->memoryStorage->getMac(), 6) == 0 || memcmp(macAddr, instance->memoryStorage->getMac1(), 6) == 0) {
+            if (dataLen > sizeof(instance->messageData)) {
+                Serial.printf("[ERROR] Data length (%d) too large for messageData (%d). Truncating.\n", dataLen, sizeof(instance->messageData));
+                memcpy(&instance->messageData, data, sizeof(instance->messageData));
+            } else {
+                memcpy(&instance->messageData, data, dataLen);
+            }
 
-        if (memcmp(macAddr, instance->memoryStorage->getMac(), 6) == 0 || 
-            memcmp(macAddr, instance->memoryStorage->getMac1(), 6) == 0) {
+            instance->messageData.data[sizeof(instance->messageData.data) - 1] = '\0'; 
+            xSemaphoreTake(instance->_commMutex, portMAX_DELAY);
+            strncpy(instance->jsonBufferLocal, instance->messageData.data, sizeof(instance->messageData.data));
+            instance->jsonBufferLocal[sizeof(instance->messageData.data)] = '\0';
+            xSemaphoreGive(instance->_commMutex);
             if (instance->messageData.dataLen == 0 && strlen(instance->messageData.data) == 0) {
                 int headerSize = instance->headerSize;
                 if (instance->audioBuffer) {
                     size_t actual_data_len = sizeof(instance->messageData.buffer) - headerSize;
                     if (actual_data_len > 0) {
-                         instance->audioBuffer->addBuffer(instance->messageData.buffer + headerSize, actual_data_len);
+                        instance->audioBuffer->addBuffer(instance->messageData.buffer + headerSize, actual_data_len);
                     }
                 }
             } else if (instance->messageData.dataLen == 1 && strlen(instance->messageData.data) == 0) {
-                Serial.println("[DEBUG] Menerima data mode (array uint8_t)");
-                for (int i = 0; i < 9; i++) {
-                    Serial.print(instance->messageData.buffer[i]);
-                    if (i < 8) Serial.print(", ");
-                }
-                Serial.println();
                 instance->memoryStorage->writeMode(instance->messageData.buffer, 9);
-            } else {
-                char jsonBufferLocal[sizeof(instance->messageData.data) + 1];
-                strncpy(jsonBufferLocal, instance->messageData.data, sizeof(instance->messageData.data));
-                jsonBufferLocal[sizeof(instance->messageData.data)] = '\0';
-
-                JsonDocument jsonDoc;
-                DeserializationError error = deserializeJson(jsonDoc, jsonBufferLocal);
-                if (!error) {
-                    const char *header = jsonDoc["h"];
-                    if (header && strcmp(header, "vol") == 0) {
-                        Serial.print("[DEBUG] Volume speaker: ");
-                        int vol = jsonDoc["d"];
-                        instance->memoryStorage->saveVolume(vol);
-                        Serial.println(vol);
-                    } else if (header && strcmp(header, "test") == 0) {
-                        Serial.print("[DEBUG] Button value: ");
-                        instance->buttonValue = jsonDoc["d"];
-                        Serial.println(instance->buttonValue);
-                    } else if (header && strcmp(header, "bool") == 0)
-                    {
-                        Serial.print("[DEBUG] value boolean: ");
-                        int value = jsonDoc["d"];
-                        instance->isLoop = value == 1 ? true : false;
-                        Serial.println(instance->isLoop);
-                    } else if (header && strcmp(header, "remot") == 0)
-                    {
-                        Serial.print("[DEBUG] Button value (dari remot): ");
-                        int value = jsonDoc["d"];
-                        int32_t* modeTones = instance->memoryStorage->readModeTones();
-                        if (value >= 0 && value < 9) {
-                            instance->buttonValue = modeTones[value];
-                        } else {
-                            Serial.printf("[ERROR] Invalid mode value received: %d. Setting buttonValue to 0.\n", value);
-                            instance->buttonValue = 0;
-                        }
-                        Serial.println(instance->buttonValue);
-                    } else {
-                        Serial.printf("[DEBUG] Unknown JSON header: %s\n", header ? header : "NULL");
-                    }
-                } else {
-                    Serial.println("[DEBUG] Error parsing JSON");
-                    Serial.print("[DEBUG] Error parsing JSON: ");
-                    Serial.println(error.c_str());
-                }
             }
+            
         } else {
             Serial.println("[DEBUG] MAC address tidak cocok dengan yang tersimpan di storage");
         }
@@ -142,6 +84,7 @@ commEspNow::~commEspNow() {
 }
 
 commEspNow::commEspNow(Buffer* audioBuffer, storage* memoryStorage, uint8_t wifiChannel) {
+    _commMutex = xSemaphoreCreateMutex();
     Serial.println("[DEBUG] Inisialisasi commEspNow");
     instance = this;
     this->audioBuffer = audioBuffer;
@@ -350,6 +293,45 @@ void commEspNow::flush() {
     if (index > 0) {
         sendData();
         index = 0;
+    }
+}
+
+bool commEspNow::parsingData(){
+    xSemaphoreTake(_commMutex, portMAX_DELAY);
+    if (strlen(messageData.data) > 0) {
+
+        JsonDocument jsonDoc;
+        DeserializationError error = deserializeJson(jsonDoc, jsonBufferLocal);
+        if (!error) {
+            const char *header = jsonDoc["h"];
+            if (header && strcmp(header, "vol") == 0) {
+                int vol = jsonDoc["d"];
+                instance->memoryStorage->saveVolume(vol);
+            } else if (header && strcmp(header, "test") == 0) {
+                instance->buttonValue = jsonDoc["d"];
+            } else if (header && strcmp(header, "bool") == 0)
+            {
+                int value = jsonDoc["d"];
+                instance->isLoop = value == 1 ? true : false;
+            } else if (header && strcmp(header, "remot") == 0)
+            {
+                int value = jsonDoc["d"];
+                int32_t* modeTones = instance->memoryStorage->readModeTones();
+                if (value >= 0 && value < 9) {
+                    instance->buttonValue = modeTones[value];
+                } else {
+                    instance->buttonValue = 0;
+                }
+            }
+            xSemaphoreGive(instance->_commMutex);
+            return true;
+        } else {
+            xSemaphoreGive(instance->_commMutex);
+            return false;
+        }
+    } else {
+        xSemaphoreGive(instance->_commMutex);
+        return false;
     }
 }
 

@@ -16,7 +16,7 @@ sirine::sirine(i2s_port_t _i2sPort, i2s_pin_config_t &_i2sSpeakerPins,i2s_config
 void sirine::startSirine(){
   i2s_driver_install(i2sPort, &i2s_config, 0, NULL);
   i2s_set_pin(i2sPort, &i2sSpeakerPins);
-  i2s_zero_dma_buffer(i2sPort);
+  // i2s_zero_dma_buffer(i2sPort);
 
   i2s_start(i2sPort);
 }
@@ -716,7 +716,7 @@ void sirine::generateSineWave(int vol) {
   }
 
   volume = vol;
-  int16_t scaledSample = (int32_t(rawSample) * volume * envelopeVolume) / (100 * 135);
+  int16_t scaledSample = (int32_t(rawSample) * volume * envelopeVolume) / (100 * 145);
 
   phaseAccumulator += phaseStep;
 

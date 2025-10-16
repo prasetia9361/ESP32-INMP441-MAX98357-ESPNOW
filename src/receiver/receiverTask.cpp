@@ -25,7 +25,7 @@ i2s_config_t i2s_sirine_config = {
 #endif
     .intr_alloc_flags = ESP_INTR_FLAG_LEVEL1,
     .dma_buf_count = 2,
-    .dma_buf_len = 128,
+    .dma_buf_len = 64,
     .use_apll = false,
     .tx_desc_auto_clear = false,
     .fixed_mclk = 0,
@@ -91,9 +91,6 @@ void receiverTask::begin(){
     {
         pinMode(I2S_SPEAKER_SD_PIN, OUTPUT);
     }
-
-    Serial.print("My IDF Version is: ");
-    Serial.println(esp_get_idf_version());
     
     delay(200);
     
@@ -107,7 +104,6 @@ void receiverTask::begin(){
 
     mButton->begin(); 
     outBuffer->flush();
-    Serial.println("Application started");
 }
 
 void receiverTask::communication(){
@@ -115,12 +111,15 @@ void receiverTask::communication(){
         Serial.println("Komunikasi gagal dimulai!");
         return;
     }
+    int _mode = 0;
+    bool _isLoop = false;
+    int _siren = 0;
 
     for (;;)
     {
         mButton->tick();
+
         if (mButton->getMode() == true){
-            Serial.println("Proses binding dimulai");
             mCommunication->binding();
         }
 
@@ -128,13 +127,22 @@ void receiverTask::communication(){
         {
             mMemory->deleteAddress(); 
         }
-        
-        if (xSemaphoreTake(_taskMutex, portMAX_DELAY) == pdTRUE) {
-            siren = mCommunication->getButtonValue();
-            mode = mCommunication->getMode();
-            isLoop = mCommunication->getBool();
-            xSemaphoreGive(_taskMutex);
+
+        if (mCommunication->getMode() != mode)
+        {
+            _mode = mCommunication->getMode();
         }
+
+        if (mCommunication->parsingData()) {
+            _siren = mCommunication->getButtonValue();
+            _isLoop = mCommunication->getBool();
+        }
+        xSemaphoreTake(_taskMutex, portMAX_DELAY);
+        mode = _mode;
+        siren = _siren;
+        isLoop = _isLoop;
+        xSemaphoreGive(_taskMutex);
+
         vTaskDelay(5);
     }
 }
@@ -156,15 +164,14 @@ void receiverTask::processData(){
     while (true)
     {
         int currentSiren = 0;
-        int currentMode = 0;
+        int speakerMode = 0;
         bool currentLoop = false;
 
-        if (xSemaphoreTake(_taskMutex, portMAX_DELAY) == pdTRUE) {
-            SirenModeClick = siren;
-            currentMode = mode;
-            currentLoop = isLoop;
-            xSemaphoreGive(_taskMutex);
-        }
+        xSemaphoreTake(_taskMutex, portMAX_DELAY);
+        SirenModeClick = siren;
+        speakerMode= mode;
+        currentLoop = isLoop;
+        xSemaphoreGive(_taskMutex);
 
         if (currentLoop)
         {
@@ -197,7 +204,7 @@ void receiverTask::processData(){
 
         unsigned long start_time = 0;
         
-        switch (currentMode) {
+        switch (speakerMode) {
             case 1: {
                 mSirine->startSirine();
                 while (currentSiren >= 1 && currentSiren < 63) {
@@ -208,8 +215,7 @@ void receiverTask::processData(){
                     mSirine->generateI2sTone(currentSiren);
                     mSirine->generateSineWave(mMemory->getVolume());
                     if (currentSiren == 0) {
-                        Serial.println("[DEBUG] Menghentikan siren");
-                        mSirine->generateI2sTone(currentSiren);
+                        mSirine->generateI2sTone(0);
                         mSirine->cleanBuffer();
                         break;
                     }

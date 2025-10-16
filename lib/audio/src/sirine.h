@@ -4,7 +4,7 @@
 #include <driver/i2s.h>
 
 #define SAMPLE_RATE_WAVE 44100
-#define WAVE_TABLE_SIZE 256
+#define WAVE_TABLE_SIZE 128
 #define N_VALUE 0.4f
 #define M_VALUE 0.4f
 

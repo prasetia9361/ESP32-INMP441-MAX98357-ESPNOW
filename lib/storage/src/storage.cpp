@@ -305,64 +305,7 @@ void storage::writeMode(const int32_t* bufferMode, int count){
     }
 }
 
-
-int* storage::readMode() {
-    // PERHATIAN: Mengembalikan pointer ke array statis ini AMAN untuk satu kali penggunaan,
-    // tetapi jika fungsi dipanggil lagi, konten array yang sama akan ditimpa.
-    // Juga, tidak thread-safe jika tidak dilindungi oleh mutex saat pembacaan.
-    // Untuk keamanan yang lebih baik, array harus dialokasikan secara dinamis atau disalin ke buffer pemanggil.
-    static int modeArray[8]; // static agar tetap valid setelah fungsi keluar
-
-    if (_semaphore != NULL && xSemaphoreTake(_semaphore, portMAX_DELAY) == pdTRUE) {
-        File file = SPIFFS.open("/mode.json", FILE_READ);
-        if (!file) {
-            Serial.println("[ERROR] Gagal membuka file untuk membaca mode");
-            for (int i = 0; i < 8; i++) {
-                modeArray[i] = 0;
-            }
-            xSemaphoreGive(_semaphore);
-            return modeArray;
-        }
-
-        JsonDocument doc;
-        DeserializationError error = deserializeJson(doc, file);
-        file.close();
-
-        if (error) {
-            Serial.printf("[ERROR] Gagal mendeserialize file mode.json: %s\n", error.c_str());
-            for (int i = 0; i < 8; i++) {
-                modeArray[i] = 0;
-            }
-            xSemaphoreGive(_semaphore);
-            return modeArray;
-        }
-
-        JsonArray modes = doc["mode"];
-        if (modes.isNull()) {
-            Serial.println("[DEBUG] 'mode' array tidak ditemukan di mode.json. Menggunakan nilai default.");
-            for (int i = 0; i < 8; i++) {
-                modeArray[i] = 0;
-            }
-        } else {
-            for (int i = 0; i < 8 && i < modes.size(); i++) {
-                modeArray[i] = modes[i] | 0; // Default ke 0 jika tidak ada
-            }
-            for (int i = modes.size(); i < 8; i++) { // Isi sisa array dengan 0 jika modes.size < 8
-                modeArray[i] = 0;
-            }
-        }
-        xSemaphoreGive(_semaphore);
-    } else {
-        Serial.println("[ERROR] storage::readMode: Gagal mendapatkan mutex.");
-        for (int i = 0; i < 8; i++) {
-            modeArray[i] = 0;
-        }
-    }
-    return modeArray;
-}
-
 bool storage::saveVolume(int data){
-    // if (_semaphore != NULL && xSemaphoreTake(_semaphore, portMAX_DELAY) == pdTRUE) {
         JsonDocument doc;
         File fileRead = SPIFFS.open("/mode.json", FILE_READ);
         if (fileRead) {
@@ -376,25 +319,16 @@ bool storage::saveVolume(int data){
 
         File fileWrite = SPIFFS.open("/mode.json", FILE_WRITE);
         if (!fileWrite) {
-            // Serial.println("[ERROR] Gagal membuka file untuk menulis volume");
-            // xSemaphoreGive(_semaphore);
+            // ESP_LOGE(TAG,"[ERROR] Gagal membuka file untuk menulis volume");
             return false;
         }
 
         doc["volume"] = data;
         configData.dataInt = data;
         serializeJson(doc, fileWrite);
-        // if (serializeJson(doc, fileWrite) == 0) {
-            // Serial.println("[ERROR] Gagal menulis JSON ke file mode.json");
-        // } else {
-            // Serial.println("[DEBUG] Volume berhasil disimpan ke SPIFFS");
-        // }
+        
         fileWrite.close();
         return true;
-        // xSemaphoreGive(_semaphore);
-    // } else {
-    //     // Serial.println("[ERROR] storage::saveVolume: Gagal mendapatkan mutex.");
-    // }
 }
 
 void storage::deleteAddress() {
@@ -406,9 +340,7 @@ void storage::deleteAddress() {
             return;
         }
         
-        JsonDocument doc; // Buat dokumen JSON kosong
-        // doc["address0"] = ""; // Tidak perlu, karena defaultnya sudah kosong jika dihapus
-        // doc["address1"] = "";
+        JsonDocument doc; 
 
         // Menulis dokumen kosong akan menghapus semua konten
         if (serializeJson(doc, file) == 0) {
@@ -500,11 +432,6 @@ bool storage::hapusAlamat(const char *deviceName) {
     }
 }
 
-// Implementasi getter, dilindungi mutex untuk thread safety.
-// PERHATIAN: Mengembalikan pointer ke data internal masih berisiko jika pemanggil tidak mengunci mutex
-// dan data tersebut dimodifikasi di tempat lain setelah pointer dikembalikan.
-// Untuk keamanan maksimal, fungsi-fungsi ini sebaiknya mengembalikan salinan data.
-
 uint8_t targetMac[6];
 uint8_t *storage::getMac(int i){
     // static uint8_t targetMac[6];
@@ -541,31 +468,23 @@ uint8_t *storage::getMac(int i){
 uint8_t *storage::getMac(){
     uint8_t *mac_ptr = nullptr;
     xSemaphoreTake(_semaphore, portMAX_DELAY);
-    // if (_semaphore != NULL && xSemaphoreTake(_semaphore, pdMS_TO_TICKS(10)) == pdTRUE) {
     if (configData.macAddress[0] != 0)
     {
         mac_ptr = configData.macAddress;
     }
     xSemaphoreGive(_semaphore);
-    // } else {
-    //     Serial.println("[ERROR] getMac: Gagal mendapatkan mutex, mengembalikan nullptr.");
-    // }
     return mac_ptr;
 }
 
 uint8_t *storage::getMac1(){
     uint8_t *mac_ptr = nullptr;
     xSemaphoreTake(_semaphore, portMAX_DELAY);
-    // if (_semaphore != NULL && xSemaphoreTake(_semaphore, pdMS_TO_TICKS(10)) == pdTRUE) {
     if (configData.macAddress1[0] != 0)
     {
         mac_ptr = configData.macAddress1;
     }
  
     xSemaphoreGive(_semaphore);
-    // } else {
-    //     Serial.println("[ERROR] getMac1: Gagal mendapatkan mutex, mengembalikan nullptr.");
-    // }
     return mac_ptr;
 }
 
@@ -650,11 +569,6 @@ char *storage::device2(){
 
 int storage::getVolume(){
     int volume = 0;
-    // if (_semaphore != NULL && xSemaphoreTake(_semaphore, portMAX_DELAY) == pdTRUE) {
-        volume = configData.dataInt;
-        // xSemaphoreGive(_semaphore);
-    // } else {
-    //     Serial.println("[ERROR] getVolume: Gagal mendapatkan mutex, mengembalikan nilai default.");
-    // }
+    volume = configData.dataInt;
     return volume;
 }

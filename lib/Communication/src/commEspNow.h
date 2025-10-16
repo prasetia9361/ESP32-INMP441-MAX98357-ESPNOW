@@ -22,6 +22,7 @@ private:
     Buffer* audioBuffer;
     storage* memoryStorage;
     uint8_t wifiChannel;
+    char jsonBufferLocal[sizeof(messageData.data) + 1];
     int bufferSize;
     int index;
     int headerSize;
@@ -50,6 +51,7 @@ public:
     bool sendDataBool(bool data);
     void sendModeSiren(const uint8_t *modelBuffer);
     // recieve data
+    bool parsingData();
     int getButtonValue();
     int getMode();
     bool getBool();

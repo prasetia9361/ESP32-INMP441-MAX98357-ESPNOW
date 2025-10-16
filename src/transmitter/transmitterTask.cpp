@@ -1,6 +1,9 @@
 
 #include "transmitterTask.h"
 #include "config.h"
+#include <esp_log.h>
+
+static const char *TAG = "transmitterTask";
 
 i2s_port_t i2sPort = I2S_NUM_0;
 i2s_pin_config_t i2s_mic_pins = {
@@ -35,7 +38,7 @@ transmitterTask::transmitterTask()
     samples = (int16_t *)malloc(sizeof(int16_t) * BYTE_RATE);
     memset(samples, 0, sizeof(int16_t) * BYTE_RATE);
     if (!samples) {
-        Serial.println("Error: Failed to allocate memory for samples");
+        ESP_LOGE(TAG, "Error: Failed to allocate memory for samples");
     }
 }
 
@@ -84,11 +87,9 @@ void transmitterTask::trasnmitData(){
     
                 for (int i = 0; i < samples_read; i++) {
                     mCommunication->addSample(samples[i]);
-                    // Serial.println(samples[i]);
                 }
             }
             mCommunication->flush();
-            Serial.println("Finished transmitting");
             mInput->stopAudio();
         }
     }
