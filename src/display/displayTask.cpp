@@ -2,6 +2,12 @@
 
 bool whenLoop;
 
+#include "../../lib/ui/eez-flow.h"
+#include "Arduino.h"
+
+using namespace eez;
+using namespace eez::flow;
+
 extern int32_t getVol();
 
 extern const char *getAddress();
@@ -49,9 +55,11 @@ extern void setPlayButton(int button);
 #define ESP_NOW_WIFI_CHANNEL 1
 
 uint8_t transportHeader[TRANSPORT_HEADER_SIZE] = {};
-int32_t clickCount = 0;
+// int32_t clickCount = 0;
 
 displayTask::displayTask(){
+    _smphr = xSemaphoreCreateMutex();
+    _initSemaphore = xSemaphoreCreateBinary(); // Buat binary semaphore
     mScreen = new Screen();
     mMemory = new storage();
     mOutputBuffer = new Buffer(300 * 16);
@@ -59,17 +67,25 @@ displayTask::displayTask(){
     mCommunication->setHeader(TRANSPORT_HEADER_SIZE, transportHeader);
 
     macAddress = nullptr;
+    addr1 = nullptr;
+    addr2 = nullptr;
+    m_device1 = nullptr;
+    m_device2 = nullptr;
     toneSelected = nullptr;
-    latsVol = 0;
+    _getMode = new int32_t[9];
+    memset(_getMode, 0, sizeof(int32_t) * 9);
+    // latsVol = 0;
     memset(macStr, 0, sizeof(macStr));
 }
 
 displayTask::~displayTask()
 {
+    if (_smphr) { vSemaphoreDelete(_smphr); _smphr = nullptr; }
     if (mCommunication) { delete mCommunication; mCommunication = nullptr; }
     if (mOutputBuffer) { delete mOutputBuffer; mOutputBuffer = nullptr; }
     if (mMemory) { delete mMemory; mMemory = nullptr; }
     if (mScreen) { delete mScreen; mScreen = nullptr; }
+    if (_getMode) { delete[] _getMode; _getMode = nullptr; }
 }
 
 uint8_t* displayTask::convertTouint8t(int32_t* dataInt, size_t size){
@@ -81,37 +97,44 @@ uint8_t* displayTask::convertTouint8t(int32_t* dataInt, size_t size){
     return result;
 }
 
-void displayTask::begin(){
-    Serial.println("Application started");
-    Serial.print("My IDF Version is: ");
-    Serial.println(esp_get_idf_version());
+bool displayTask::initializeProcessData(){
     mMemory->init();
     
     // Inisialisasi komunikasi dan komponen lain
     if (!mCommunication->begin()) {
         Serial.println("ERROR: Communication initialization failed!");
-        return;
+        return false;
     }
     Serial.println("Communication initialized successfully");
     
+    xSemaphoreTake(_smphr, portMAX_DELAY);
+    toneSelected = mMemory->readModeTones();
+    vol = mMemory->getVolume();
+    addr1 = mMemory->getMac();
+    addr2 = mMemory->getMac1();
+    m_device1 = mMemory->device1();
+    m_device2 = mMemory->device2();
+    xSemaphoreGive(_smphr);
+
+    xSemaphoreGive(_initSemaphore); // Beri sinyal bahwa inisialisasi data selesai
+
+    return true;
+}
+
+bool displayTask::lvglInit(){
+    xSemaphoreTake(_initSemaphore, portMAX_DELAY); // Tunggu sinyal dari initializeProcessData
+
     // Inisialisasi screen
     if (!mScreen->begin()) {
         Serial.println("ERROR: Screen initialization failed!");
-        return;
+        return false;
     }
     Serial.println("Screen initialized successfully");
     
-    // Baca konfigurasi tone dari storage
-    toneSelected = mMemory->readModeTones();
-
-    Serial.println("Setup done");
-
     // Inisialisasi UI (EEZ/LVGL)
     ui_init();
-    Serial.println("UI initialized successfully");
-
-    setVol( mMemory->getVolume());
-    latsVol = getVol();
+    xSemaphoreTake(_smphr, portMAX_DELAY);
+    setVol(vol);
 
     if (toneSelected != nullptr) {
         setModes(toneSelected, 9);
@@ -120,35 +143,44 @@ void displayTask::begin(){
         setModes(defaultModes, 9);
     }
 
-    if (mMemory->getMac() == nullptr) {
+    if (addr1 == nullptr) {
         setAddress("");
         setDevice1("");
         setHidden(FLOW_GLOBAL_VARIABLE_TOP_BUTTON_HIDDEN, true);
     } else {
-        uint8_t* mac = mMemory->getMac();
+        uint8_t* mac = addr1;
         snprintf(macStr, sizeof(macStr), "%02X:%02X:%02X:%02X:%02X:%02X",
                 mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
         setAddress(macStr);
-        setDevice1(mMemory->device1());
+        setDevice1(m_device1);
         setHidden(FLOW_GLOBAL_VARIABLE_TOP_BUTTON_HIDDEN, false);
     }
 
-    if (mMemory->getMac1() == nullptr) {
+    if (addr2 == nullptr) {
         setAddress2("");
         setDevice2("");
         setHidden(FLOW_GLOBAL_VARIABLE_HIDDEN_MASSAGE, true);
     } else {
-        uint8_t* mac = mMemory->getMac1();
+        uint8_t* mac = addr2;
         snprintf(macStr, sizeof(macStr), "%02X:%02X:%02X:%02X:%02X:%02X",
                 mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
         setAddress2(macStr);
-        setDevice2(mMemory->device2());
+        setDevice2(m_device2);
         setHidden(FLOW_GLOBAL_VARIABLE_HIDDEN_MASSAGE, false);
     }
+    xSemaphoreGive(_smphr);
+    Serial.println("UI initialized successfully");
 
-    Serial.println("=== Display Task Setup Complete ===");
+    return true;
 }
 
+bool displayTask::begin(){
+    Serial.println("Application started");
+    Serial.print("My IDF Version is: ");
+    Serial.println(esp_get_idf_version());
+    return true;
+}
+// core 1
 void displayTask::tick(){
     if (!mScreen) {
         Serial.println("ERROR: Screen object is null!");
@@ -158,197 +190,176 @@ void displayTask::tick(){
     mScreen->lvHandler();
     ui_tick();
 }
-
-void displayTask::updateData(){
-    if (switchLoop() != whenLoop)
+// core 1
+void displayTask::loop(){
+    
+    const char* choice = getChoiseDevice();
+    if (deviceSelected && choice && strcmp(deviceSelected, choice) != 0)
     {
-        Serial.println(switchLoop());
-        whenLoop = switchLoop();
+        deviceSelected = choice;
+    } else if (!deviceSelected && choice) {
+        deviceSelected = choice;
     }
-    int state = currentState();
 
-    if (state != actionState_none)
+    if (memcmp(_getMode, getModes(), 9 * sizeof(int32_t)) != 0)
     {
-        Serial.println(state);
+        for (size_t i = 0; i < 9; i++)
+        {
+            _getMode[i] = getModes()[i];
+        }
+        
+    }
+    if (vol != getVol()) {
+        vol = getVol();
+    }
+    if (_switch != switchLoop()) {
+        _switch = switchLoop();
     }
 
-    switch (state)
+    if (_button != getButton()) {
+        _button = getButton();
+    }
+    if (sirenTone != getSirenTone())
     {
-    case actionState_binding: { // binding
-        bool bindingResult = mCommunication->binding();
-            
-        if (getChoiseDevice() == mMemory->device1()) {
-            Serial.println("device1");
-            macAddress = mMemory->getMac();
-        } else if (getChoiseDevice() == mMemory->device2()) {
-            Serial.println("device2");
-            macAddress = mMemory->getMac1();
-        }
-        setCurrentState(actionState_none);
-        break;
-    }
-
-    case actionState_delete_address: { // delete
-        bool deleteResult = mMemory->hapusAlamat(getChoiseDevice());
-        if (deleteResult) {
-            Serial.println("Alamat berhasil dihapus");
-        } else {
-            Serial.println("Alamat gagal dihapus");
-        }
-        setCurrentState(actionState_none);
-        break;
-    }
-
-    case actionState_save_sirine: {
-        if (macAddress != nullptr) {
-            mCommunication->addPeer(macAddress);
-            uint8_t* dataTones = convertTouint8t(getModes(), 9);
-            if (dataTones) {
-                mCommunication->sendModeSiren(dataTones);
-                delete[] dataTones;
-            }
-        }
-        mMemory->writeMode(getModes(), 9);
-        setCurrentState(actionState_none);
-        break;
-    }
-
-    case actionState_send_volume: {
-        if (macAddress != nullptr) {
-            mCommunication->addPeer(macAddress);
-            mCommunication->sendDataInt(getVol(),"vol");
-        }
-        mMemory->saveVolume(getVol());
-        // String presentase = String(getVol()) + "%";
-        // Serial.println(presentase);
-        setCurrentState(actionState_none);
-        break;
+        sirenTone = getSirenTone();
     }
     
-    default:{
-        // if (mMemory->device1() != NULL) {
-        //     uint8_t* mac = mMemory->getMac();
-        //     snprintf(macStr, sizeof(macStr), "%02X:%02X:%02X:%02X:%02X:%02X",
-        //             mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
-        //     Serial.print("Nilai macStr (device1): ");
-        //     Serial.println(macStr);
-        //     setAddress(macStr);
-        //     setDevice1(mMemory->device1());
-        //     setHidden(FLOW_GLOBAL_VARIABLE_TOP_BUTTON_HIDDEN, false);
-        //     Serial.println(mMemory->device1());
-        // }
+    // --- LOGIKA STATE YANG DIPERBAIKI ---
+    // int ui_state = currentState();
+    // if (ui_state != actionState_none) {
+    //     // Ada aksi baru dari UI
+    //     xSemaphoreTake(_smphr, portMAX_DELAY);
+    //     if (state == actionState_none) {
+    //         // Jika tidak ada aksi yang sedang diproses, ambil aksi baru ini
+    //         state = ui_state;
+    //     }
+    //     xSemaphoreGive(_smphr);
+    //     // Langsung reset state di UI agar tidak memicu aksi yang sama berulang kali
+    //     setCurrentState(actionState_none);
+    // }
+    // --- AKHIR PERBAIKAN ---
 
-        // if (mMemory->device2() != NULL) {
-        //     uint8_t* mac = mMemory->getMac1();
-        //     snprintf(macStr, sizeof(macStr), "%02X:%02X:%02X:%02X:%02X:%02X",
-        //             mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
-        //     Serial.print("Nilai macStr (device2): ");
-        //     Serial.println(macStr);
-        //     setAddress2(macStr);
-        //     setDevice2(mMemory->device2());
-        //     setHidden(FLOW_GLOBAL_VARIABLE_HIDDEN_MASSAGE, false);
-        // }
-            
-        // uint8_t* mac = mMemory->getMac();
-        // snprintf(macStr, sizeof(macStr), "%02X:%02X:%02X:%02X:%02X:%02X",
-        //         mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
-        // setAddress(macStr);
-        // setDevice1(mMemory->device1());
-        // uint8_t* mac1 = mMemory->getMac1();
-        // snprintf(macStr, sizeof(macStr), "%02X:%02X:%02X:%02X:%02X:%02X",
-        //         mac1[0], mac1[1], mac1[2], mac1[3], mac1[4], mac1[5]);
-        // setAddress2(macStr);
-        // setDevice2(mMemory->device2());
-        // // Jika getDevice1 kosong (pointer ke string kosong), setHidden true
-        // if (getDevice1() == nullptr || getDevice1()[0] == '\0') {
-        //     setHidden(FLOW_GLOBAL_VARIABLE_TOP_BUTTON_HIDDEN, true);
-        // } else {
-        //     setHidden(FLOW_GLOBAL_VARIABLE_TOP_BUTTON_HIDDEN, false);
-        // }
+    if (state != currentState())
+    {
+        state = currentState();
+    }
+    
 
-        // Jika getDevice2 kosong (pointer ke string kosong), setHidden true
-        // if (getDevice2() == nullptr || getDevice2()[0] == '\0') {
-        //     setHidden(FLOW_GLOBAL_VARIABLE_HIDDEN_MASSAGE, true);
-        // } else {
-        //     setHidden(FLOW_GLOBAL_VARIABLE_HIDDEN_MASSAGE, false);
-        // }
-        
-        
-        
-        
-        break;
+
+    if (!_switch)
+    {
+        if (_button != 2)
+        {
+            setPlayButton(0);
+        }
     }
+    
+}
+// core 0
+void displayTask::processData(){
+    // --- LOGIKA STATE YANG DIPERBAIKI ---
+    if (state == actionState_none) {
+        // Tidak ada yang perlu dilakukan
+        return;
     }
+
+    if (lastState != state)
+    {
+        lastState = state;
+        switch (lastState)
+        {
+        case actionState_binding: { // binding
+            bool bindingResult = mCommunication->binding();
+            if (bindingResult) {
+                if (strcmp(deviceSelected, m_device1) == 0) {
+                    Serial.println("device1 selected for binding");
+                    macAddress = mMemory->getMac();
+                } else if (strcmp(deviceSelected, m_device2) == 0) {
+                    Serial.println("device2 selected for binding");
+                    macAddress = mMemory->getMac1();
+                }
+            } else {
+                Serial.println("Binding failed");
+            }
+            break;
+        }
+
+        case actionState_delete_address: { // delete
+            bool deleteResult = mMemory->hapusAlamat(deviceSelected);
+            if (deleteResult) {
+                Serial.println("Alamat berhasil dihapus");
+            } else {
+                Serial.println("Alamat gagal dihapus");
+            }
+            break;
+        }
+
+        case actionState_save_sirine: {
+            if (macAddress != nullptr) {
+                mCommunication->addPeer(macAddress);
+                uint8_t* dataTones = convertTouint8t(_getMode, 9);
+                if (dataTones) {
+                    mCommunication->sendModeSiren(dataTones);
+                    delete[] dataTones;
+                }
+            }
+            mMemory->writeMode(_getMode, 9);
+            break;
+        }
+
+        case actionState_send_volume: {
+            if (macAddress != nullptr) {
+                mCommunication->addPeer(macAddress);
+                if (mCommunication->sendDataInt(vol,"vol") == 1)
+                {
+                    mMemory->saveVolume(vol);
+                }
+                
+            }
+            break;
+        }
+        
+        default:
+            // Aksi tidak diketahui, abaikan.
+            break;
+        
+        }
+    }
+    
+
+
+
+    // Setelah aksi selesai, reset state lokal
+    // xSemaphoreTake(_smphr, portMAX_DELAY);
+    // state = actionState_none;
+    // xSemaphoreGive(_smphr);
+    // --- AKHIR PERBAIKAN ---
 }
 
 void displayTask::testSiren(){
-    if (mCommunication->addPeer(macAddress))
-    {
-        mCommunication->sendDataBool(switchLoop());
-        if (switchLoop())
+    if (macAddress != nullptr) {
+        mCommunication->addPeer(macAddress);
+        mCommunication->sendDataBool(_switch);
+        if (_switch)
         {
-            if (getButton() == 1) {
+            if (_button == 1) {
                 mCommunication->sendDataInt(0,"test");
-                // mCommunication->addPeer();
-                // clickCount = (clickCount + 1) % 2;
-                // if (clickCount == 1) {
-                //     // mCommunication->sendDataInt(getSirenTone(),"test");
-                //     // Serial.println("button click on");
-                //     // Serial.print("play siren :");
-                //     // Serial.println(getSirenTone());
-                //     // setPlayButton(0);
-                // } else {
-                //     Serial.println("button click off");
-                //     mCommunication->sendDataInt(0,"test");
-                //     setPlayButton(0);
-                // }
-            } else if (getButton() == 2)
-            {
-                // mCommunication->addPeer();
-                // clickCount = 0;
-                mCommunication->sendDataInt(getSirenTone(),"test");
-                // setPlayButton(1);
-                // currentState = actionState_none;
-            }else if (getButton() == 3)
-            {
-                // clickCount = 0;
+            } else if (_button == 2) {
+                mCommunication->sendDataInt(sirenTone,"test");
+            } else if (_button == 3) {
                 mCommunication->sendDataInt(63,"test");
-                // setPlayButton(1);
             }
             
-        }else
+        } else
         {
-            if (getButton() == 2)
-            {
-                // mCommunication->addPeer();
-                clickCount = 0;
+            if (_button == 2) {
                 Serial.println("button press on");
-                mCommunication->sendDataInt(getSirenTone(),"test");
+                mCommunication->sendDataInt(sirenTone,"test");
                 Serial.print("play siren :");
-                Serial.println(getSirenTone());
-                // currentState = actionState_none;
-            }else
-            {
-                // clickCount = 0;
+                Serial.println(sirenTone);
+            } else {
                 mCommunication->sendDataInt(0,"test");
-                setPlayButton(0);
             }
         }
-
-        // if (getButton() == 2)
-        // {
-        //     // mCommunication->addPeer();
-        //     // clickCount = 0;
-        //     Serial.println("button press on");
-        //     mCommunication->sendDataInt(getSirenTone(),"test");
-        //     Serial.print("play siren :");
-        //     Serial.println(getSirenTone());
-        //     // currentState = actionState_none;
-        // }else
-        // {
-        //     // clickCount = 0;
-        //     mCommunication->sendDataInt(0,"test");
-        //     setPlayButton(0);
-        // }
     }
 }

@@ -307,15 +307,15 @@ void storage::writeMode(const int32_t* bufferMode, int count){
 
 bool storage::saveVolume(int data){
         JsonDocument doc;
-        File fileRead = SPIFFS.open("/mode.json", FILE_READ);
-        if (fileRead) {
-            DeserializationError error = deserializeJson(doc, fileRead);
-            if (error) {
-                // Serial.printf("[ERROR] Gagal deserialize mode.json: %s\n", error.c_str());
-                return false;
-            }
-            fileRead.close();
-        }
+        // File fileRead = SPIFFS.open("/mode.json", FILE_READ);
+        // if (fileRead) {
+        //     DeserializationError error = deserializeJson(doc, fileRead);
+        //     if (error) {
+        //         // Serial.printf("[ERROR] Gagal deserialize mode.json: %s\n", error.c_str());
+        //         return false;
+        //     }
+        //     fileRead.close();
+        // }
 
         File fileWrite = SPIFFS.open("/mode.json", FILE_WRITE);
         if (!fileWrite) {

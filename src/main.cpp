@@ -22,6 +22,7 @@ displayTask *lcd;
 void applicationTask(void *param);
 void appCore0(void *param);
 void appCore1(void *param);
+void appCore1UpdateData(void *param);
 #endif
 
 
@@ -84,35 +85,56 @@ void setup(){
 #endif
 #ifdef DISP
     lcd = new displayTask();
-    lcd->begin();
+    if(lcd->begin()){
+        Serial.println("Display Task Initialized Successfully");
+    }
 
     TaskHandle_t handleCore0;
     xTaskCreatePinnedToCore(
         appCore0,
         "appCore0",
-        32768,
+        16384,
         NULL,
         1,
         &handleCore0,
         0
     );
 
+    lcd->lvglInit();
 
     TaskHandle_t handleCore1;
     xTaskCreatePinnedToCore(
         appCore1,
         "appCore1",
-        32768,
+        16384,
         NULL,
         1,
         &handleCore1,
         1
     );
+
+    // TaskHandle_t handleCore1UpdateData;
+    // xTaskCreatePinnedToCore(
+    //     appCore1UpdateData,
+    //     "appCore1UpdateData",
+    //     4096,
+    //     NULL,
+    //     2,
+    //     &handleCore1UpdateData,
+    //     1
+    // );
+
 #endif
 }
 
 void loop(){
-    vTaskDelay(pdMS_TO_TICKS(1000));
+    if (lcd)
+    {
+        lcd->tick();
+    }
+    
+    
+    vTaskDelay(10);
 }
 
 
@@ -144,23 +166,32 @@ void appCore1(void *param){
 
 #ifdef DISP
 void appCore0(void *param){
-    for (;;)
+    lcd->initializeProcessData();
+    while (true)
     {
-        lcd->updateData();
+        lcd->processData();
         lcd->testSiren();
-        vTaskDelay(10);
+        vTaskDelay(5);
     }
 }
 
 void appCore1(void *param){
-    for (;;)
+    while (true)
     {
-        if (lcd) {
-            lcd->tick();
-            
-        }
+        
+        lcd->loop();
         vTaskDelay(10);
     }
 }
+
+// void appCore1UpdateData(void *param){
+//     for (;;)
+//     {
+//         if (lcd) {
+//             lcd->loop();
+//         }
+//         vTaskDelay(100);
+//     }
+// }
 #endif
 
