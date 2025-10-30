@@ -172,6 +172,12 @@ void receiverTask::communication(){
                         _currentSiren = 0;
                     }
                 } 
+            }else if(_siren == 63)
+            {
+                _currentSiren = 0;
+                clickCount = 0;
+                onPress = 0;
+                lastSiren = 0;
             }
         }else if (_isLoop == false)
         {
@@ -219,7 +225,7 @@ void receiverTask::processData(){
         unsigned long start_time = 0;
         
         switch (speakerMode) {
-            case 1: {
+            case MODE_SIRINE_TONE: {
                 mSirine->startSirine();
                 while (currentSiren >= 1 && currentSiren < 63) {
                     xSemaphoreTake(_taskMutex, portMAX_DELAY);
@@ -236,7 +242,7 @@ void receiverTask::processData(){
                 }
                 mSirine->stopSirine();
                 break;
-            }case 2: {
+            }case MODE_INISIALITATION: {
                 volumeAudio = mMemory->getVolume();
                 Serial.printf("[DEBUG] Volume audio: %d\n", volumeAudio);
                 break;

@@ -9,7 +9,18 @@
 #include "buffer.h"
 
 const int maxEspNowPacketSize = 127;
+typedef enum {
+    MODE_SPEAKER = 0,
+    MODE_SIRINE_TONE = 1,
+    MODE_INISIALITATION = 2
+} typemode;
 
+typedef enum {
+    VOL = 0x56,   // 'V'
+    TEST = 0x54,  // 'T'
+    BOOL = 0x42,  // 'B'
+    REMOT = 0x52, // 'R'
+} espNowHeader;
 class commEspNow {
 private:
     typedef struct message {
@@ -47,7 +58,7 @@ public:
     void flush();
 
     // sending data 
-    int sendDataInt(int data, const char *header);
+    int sendDataInt(int data, uint8_t header);
     bool sendDataBool(bool data);
     void sendModeSiren(const uint8_t *modelBuffer);
     // recieve data

@@ -116,14 +116,14 @@ void transmitterTask::playButton() {
                     break;
 
                 case KEY_RELEASED:
-                    mCommunication->sendDataInt(dataByte, "remot");
+                    mCommunication->sendDataInt(dataByte, REMOT);
                     shouldSend = true;
                     break;
 
                 default:
                     const int modeTones[9] = {0,1,2,3,4,5,6,7,8};
                     if (isToneValid(dataByte, modeTones, 9)) {
-                        mCommunication->sendDataInt(dataByte, "remot");
+                        mCommunication->sendDataInt(dataByte, REMOT);
                         shouldSend = true;
                     }
                     break;

@@ -197,17 +197,17 @@ void displayTask::processData(){
                 mCommunication->sendDataBool(currentSwitchState);
                 if (currentSwitchState) {
                     if (currentButtonState == 1) { //release
-                        mCommunication->sendDataInt(0, "test");
+                        mCommunication->sendDataInt(0, TEST);
                     } else if (currentButtonState == 2) { //pressed
-                        mCommunication->sendDataInt(currentSirenTone, "test");
+                        mCommunication->sendDataInt(currentSirenTone, TEST);
                     } else if (currentButtonState == 3) { //close
-                        mCommunication->sendDataInt(63, "test");
+                        mCommunication->sendDataInt(63, TEST);
                     }
                 } else {
                     if (currentButtonState == 2) {
-                        mCommunication->sendDataInt(currentSirenTone, "test");
+                        mCommunication->sendDataInt(currentSirenTone, TEST);
                     } else {
-                        mCommunication->sendDataInt(0, "test");
+                        mCommunication->sendDataInt(0, TEST);
                     }
                 }
             }
@@ -267,7 +267,7 @@ void displayTask::processData(){
         case actionState_send_volume: {
             if (macAddress) {
                 mCommunication->addPeer(macAddress);
-                if (mCommunication->sendDataInt(currentVolume, "vol") == 1) {
+                if (mCommunication->sendDataInt(currentVolume, VOL) == 1) {
                     mMemory->saveVolume(currentVolume);
                 }
             }

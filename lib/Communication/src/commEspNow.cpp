@@ -36,7 +36,8 @@ void receiverCallback(const uint8_t* macAddr, const uint8_t* data, int dataLen) 
             strncpy(instance->jsonBufferLocal, instance->messageData.data, sizeof(instance->messageData.data));
             instance->jsonBufferLocal[sizeof(instance->messageData.data)] = '\0';
             xSemaphoreGive(instance->_commMutex);
-            if (instance->messageData.dataLen == 0 && strlen(instance->messageData.data) == 0) {
+
+            if (instance->messageData.dataLen == MODE_SPEAKER && strlen(instance->messageData.data) == 0) {
                 int headerSize = instance->headerSize;
                 if (instance->audioBuffer) {
                     size_t actual_data_len = sizeof(instance->messageData.buffer) - headerSize;
@@ -44,7 +45,7 @@ void receiverCallback(const uint8_t* macAddr, const uint8_t* data, int dataLen) 
                         instance->audioBuffer->addBuffer(instance->messageData.buffer + headerSize, actual_data_len);
                     }
                 }
-            } else if (instance->messageData.dataLen == 2 && strlen(instance->messageData.data) == 0) {
+            } else if (instance->messageData.dataLen == MODE_INISIALITATION && strlen(instance->messageData.data) == 0) {
                 instance->memoryStorage->writeMode(instance->messageData.buffer, 9);
             }
             
@@ -230,14 +231,14 @@ void commEspNow::addSample(int16_t sample) {
 
     if ((index + headerSize) == bufferSize) {
         memset(messageData.data, 0, sizeof(messageData.data));
-        messageData.dataLen = 0;
+        messageData.dataLen = MODE_SPEAKER;
         sendData();
         index = 0;
     }
 }
 
-int commEspNow::sendDataInt(int data, const char *header) {
-    bool isVolHeader = (strcmp(header, "vol") == 0);
+int commEspNow::sendDataInt(int data, uint8_t header) {
+    bool isVolHeader = (header == VOL);
     if (!isVolHeader && data == lastData) {
         return 0;
     }
@@ -253,9 +254,9 @@ int commEspNow::sendDataInt(int data, const char *header) {
 
     serializeJson(doc, messageData.data);
     if (isVolHeader) {
-        messageData.dataLen = 2;
+        messageData.dataLen = MODE_INISIALITATION;
     } else {
-        messageData.dataLen = 1;
+        messageData.dataLen = MODE_SPEAKER;
     }
 
     sendData();
@@ -272,10 +273,10 @@ bool commEspNow::sendDataBool(bool data){
     if (data != lastBool)
     {
         JsonDocument doc;
-        doc["h"] = "bool";
+        doc["h"] = BOOL;
         doc["d"] = data == true ? 1 : 0;
         serializeJson(doc, messageData.data);
-        messageData.dataLen = 1;
+        messageData.dataLen = MODE_SIRINE_TONE;
         sendData();
         memset(messageData.data, 0, sizeof(messageData.data));
         lastBool = data;
@@ -289,7 +290,7 @@ bool commEspNow::sendDataBool(bool data){
 void commEspNow::sendModeSiren(const uint8_t *modelBuffer){
     memcpy(messageData.buffer, modelBuffer, sizeof(messageData.buffer));
     memset(messageData.data, 0, sizeof(messageData.data));
-    messageData.dataLen = 2;
+    messageData.dataLen = MODE_INISIALITATION;
     sendData();
 }
 
@@ -300,43 +301,47 @@ void commEspNow::flush() {
     }
 }
 
-bool commEspNow::parsingData(){
-    xSemaphoreTake(_commMutex, portMAX_DELAY);
-    if (strlen(messageData.data) > 0) {
-
-        JsonDocument jsonDoc;
-        DeserializationError error = deserializeJson(jsonDoc, jsonBufferLocal);
-        if (!error) {
-            const char *header = jsonDoc["h"];
-            if (header && strcmp(header, "vol") == 0) {
-                int vol = jsonDoc["d"];
-                instance->memoryStorage->saveVolume(vol);
-            } else if (header && strcmp(header, "test") == 0) {
-                instance->buttonValue = jsonDoc["d"];
-            } else if (header && strcmp(header, "bool") == 0)
-            {
-                int value = jsonDoc["d"];
-                instance->isLoop = value == 1 ? true : false;
-            } else if (header && strcmp(header, "remot") == 0)
-            {
-                int value = jsonDoc["d"];
-                int32_t* modeTones = instance->memoryStorage->readModeTones();
-                if (value >= 0 && value < 9) {
-                    instance->buttonValue = modeTones[value];
-                } else {
-                    instance->buttonValue = 0;
-                }
-            }
-            xSemaphoreGive(instance->_commMutex);
-            return true;
-        } else {
-            xSemaphoreGive(instance->_commMutex);
-            return false;
-        }
-    } else {
-        xSemaphoreGive(instance->_commMutex);
+bool commEspNow::parsingData() {
+    if (xSemaphoreTake(_commMutex, portMAX_DELAY) != pdTRUE) {
         return false;
     }
+
+    bool success = false;
+    if (strlen(jsonBufferLocal) > 0) {
+        JsonDocument jsonDoc;
+        DeserializationError error = deserializeJson(jsonDoc, jsonBufferLocal);
+    if (!error) {
+            uint8_t header = jsonDoc["h"];
+            int value = jsonDoc["d"];
+
+            switch (header) {
+                case VOL:
+                    instance->memoryStorage->saveVolume(value);
+                    success = true;
+                    break;
+                case TEST:
+                    instance->buttonValue = value;
+                    success = true;
+                    break;
+                case BOOL:
+                    instance->isLoop = (value == 1);
+                    success = true;
+                    break;
+                case REMOT: {
+                    int32_t* modeTones = instance->memoryStorage->readModeTones();
+                    instance->buttonValue = (value >= 0 && value < 9) ? modeTones[value] : 0;
+                    success = true;
+                    break;
+                }
+                default:
+                    // Unknown header, do nothing
+                    break;
+            }
+        }
+    }
+
+    xSemaphoreGive(_commMutex);
+    return success;
 }
 
 int commEspNow::getButtonValue() {
