@@ -39,7 +39,7 @@ public:
     void processData();
 
 private:
-    uint8_t* convertTouint8t(const std::vector<int32_t>& dataInt, size_t& size);
+    std::vector<uint8_t> convertTouint8t(const std::vector<int32_t>& dataInt);
 
     // Pointers to managed objects
     Screen* mScreen;

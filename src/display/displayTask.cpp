@@ -66,18 +66,17 @@ displayTask::~displayTask()
     // No need to delete _getMode, std::vector handles it.
 }
 
-// This function is risky due to manual memory management.
-// A better approach would be to return a std::vector<uint8_t>
-uint8_t* displayTask::convertTouint8t(const std::vector<int32_t>& dataInt, size_t& size) {
+std::vector<uint8_t> displayTask::convertTouint8t(const std::vector<int32_t>& dataInt) {
+    std::vector<uint8_t> result;
     if (dataInt.empty()) {
-        size = 0;
-        return nullptr;
+        return result;
     }
-    size = dataInt.size();
-    uint8_t* result = new uint8_t[size];
-    for (size_t i = 0; i < size; i++) {
-        result[i] = static_cast<uint8_t>(dataInt[i]);
+
+    result.reserve(dataInt.size());
+    for (int32_t value : dataInt) {
+        result.push_back(static_cast<uint8_t>(value));
     }
+
     return result;
 }
 
@@ -253,11 +252,9 @@ void displayTask::processData(){
             mMemory->writeMode(currentModes.data(), currentModes.size());
             if (macAddress) {
                 mCommunication->addPeer(macAddress);
-                size_t dataSize = 0;
-                uint8_t* dataTones = convertTouint8t(currentModes, dataSize);
-                if (dataTones) {
-                    mCommunication->sendModeSiren(dataTones);
-                    delete[] dataTones; // IMPORTANT: free the memory
+                std::vector<uint8_t> dataTones = convertTouint8t(currentModes);
+                if (!dataTones.empty()) {
+                    mCommunication->sendModeSiren(dataTones.data());
                 }
             }
             setCurrentState(actionState_none); // Reset state

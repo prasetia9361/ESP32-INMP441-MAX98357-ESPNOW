@@ -33,4 +33,6 @@ const int COL_2 = GPIO_NUM_16;
 const int COL_3 = GPIO_NUM_17;
 const int COL_4 = GPIO_NUM_18;
 
+#define SAMPLE_RATE 48000 
+
 #endif // PROJECT_APP_CONFIG_H

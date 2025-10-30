@@ -10,7 +10,6 @@
 #include "storage.h"
 #include "button/button.h"
 
-#define SAMPLE_RATE 48000 // Microfone
 #define BYTE_RATE 1024
 
 #define ESP_NOW_WIFI_CHANNEL 1
