@@ -716,7 +716,7 @@ void sirine::generateSineWave(int vol) {
   }
 
   volume = vol;
-  int16_t scaledSample = (int32_t(rawSample) * volume * envelopeVolume) / (100 * 200);
+  int16_t scaledSample = (int32_t(rawSample) * volume * envelopeVolume) / (100 * 147);
 
   phaseAccumulator += phaseStep;
 

@@ -76,6 +76,15 @@ receiverTask::receiverTask()
     if (!samples) {
         Serial.println("Error: Failed to allocate memory for samples");
     }
+
+    siren = 0;
+    mode = 0;
+    isLoop = false;
+    clickTimeout = 300;
+    clickTime = 0;
+    clickCount = 0;
+    SirenModeClick = 0;
+    volumeAudio = 0;
 }
 
 receiverTask::~receiverTask()
@@ -95,6 +104,7 @@ void receiverTask::begin(){
     delay(200);
     
     mMemory->init(); 
+    volumeAudio = mMemory->getVolume();
     delay(100);
 
     mSirine->generateWaveTable();
@@ -132,7 +142,7 @@ void receiverTask::communication(){
             mMemory->deleteAddress(); 
         }
 
-        if (mCommunication->getMode() != mode)
+        if (mCommunication->getMode() != _mode)
         {
             _mode = mCommunication->getMode();
         }
@@ -198,7 +208,6 @@ void receiverTask::processData(){
     int speakerMode = 0;
     bool currentLoop = false;
     int loopSiren = 0;
-    int volumeAudio = 0;
     while (true)
     {
         xSemaphoreTake(_taskMutex, portMAX_DELAY);
@@ -229,6 +238,7 @@ void receiverTask::processData(){
                 break;
             }case 2: {
                 volumeAudio = mMemory->getVolume();
+                Serial.printf("[DEBUG] Volume audio: %d\n", volumeAudio);
                 break;
             }
             default: {
@@ -244,7 +254,7 @@ void receiverTask::processData(){
                     {
                         digitalWrite(I2S_SPEAKER_SD_PIN, HIGH);
                     }
-                    volSpeaker = map(volumeAudio, 0, 100, 0, 7);
+                    int volSpeaker = map(volumeAudio, 0, 90, 0, 8);
                     outBuffer->removeBuffer(samples, BYTE_RATE, volSpeaker);
                     mOutput->write(samples, BYTE_RATE);
                     if (I2S_SPEAKER_SD_PIN != -1)

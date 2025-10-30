@@ -31,11 +31,11 @@ private:
     int siren = 0;
     int mode =0;
     bool isLoop = false;
-    int volSpeaker = 11;
     int clickTimeout =300;
     int clickTime = 0;
     int clickCount;
     int SirenModeClick;
+    int volumeAudio = 0;
 
     SemaphoreHandle_t _taskMutex; 
 

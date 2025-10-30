@@ -169,7 +169,7 @@ void displayTask::tick(){
 void displayTask::loop(){
     // Update all local state variables from UI/external functions
     deviceSelected = getChoiseDevice();
-    currentVolume = getVol();
+    currentVolume = map(getVol(), 0, 100, 0, 90);
     currentSwitchState = switchLoop();
     currentButtonState = getButton();
     currentSirenTone = getSirenTone();

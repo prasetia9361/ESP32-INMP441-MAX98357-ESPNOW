@@ -340,20 +340,17 @@ bool commEspNow::parsingData(){
 }
 
 int commEspNow::getButtonValue() {
-    int value = 0;
-    value = buttonValue;
+    int value = buttonValue;
     return value;
 }
 
 int commEspNow::getMode() {
-    int value = 0;
-    value = messageData.dataLen;
+    int value = messageData.dataLen;
     return value;
 }
 
 bool commEspNow::getBool(){
-    bool value = false;
-    value = isLoop;
+    bool value = isLoop;
     return value;
 }
 

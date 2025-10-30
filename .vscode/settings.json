@@ -29,7 +29,11 @@
         "ostream": "cpp",
         "sstream": "cpp",
         "istream": "cpp",
-        "limits": "cpp"
+        "limits": "cpp",
+        "ratio": "cpp",
+        "tuple": "cpp",
+        "type_traits": "cpp",
+        "utility": "cpp"
     },
     "cmake.sourceDirectory": "C:/Users/ACER/Documents/PlatformIO/Projects/ESP32-INMP441-MAX98357-ESPNOW-stress/lib/lvgl"
 }
