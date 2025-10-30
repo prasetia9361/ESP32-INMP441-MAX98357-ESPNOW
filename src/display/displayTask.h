@@ -17,17 +17,14 @@
 #include "Buffer.h"
 #include "commEspNow.h"
 #include "structs.h" 
+
+#include <array>
+#include <vector>
+
 class Screen;
 class storage;
 class Buffer;
 class commEspNow;
-
-enum DeviceType {
-    device1 = 0,
-    device2 = 1
-};
-
-
 
 class displayTask {
 public:
@@ -38,41 +35,37 @@ public:
     bool initializeProcessData();
     bool lvglInit();
     void tick();
-    void testSiren();
-    void updateData();
     void loop();
     void processData();
-    int latesButton;
 
 private:
-    uint8_t* convertTouint8t(int32_t* dataInt, size_t size);
+    uint8_t* convertTouint8t(const std::vector<int32_t>& dataInt, size_t& size);
+
+    // Pointers to managed objects
     Screen* mScreen;
     storage* mMemory;
     Buffer* mOutputBuffer;
     commEspNow* mCommunication;
     
+    // Data from storage
     int32_t* toneSelected;        
-    uint8_t* macAddress;
     uint8_t* addr1;
     uint8_t* addr2;
     char *m_device1;
     char *m_device2;
 
-    int state = 0;
-    int lastState = 0;
-    bool isBinding = false;
-    bool isSaveSiren = false;
-    bool isSendVol = false;
-    int latsVol;
-    char macStr[32];
+    // State variables
+    int currentStateValue = 0;
+    int lastStateValue = 0;
+    
+    char macStr[18]; // MAC string format is 17 chars + null terminator
     const char *deviceSelected = nullptr;
-    int32_t * _getMode = nullptr;
-    int vol = 0;
-    bool _switch = false;
-    int _button = 0;
-    int sirenTone = 0;
-    SemaphoreHandle_t _smphr;
-    SemaphoreHandle_t _initSemaphore; // Tambahkan ini
-    SemaphoreHandle_t _sTest;
+    std::vector<int32_t> currentModes;
+    int currentVolume = 0;
+    bool currentSwitchState = false;
+    int currentButtonState = 0;
+    int currentSirenTone = 0;
+
+    SemaphoreHandle_t _initSemaphore;
 };
 #endif // DISPLAYTASK_H

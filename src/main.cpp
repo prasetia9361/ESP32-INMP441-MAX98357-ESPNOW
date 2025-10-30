@@ -106,35 +106,29 @@ void setup(){
     xTaskCreatePinnedToCore(
         appCore1,
         "appCore1",
-        16384,
+        8192,
         NULL,
         1,
         &handleCore1,
         1
     );
 
-    // TaskHandle_t handleCore1UpdateData;
-    // xTaskCreatePinnedToCore(
-    //     appCore1UpdateData,
-    //     "appCore1UpdateData",
-    //     4096,
-    //     NULL,
-    //     2,
-    //     &handleCore1UpdateData,
-    //     1
-    // );
+    TaskHandle_t handleCore1UpdateData;
+    xTaskCreatePinnedToCore(
+        appCore1UpdateData,
+        "appCore1UpdateData",
+        8192,
+        NULL,
+        2,
+        &handleCore1UpdateData,
+        1
+    );
 
 #endif
 }
 
 void loop(){
-    if (lcd)
-    {
-        lcd->tick();
-    }
-    
-    
-    vTaskDelay(10);
+    vTaskDelay(pdMS_TO_TICKS(1000));
 }
 
 
@@ -170,7 +164,6 @@ void appCore0(void *param){
     while (true)
     {
         lcd->processData();
-        lcd->testSiren();
         vTaskDelay(5);
     }
 }
@@ -184,14 +177,14 @@ void appCore1(void *param){
     }
 }
 
-// void appCore1UpdateData(void *param){
-//     for (;;)
-//     {
-//         if (lcd) {
-//             lcd->loop();
-//         }
-//         vTaskDelay(100);
-//     }
-// }
+void appCore1UpdateData(void *param){
+    for (;;)
+    {
+        if (lcd) {
+            lcd->tick();
+        }
+        vTaskDelay(10);
+    }
+}
 #endif
 

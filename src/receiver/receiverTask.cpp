@@ -114,6 +114,10 @@ void receiverTask::communication(){
     int _mode = 0;
     bool _isLoop = false;
     int _siren = 0;
+    int _currentSiren = 0;
+    int lastSiren = 0;
+    int onPress = 0;
+    int clickCount = 0;
 
     for (;;)
     {
@@ -137,10 +141,39 @@ void receiverTask::communication(){
             _siren = mCommunication->getButtonValue();
             _isLoop = mCommunication->getBool();
         }
+
+        if (_isLoop == true)
+        {
+            if (_siren != lastSiren && _siren < 63)
+            {
+                lastSiren = _siren;
+
+                if (lastSiren >= 1)
+                {
+                    onPress = lastSiren;
+                }else
+                {
+                    clickCount = (clickCount + 1) % 2;
+                    if (clickCount == 1)
+                    {
+                        _currentSiren = onPress;
+                    }else
+                    {
+                        _currentSiren = 0;
+                    }
+                } 
+            }
+        }else if (_isLoop == false)
+        {
+            _currentSiren = _siren;
+            clickCount = 0;
+            onPress = 0;
+        }
+
         xSemaphoreTake(_taskMutex, portMAX_DELAY);
         mode = _mode;
-        siren = _siren;
         isLoop = _isLoop;
+        siren = _currentSiren;
         xSemaphoreGive(_taskMutex);
 
         vTaskDelay(5);
@@ -161,46 +194,18 @@ void receiverTask::processData(){
     }
     int lastSiren = 0;
     int onPress = 0;
+    int currentSiren = 0;
+    int speakerMode = 0;
+    bool currentLoop = false;
+    int loopSiren = 0;
+    int volumeAudio = 0;
     while (true)
     {
-        int currentSiren = 0;
-        int speakerMode = 0;
-        bool currentLoop = false;
-
         xSemaphoreTake(_taskMutex, portMAX_DELAY);
-        SirenModeClick = siren;
         speakerMode= mode;
         currentLoop = isLoop;
+        currentSiren = siren;
         xSemaphoreGive(_taskMutex);
-
-        if (currentLoop)
-        {
-            if (SirenModeClick != lastSiren && SirenModeClick < 63)
-            {
-                lastSiren = SirenModeClick;
-
-                if (lastSiren >= 1)
-                {
-                    onPress = lastSiren;
-                }else
-                {
-                    clickCount = (clickCount + 1) % 2;
-                    if (clickCount == 0)
-                    {
-                        currentSiren = onPress;
-                    }else
-                    {
-                        currentSiren = 0;
-                    }
-                } 
-            }else if (SirenModeClick == 63){
-                clickCount = 1;
-                currentSiren = 0;
-            }
-        }else
-        {
-            currentSiren = SirenModeClick;
-        }
 
         unsigned long start_time = 0;
         
@@ -213,7 +218,7 @@ void receiverTask::processData(){
                     xSemaphoreGive(_taskMutex);
                     
                     mSirine->generateI2sTone(currentSiren);
-                    mSirine->generateSineWave(mMemory->getVolume());
+                    mSirine->generateSineWave(volumeAudio);
                     if (currentSiren == 0) {
                         mSirine->generateI2sTone(0);
                         mSirine->cleanBuffer();
@@ -221,6 +226,9 @@ void receiverTask::processData(){
                     }
                 }
                 mSirine->stopSirine();
+                break;
+            }case 2: {
+                volumeAudio = mMemory->getVolume();
                 break;
             }
             default: {
@@ -236,7 +244,7 @@ void receiverTask::processData(){
                     {
                         digitalWrite(I2S_SPEAKER_SD_PIN, HIGH);
                     }
-                    volSpeaker = map(mMemory->getVolume(), 0, 100, 0, 8);
+                    volSpeaker = map(volumeAudio, 0, 100, 0, 7);
                     outBuffer->removeBuffer(samples, BYTE_RATE, volSpeaker);
                     mOutput->write(samples, BYTE_RATE);
                     if (I2S_SPEAKER_SD_PIN != -1)

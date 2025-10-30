@@ -44,7 +44,7 @@ void receiverCallback(const uint8_t* macAddr, const uint8_t* data, int dataLen) 
                         instance->audioBuffer->addBuffer(instance->messageData.buffer + headerSize, actual_data_len);
                     }
                 }
-            } else if (instance->messageData.dataLen == 1 && strlen(instance->messageData.data) == 0) {
+            } else if (instance->messageData.dataLen == 2 && strlen(instance->messageData.data) == 0) {
                 instance->memoryStorage->writeMode(instance->messageData.buffer, 9);
             }
             
@@ -252,7 +252,11 @@ int commEspNow::sendDataInt(int data, const char *header) {
     doc["d"] = data;
 
     serializeJson(doc, messageData.data);
-    messageData.dataLen = 1;
+    if (isVolHeader) {
+        messageData.dataLen = 2;
+    } else {
+        messageData.dataLen = 1;
+    }
 
     sendData();
     memset(messageData.data, 0, sizeof(messageData.data));
@@ -285,7 +289,7 @@ bool commEspNow::sendDataBool(bool data){
 void commEspNow::sendModeSiren(const uint8_t *modelBuffer){
     memcpy(messageData.buffer, modelBuffer, sizeof(messageData.buffer));
     memset(messageData.data, 0, sizeof(messageData.data));
-    messageData.dataLen = 1;
+    messageData.dataLen = 2;
     sendData();
 }
 
