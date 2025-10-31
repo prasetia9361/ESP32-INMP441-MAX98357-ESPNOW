@@ -256,7 +256,7 @@ int commEspNow::sendDataInt(int data, uint8_t header) {
     if (isVolHeader) {
         messageData.dataLen = MODE_INISIALITATION;
     } else {
-        messageData.dataLen = MODE_SPEAKER;
+        messageData.dataLen = MODE_SIRINE_TONE;
     }
 
     sendData();
