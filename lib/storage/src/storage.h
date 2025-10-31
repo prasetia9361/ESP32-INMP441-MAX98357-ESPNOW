@@ -34,7 +34,7 @@ public:
     char *device2();
     int getVolume();
 
-    void init();
+    bool init();
     void writeMode(const uint8_t *bufferMode, int count);
     void writeMode(const int32_t* bufferMode, int count);
     int* readMode();

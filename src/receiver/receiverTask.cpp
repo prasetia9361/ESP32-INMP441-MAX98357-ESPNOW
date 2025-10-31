@@ -45,7 +45,12 @@ void receiverTask::begin(){
     
     delay(200);
     
-    mMemory->init(); 
+    while (!mMemory->init())
+    {
+        Serial.println("[ERROR] Gagal menginisialisasi memori.");
+        delay(1000);
+    }
+     
     volumeAudio = mMemory->getVolume();
     delay(100);
 

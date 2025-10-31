@@ -35,7 +35,12 @@ void transmitterTask::begin(){
     Serial.print("My IDF Version is: ");
     Serial.println(esp_get_idf_version());
     
-    mMemory->init(); 
+    while (!mMemory->init())
+    {
+        Serial.println("[ERROR] Gagal menginisialisasi memori.");
+        delay(1000);
+    }
+     
     
     if (!mCommunication->begin()) {
         Serial.println("Komunikasi gagal dimulai!");

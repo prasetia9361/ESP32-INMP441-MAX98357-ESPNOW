@@ -108,7 +108,7 @@ void setup(){
         "appCore1",
         8192,
         NULL,
-        1,
+        2,
         &handleCore1,
         1
     );
@@ -119,7 +119,7 @@ void setup(){
         "appCore1UpdateData",
         8192,
         NULL,
-        2,
+        1,
         &handleCore1UpdateData,
         1
     );

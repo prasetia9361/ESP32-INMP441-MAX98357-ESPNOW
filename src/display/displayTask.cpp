@@ -81,7 +81,11 @@ std::vector<uint8_t> displayTask::convertTouint8t(const std::vector<int32_t>& da
 }
 
 bool displayTask::initializeProcessData(){
-    mMemory->init();
+    if (!mMemory->init()) {
+        Serial.println("ERROR: Storage initialization failed!");
+        return false;
+    }
+    Serial.println("Storage initialized successfully");
     
     if (!mCommunication->begin()) {
         Serial.println("ERROR: Communication initialization failed!");
@@ -249,13 +253,13 @@ void displayTask::processData(){
         }
 
         case actionState_save_sirine: {
-            mMemory->writeMode(currentModes.data(), currentModes.size());
             if (macAddress) {
                 mCommunication->addPeer(macAddress);
                 std::vector<uint8_t> dataTones = convertTouint8t(currentModes);
                 if (!dataTones.empty()) {
                     mCommunication->sendModeSiren(dataTones.data());
                 }
+                mMemory->writeMode(currentModes.data(), currentModes.size());
             }
             setCurrentState(actionState_none); // Reset state
             break;
